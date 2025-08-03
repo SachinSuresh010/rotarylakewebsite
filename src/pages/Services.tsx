@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Badge } from 'react-bootstrap';
-import { motion } from 'framer-motion';
+import { Container, Row, Col, Card, Badge, Button } from 'react-bootstrap';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface Project {
   id: string;
@@ -27,7 +27,7 @@ const Services: React.FC = () => {
   const [servicesData, setServicesData] = useState<ServicesData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedService, setSelectedService] = useState<string | null>(null);
+  const [expandedServices, setExpandedServices] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const loadServicesData = async () => {
@@ -70,6 +70,26 @@ const Services: React.FC = () => {
 
     loadServicesData();
   }, []);
+
+  const toggleService = (serviceId: string) => {
+    const newExpanded = new Set(expandedServices);
+    if (newExpanded.has(serviceId)) {
+      newExpanded.delete(serviceId);
+    } else {
+      newExpanded.add(serviceId);
+    }
+    setExpandedServices(newExpanded);
+  };
+
+  const expandAll = () => {
+    if (servicesData) {
+      setExpandedServices(new Set(servicesData.services.map(s => s.id)));
+    }
+  };
+
+  const collapseAll = () => {
+    setExpandedServices(new Set());
+  };
 
   if (loading) {
     return (
@@ -122,24 +142,56 @@ const Services: React.FC = () => {
   return (
     <div style={{ paddingTop: '80px', backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
       <Container className="py-5">
+        {/* Header Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className="text-center mb-5"
         >
-          <h3 className="mbr-fonts-style display-2">
+          <h3 className="mbr-fonts-style display-2" style={{ color: '#1a365d' }}>
             <strong>Our Services</strong>
           </h3>
-          <h5 className="mbr-section-subtitle mbr-fonts-style align-center mb-0 mt-2 display-5">
+          <h5 className="mbr-section-subtitle mbr-fonts-style align-center mb-0 mt-2 display-5" style={{ color: '#2d5a5f' }}>
             Rotary avenues of service
           </h5>
-          <p style={{ textAlign: 'center', marginTop: '10px', color: '#666' }}>
+          <p style={{ textAlign: 'center', marginTop: '10px', color: '#4a5568' }}>
             {servicesData.services.length} service categories • {totalProjects} total projects
           </p>
+          
+          {/* Control Buttons */}
+          <div className="mt-4 mb-4">
+            <Button 
+              variant="outline-primary" 
+              size="sm" 
+              className="me-2"
+              onClick={expandAll}
+              style={{ 
+                borderColor: '#2d5a5f', 
+                color: '#2d5a5f',
+                '--bs-btn-hover-bg': '#2d5a5f',
+                '--bs-btn-hover-border-color': '#2d5a5f'
+              } as React.CSSProperties}
+            >
+              Expand All
+            </Button>
+            <Button 
+              variant="outline-secondary" 
+              size="sm"
+              onClick={collapseAll}
+              style={{ 
+                borderColor: '#718096', 
+                color: '#718096',
+                '--bs-btn-hover-bg': '#718096',
+                '--bs-btn-hover-border-color': '#718096'
+              } as React.CSSProperties}
+            >
+              Collapse All
+            </Button>
+          </div>
         </motion.div>
 
-        {/* Service Categories Overview */}
+        {/* Services Overview Cards */}
         <Row className="mb-5">
           {servicesData.services.map((service, index) => (
             <Col key={service.id} xs={12} md={6} lg={4} className="mb-4">
@@ -149,35 +201,53 @@ const Services: React.FC = () => {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
               >
                 <Card 
-                  className="h-100 service-card"
+                  className="h-100 service-overview-card"
                   style={{
                     cursor: 'pointer',
-                    transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
-                    border: selectedService === service.id ? '2px solid #007bff' : '1px solid #dee2e6'
+                    transition: 'all 0.3s ease-in-out',
+                    border: expandedServices.has(service.id) ? '2px solid #2d5a5f' : '1px solid #e2e8f0',
+                    backgroundColor: expandedServices.has(service.id) ? '#f7fafc' : 'white'
                   }}
-                  onClick={() => setSelectedService(selectedService === service.id ? null : service.id)}
+                  onClick={() => toggleService(service.id)}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-5px)';
-                    e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
+                    e.currentTarget.style.transform = 'translateY(-3px)';
+                    e.currentTarget.style.boxShadow = '0 6px 20px rgba(45, 90, 95, 0.15)';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
                   }}
                 >
                   <Card.Body className="text-center p-4">
                     <div className="mb-3" style={{ fontSize: '3rem' }}>
                       {service.icon}
                     </div>
-                    <Card.Title className="mbr-fonts-style display-5">
+                    <Card.Title className="mbr-fonts-style display-5" style={{ color: '#1a365d' }}>
                       <strong>{service.title}</strong>
                     </Card.Title>
-                    <Card.Text className="mbr-text mbr-fonts-style display-7">
+                    <Card.Text className="mbr-text mbr-fonts-style display-7 mb-3" style={{ color: '#4a5568' }}>
                       {service.description}
                     </Card.Text>
-                    <Badge bg="primary" className="mt-2">
-                      {service.projects.length} {service.projects.length === 1 ? 'Project' : 'Projects'}
-                    </Badge>
+                    <div className="d-flex justify-content-between align-items-center">
+                      <Badge 
+                        style={{ 
+                          backgroundColor: '#2d5a5f', 
+                          color: 'white',
+                          border: 'none'
+                        }}
+                      >
+                        {service.projects.length} {service.projects.length === 1 ? 'Project' : 'Projects'}
+                      </Badge>
+                      <Badge 
+                        style={{ 
+                          backgroundColor: expandedServices.has(service.id) ? '#38a169' : '#718096',
+                          color: 'white',
+                          border: 'none'
+                        }}
+                      >
+                        {expandedServices.has(service.id) ? 'Expanded' : 'Click to Expand'}
+                      </Badge>
+                    </div>
                   </Card.Body>
                 </Card>
               </motion.div>
@@ -185,136 +255,114 @@ const Services: React.FC = () => {
           ))}
         </Row>
 
-        {/* Projects by Selected Service */}
-        {selectedService && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="mb-5"
-          >
-            <div className="text-center mb-4">
-              <h4 className="mbr-fonts-style display-4">
-                <strong>
-                  {servicesData.services.find(s => s.id === selectedService)?.title} Projects
-                </strong>
-              </h4>
-              <button 
-                className="btn btn-outline-secondary btn-sm"
-                onClick={() => setSelectedService(null)}
+        {/* Projects by Service Category */}
+        <AnimatePresence>
+          {servicesData.services.map((service) => (
+            expandedServices.has(service.id) && (
+              <motion.div
+                key={service.id}
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.5 }}
+                className="mb-5"
               >
-                ← Back to All Services
-              </button>
-            </div>
-            
-            <Row>
-              {servicesData.services
-                .find(s => s.id === selectedService)
-                ?.projects.map((project, index) => (
-                  <Col key={project.id} xs={12} md={6} lg={4} className="mb-4">
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.6, delay: index * 0.1 }}
-                    >
-                      <Card className="h-100 project-card">
-                        <div className="item-img">
-                          <img 
-                            src={project.image} 
-                            alt={project.alt}
-                            style={{
-                              width: '100%',
-                              height: '200px',
-                              objectFit: 'cover',
-                              borderTopLeftRadius: 'calc(0.375rem - 1px)',
-                              borderTopRightRadius: 'calc(0.375rem - 1px)'
-                            }}
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.src = '/assets/images/placeholder.jpg';
-                            }}
-                          />
-                        </div>
-                        <Card.Body className="p-4">
-                          <h5 className="item-title mbr-fonts-style display-7">
-                            <strong>{project.title}</strong>
-                          </h5>
-                          <p className="item-subtitle mbr-fonts-style mt-1 display-7" style={{ color: '#666', fontSize: '0.9rem' }}>
-                            <em>{project.date}</em>
-                          </p>
-                          <p className="mbr-text mbr-fonts-style mt-3 display-7">
-                            {project.description}
-                          </p>
-                        </Card.Body>
-                      </Card>
-                    </motion.div>
-                  </Col>
-                ))}
-            </Row>
-          </motion.div>
-        )}
+                <Card style={{ borderColor: '#2d5a5f' }}>
+                  <Card.Header 
+                    style={{ 
+                      backgroundColor: '#2d5a5f',
+                      color: 'white',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => toggleService(service.id)}
+                  >
+                    <div className="d-flex justify-content-between align-items-center">
+                      <div>
+                        <span style={{ fontSize: '1.5rem', marginRight: '10px' }}>{service.icon}</span>
+                        <h4 className="mb-0">{service.title} Projects</h4>
+                      </div>
+                      <Button 
+                        variant="outline-light" 
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleService(service.id);
+                        }}
+                        style={{
+                          borderColor: 'rgba(255,255,255,0.5)',
+                          color: 'white'
+                        }}
+                      >
+                        Collapse
+                      </Button>
+                    </div>
+                  </Card.Header>
+                  <Card.Body className="p-4">
+                    <Row>
+                      {service.projects.map((project, index) => (
+                        <Col key={project.id} xs={12} md={6} lg={4} className="mb-4">
+                          <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, delay: index * 0.1 }}
+                          >
+                            <Card className="h-100 project-card" style={{ borderColor: '#e2e8f0' }}>
+                              <div className="item-img">
+                                <img 
+                                  src={project.image} 
+                                  alt={project.alt}
+                                  style={{
+                                    width: '100%',
+                                    height: '200px',
+                                    objectFit: 'cover',
+                                    borderTopLeftRadius: 'calc(0.375rem - 1px)',
+                                    borderTopRightRadius: 'calc(0.375rem - 1px)'
+                                  }}
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.src = '/assets/images/placeholder.jpg';
+                                  }}
+                                />
+                              </div>
+                              <Card.Body className="p-3">
+                                <h6 className="item-title mbr-fonts-style display-7 mb-2" style={{ color: '#1a365d' }}>
+                                  <strong>{project.title}</strong>
+                                </h6>
+                                <p className="item-subtitle mbr-fonts-style mb-2" style={{ color: '#718096', fontSize: '0.85rem' }}>
+                                  <em>{project.date}</em>
+                                </p>
+                                <p className="mbr-text mbr-fonts-style mb-0 display-7" style={{ fontSize: '0.9rem', color: '#4a5568' }}>
+                                  {project.description}
+                                </p>
+                              </Card.Body>
+                            </Card>
+                          </motion.div>
+                        </Col>
+                      ))}
+                    </Row>
+                  </Card.Body>
+                </Card>
+              </motion.div>
+            )
+          ))}
+        </AnimatePresence>
 
-        {/* All Projects Overview (when no service is selected) */}
-        {!selectedService && (
+        {/* Summary Section */}
+        {expandedServices.size === 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
+            className="text-center mt-5"
           >
-            <div className="text-center mb-4">
-              <h4 className="mbr-fonts-style display-4">
-                <strong>Recent Projects</strong>
-              </h4>
-              <p className="text-muted">Click on a service category above to view all projects</p>
-            </div>
-            
-            <Row>
-              {servicesData.services.flatMap(service => 
-                service.projects.slice(0, 2).map(project => ({ ...project, serviceTitle: service.title }))
-              ).slice(0, 6).map((project, index) => (
-                <Col key={`${project.serviceTitle}-${project.id}`} xs={12} md={6} lg={4} className="mb-4">
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: index * 0.1 }}
-                  >
-                    <Card className="h-100 project-card">
-                      <div className="item-img">
-                        <img 
-                          src={project.image} 
-                          alt={project.alt}
-                          style={{
-                            width: '100%',
-                            height: '200px',
-                            objectFit: 'cover',
-                            borderTopLeftRadius: 'calc(0.375rem - 1px)',
-                            borderTopRightRadius: 'calc(0.375rem - 1px)'
-                          }}
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.src = '/assets/images/placeholder.jpg';
-                          }}
-                        />
-                      </div>
-                      <Card.Body className="p-4">
-                        <Badge bg="secondary" className="mb-2">
-                          {project.serviceTitle}
-                        </Badge>
-                        <h5 className="item-title mbr-fonts-style display-7">
-                          <strong>{project.title}</strong>
-                        </h5>
-                        <p className="item-subtitle mbr-fonts-style mt-1 display-7" style={{ color: '#666', fontSize: '0.9rem' }}>
-                          <em>{project.date}</em>
-                        </p>
-                        <p className="mbr-text mbr-fonts-style mt-3 display-7">
-                          {project.description}
-                        </p>
-                      </Card.Body>
-                    </Card>
-                  </motion.div>
-                </Col>
-              ))}
-            </Row>
+            <Card className="border-0" style={{ backgroundColor: '#f7fafc' }}>
+              <Card.Body className="p-5">
+                <h5 className="mb-3" style={{ color: '#2d5a5f' }}>👆 Click on any service category above to view its projects</h5>
+                <p style={{ color: '#4a5568', marginBottom: 0 }}>
+                  Each category contains detailed information about our projects and initiatives in that area of service.
+                </p>
+              </Card.Body>
+            </Card>
           </motion.div>
         )}
       </Container>
