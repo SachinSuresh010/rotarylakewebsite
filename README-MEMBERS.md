@@ -6,7 +6,7 @@ This system allows you to dynamically manage all member information for the Rota
 
 ### New Files:
 - `public/assets/data/members.json` - Contains all member data in a unified structure
-- `public/admin/members-admin.html` - Admin interface to manage member data
+- `src/pages/Admin.tsx` - React-based admin interface to manage member data
 
 ### Modified Files:
 - `src/pages/Home.tsx` - Updated to use dynamic loading for directors carousel
@@ -54,7 +54,7 @@ The React components automatically:
 - Display all members in the members page
 
 ### 3. Admin Interface
-The admin interface at `/admin/members-admin.html` provides:
+The admin interface at `/admin` (React component) provides:
 - Form to add new members with all their information
 - Visual display of all members with their positions and history
 - Ability to delete members
@@ -80,7 +80,7 @@ Each member in the JSON has the following properties:
 ### Adding New Members
 
 1. **Via Admin Interface (Recommended):**
-   - Open `/admin/members-admin.html` in your browser
+   - Navigate to `/admin` in your React application
    - Use the "Add New Member" tab
    - Fill out all the member information
    - Check "Is Past President" if applicable
