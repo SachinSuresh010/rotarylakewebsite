@@ -19,6 +19,8 @@ body {
   flex-direction: column;
 }
 
+/* Admin page specific overrides - removed conflicting styles */
+
 /* Custom styles for React components */
 .navbar-brand img {
   height: 3rem;
@@ -248,6 +250,20 @@ body {
   color: white;
   padding: 40px 0 20px;
   width: 100%;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* Remove any bottom margin/padding that might cause white space */
+.footer4 {
+  margin-bottom: 0 !important;
+  padding-bottom: 20px !important;
+}
+
+/* Ensure the footer extends to the bottom without white space */
+.footer.cid-tnERSFypqt {
+  margin-bottom: 0 !important;
+  padding-bottom: 20px !important;
 }
 
 .footer h5 {
@@ -558,5 +574,247 @@ body {
   to {
     opacity: 1;
     transform: translateX(0);
+  }
+}
+
+/* Global body and html styles to prevent unwanted spacing */
+body {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+html {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Modal styling fixes */
+.modal-content {
+  border-radius: 15px !important;
+  border: none !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+  max-width: 350px !important;
+  margin: 0 auto !important;
+}
+
+.modal-header {
+  border-bottom: none !important;
+  padding: 1rem 1rem 0 1rem !important;
+}
+
+.modal-body {
+  padding: 1rem !important;
+  max-height: 300px !important;
+  overflow-y: auto !important;
+}
+
+.modal-footer {
+  border-top: none !important;
+  padding: 0 1rem 1rem 1rem !important;
+}
+
+.modal-dialog {
+  margin: 1rem auto !important;
+  max-width: 350px !important;
+}
+
+/* Ensure modals are properly positioned and don't get cut off */
+.modal {
+  z-index: 1050 !important;
+}
+
+.modal-backdrop {
+  z-index: 1040 !important;
+}
+
+/* Form control styling in modals */
+.modal .form-control,
+.modal .form-select {
+  border: none !important;
+  background-color: #f8f9fa !important;
+  border-radius: 8px !important;
+  padding: 10px 12px !important;
+  transition: all 0.3s ease !important;
+  font-size: 0.9rem !important;
+}
+
+.modal .form-control:focus,
+.modal .form-select:focus {
+  background-color: #ffffff !important;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
+  border-color: #007bff !important;
+}
+
+/* Button styling in modals */
+.modal .btn {
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+  font-size: 0.9rem !important;
+  padding: 8px 16px !important;
+}
+
+.modal .btn-primary {
+  background: linear-gradient(135deg, #0066CC 0%, #003366 100%) !important;
+  border: none !important;
+}
+
+.modal .btn-danger {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+  border: none !important;
+}
+
+.modal .btn-secondary {
+  background: #6c757d !important;
+  border: none !important;
+}
+
+/* Form group spacing in modals */
+.modal .form-group {
+  margin-bottom: 1rem !important;
+}
+
+.modal .form-label {
+  margin-bottom: 0.5rem !important;
+  font-size: 0.9rem !important;
+}
+
+/* Alert spacing in modals */
+.modal .alert {
+  margin-bottom: 1rem !important;
+  padding: 0.75rem !important;
+  font-size: 0.85rem !important;
+}
+
+/* Ensure modal content doesn't overflow */
+.modal-content {
+  max-height: 400px !important;
+  overflow: hidden !important;
+}
+
+.modal-body {
+  overflow-y: auto !important;
+  max-height: 200px !important;
+}
+
+/* Responsive modal adjustments */
+@media (max-width: 768px) {
+  .modal-dialog {
+    margin: 0.5rem auto !important;
+    max-width: 90vw !important;
+  }
+  
+  .modal-body {
+    max-height: 250px !important;
+  }
+  
+  .modal-content {
+    max-width: 90vw !important;
+  }
+}
+
+/* User dropdown styling */
+.user-dropdown .dropdown-toggle {
+  display: flex !important;
+  align-items: center !important;
+  padding: 0.75rem 1rem !important;
+  border: none !important;
+  background: transparent !important;
+  color: #000 !important;
+  text-decoration: none !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+}
+
+.user-dropdown .dropdown-toggle:hover,
+.user-dropdown .dropdown-toggle:focus {
+  background: rgba(0, 102, 204, 0.08) !important;
+  color: #0066CC !important;
+  text-decoration: none !important;
+  transform: translateY(-1px) !important;
+}
+
+.user-dropdown .dropdown-toggle::after {
+  margin-left: 0.75rem !important;
+  font-size: 12px !important;
+}
+
+.user-dropdown .dropdown-menu {
+  border: none !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12) !important;
+  border-radius: 12px !important;
+  padding: 0.75rem 0 !important;
+  min-width: 220px !important;
+  margin-top: 8px !important;
+}
+
+.user-dropdown .dropdown-item {
+  padding: 0.875rem 1.25rem !important;
+  color: #333 !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+  font-size: 14px !important;
+}
+
+.user-dropdown .dropdown-item:hover {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+  color: #0066CC !important;
+  transform: translateX(2px) !important;
+}
+
+.user-dropdown .dropdown-divider {
+  margin: 0.75rem 0 !important;
+  border-color: #e9ecef !important;
+}
+
+/* Profile avatar styling */
+.user-dropdown .dropdown-toggle .position-relative {
+  display: flex !important;
+  align-items: center !important;
+}
+
+.user-dropdown .dropdown-toggle .bg-primary {
+  background: linear-gradient(135deg, #0066CC 0%, #003366 100%) !important;
+}
+
+/* Enhanced dropdown animations */
+.user-dropdown .dropdown-menu.show {
+  animation: dropdownFadeIn 0.2s ease-out !important;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Profile icon hover effects */
+.user-dropdown .dropdown-toggle:hover .position-relative img,
+.user-dropdown .dropdown-toggle:hover .position-relative div {
+  transform: scale(1.05) !important;
+  transition: transform 0.2s ease !important;
+}
+
+/* Responsive adjustments for user dropdown */
+@media (max-width: 768px) {
+  .user-dropdown .dropdown-toggle .d-none {
+    display: none !important;
+  }
+  
+  .user-dropdown .dropdown-toggle {
+    padding: 0.5rem !important;
+  }
+  
+  .user-dropdown .dropdown-menu {
+    min-width: 200px !important;
+  }
+  
+  .user-dropdown .dropdown-toggle::after {
+    margin-left: 0.5rem !important;
   }
 }

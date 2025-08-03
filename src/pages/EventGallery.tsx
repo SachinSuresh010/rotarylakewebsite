@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Container, Row, Col, Modal, Button } from 'react-bootstrap';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 interface EventImage {
   id: string;
@@ -31,19 +31,19 @@ const EventGallery: React.FC<EventGalleryProps> = ({
     setShowLightbox(true);
   };
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setShowLightbox(false);
-  };
+  }, []);
 
-  const handlePrevious = () => {
+  const handlePrevious = useCallback(() => {
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
-  };
+  }, [images.length]);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     setCurrentImageIndex((prev) => (prev + 1) % images.length);
-  };
+  }, [images.length]);
 
-  const handleKeyDown = (e: KeyboardEvent) => {
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (!showLightbox) return;
     
     switch (e.key) {
@@ -57,12 +57,12 @@ const EventGallery: React.FC<EventGalleryProps> = ({
         handleNext();
         break;
     }
-  };
+  }, [showLightbox, handleClose, handlePrevious, handleNext]);
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [showLightbox]);
+  }, [showLightbox, handleKeyDown]);
 
   return (
     <div style={{ paddingTop: '80px', backgroundColor: '#f8f9fa', minHeight: '100vh' }}>

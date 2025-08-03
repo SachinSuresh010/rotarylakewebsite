@@ -1,0 +1,4261 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Container, Row, Col, Card, Button, Form, Alert, Nav, Table, Badge, InputGroup, Spinner, Modal } from 'react-bootstrap';
+import { FaUsers, FaChartBar, FaGear, FaRightFromBracket, FaPlus, FaPenToSquare, FaTrash, FaMagnifyingGlass, FaClock, FaUserCheck, FaUserXmark, FaEye, FaCalendar, FaEnvelope, FaUser, FaBriefcase, FaGraduationCap, FaHeart, FaLocationDot, FaPhone, FaTrophy, FaStar, FaXmark, FaLinkedin, FaFacebook, FaTwitter, FaCamera, FaFloppyDisk, FaTag } from 'react-icons/fa6';
+import MemberSearchModal from '../components/MemberSearchModal';
+
+// Icon wrapper components to fix TypeScript issues
+const IconWrapper: React.FC<{ icon: any; className?: string; style?: React.CSSProperties }> = ({ icon: Icon, className, style }) => <Icon className={className} style={style} />;
+
+// Modern CSS for the admin panel
+const modernStyles = `
+  /* Modern Admin Panel Styles */
+  .admin-modern {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: calc(100vh - 200px);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    padding: 6rem 0 2rem 0 !important;
+    margin-top: 2rem;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .admin-sidebar {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
+  
+  .admin-main {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    margin: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  }
+  
+  .admin-header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    margin: 20px;
+    padding: 24px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    margin-top: 1rem;
+  }
+  
+  .admin-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .admin-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+  }
+  
+  .admin-nav {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    border: none;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  }
+  
+  .admin-nav .nav-link {
+    border: none;
+    color: #64748b;
+    font-weight: 600;
+    padding: 16px 24px;
+    border-radius: 12px;
+    margin: 4px 8px;
+    transition: all 0.3s ease;
+  }
+  
+  .admin-nav .nav-link:hover {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+  }
+  
+  .admin-nav .nav-link.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+  }
+  
+  .admin-btn {
+    border: none;
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  }
+  
+  .admin-btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+  
+  .admin-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+  }
+  
+  .admin-btn-outline {
+    background: rgba(255, 255, 255, 0.9);
+    color: #667eea;
+    border: 2px solid #667eea;
+  }
+  
+  .admin-btn-outline:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-2px);
+  }
+  
+  .admin-form-control {
+    border: none;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    padding: 16px 20px;
+    font-size: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .admin-form-control:focus {
+    background: white;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
+    transform: translateY(-1px);
+  }
+  
+  .admin-table {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
+  
+  .admin-table th {
+    background: rgba(102, 126, 234, 0.1);
+    border: none;
+    padding: 20px;
+    font-weight: 700;
+    color: #374151;
+  }
+  
+  .admin-table td {
+    border: none;
+    padding: 20px;
+    vertical-align: middle;
+  }
+  
+  .admin-table tbody tr {
+    transition: all 0.3s ease;
+  }
+  
+  .admin-table tbody tr:hover {
+    background: rgba(102, 126, 234, 0.05);
+    transform: scale(1.01);
+  }
+  
+  .admin-badge {
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-weight: 600;
+    font-size: 12px;
+  }
+  
+  .admin-modal {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    border: none;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  }
+  
+  .admin-modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 24px 24px 0 0;
+    border: none;
+    padding: 24px 32px;
+  }
+  
+  .admin-modal-body {
+    padding: 32px;
+    background: rgba(255, 255, 255, 0.95);
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+  
+  .admin-modal-footer {
+    border: none;
+    padding: 24px 32px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 0 0 24px 24px;
+  }
+  
+  .admin-stats-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    border: none;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    overflow: hidden;
+  }
+  
+  .admin-stats-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+  }
+  
+  .admin-stats-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    font-size: 24px;
+  }
+  
+  .admin-stats-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+  
+  .admin-stats-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+  }
+  
+  .admin-stats-info {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+  }
+  
+  .admin-stats-warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+  }
+  
+  .admin-stats-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+  }
+  
+  .admin-login-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .admin-login-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 24px 24px 0 0;
+    padding: 40px;
+    text-align: center;
+    color: white;
+  }
+  
+  .admin-login-body {
+    padding: 40px;
+  }
+  
+  .admin-spinner {
+    color: #667eea;
+  }
+  
+  .admin-text-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .admin-glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  /* Modal size fixes */
+  .modal-xxl {
+    max-width: 90vw !important;
+    width: 90vw !important;
+  }
+  
+  .modal-xxl .modal-dialog {
+    max-width: 90vw !important;
+    width: 90vw !important;
+    margin: 2rem auto;
+    max-height: 90vh;
+  }
+  
+  .modal-xxl .modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 20px;
+    border: none;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    max-width: 90vw !important;
+    width: 90vw !important;
+    height: 90vh !important;
+  }
+  
+  .modal-xxl .modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+    padding: 2rem;
+  }
+  
+  /* Fix modal backdrop to cover full viewport */
+  .modal-backdrop {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    z-index: 1040 !important;
+  }
+  
+  /* Ensure modal covers full viewport */
+  .modal {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 1050 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  /* Override App.css modal restrictions for admin modals */
+  .admin-modal {
+    max-width: 90vw !important;
+    width: 90vw !important;
+  }
+  
+  .admin-modal .modal-dialog {
+    max-width: 90vw !important;
+    width: 90vw !important;
+    margin: 2rem auto !important;
+    height: 90vh !important;
+    max-height: 90vh !important;
+  }
+  
+  .admin-modal .modal-content {
+    max-width: 90vw !important;
+    width: 90vw !important;
+    max-height: 90vh !important;
+    height: 90vh !important;
+    border-radius: 20px !important;
+    border: none !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
+  }
+  
+  .admin-modal .modal-body {
+    max-height: 70vh !important;
+    overflow-y: auto !important;
+    padding: 2rem !important;
+  }
+  
+  .admin-modal .modal-header {
+    padding: 1.5rem 2rem !important;
+    border-bottom: none !important;
+  }
+  
+  .admin-modal .modal-footer {
+    padding: 1.5rem 2rem !important;
+    border-top: none !important;
+  }
+  
+  /* Ensure form content is properly displayed in admin modals */
+  .admin-modal .form-control,
+  .admin-modal .form-select {
+    border: none !important;
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    border-radius: 12px !important;
+    padding: 16px 20px !important;
+    font-size: 16px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    transition: all 0.3s ease !important;
+  }
+  
+  .admin-modal .form-control:focus,
+  .admin-modal .form-select:focus {
+    background-color: white !important;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2) !important;
+    transform: translateY(-1px) !important;
+  }
+  
+  .admin-modal .btn {
+    border-radius: 12px !important;
+    padding: 12px 24px !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  .admin-modal .nav-tabs {
+    border-bottom: 2px solid rgba(102, 126, 234, 0.1) !important;
+  }
+  
+  .admin-modal .nav-tabs .nav-link {
+    border: none !important;
+    color: #64748b !important;
+    font-weight: 600 !important;
+    padding: 16px 24px !important;
+    border-radius: 12px 12px 0 0 !important;
+    margin-right: 4px !important;
+    transition: all 0.3s ease !important;
+  }
+  
+  .admin-modal .nav-tabs .nav-link:hover {
+    background: rgba(102, 126, 234, 0.1) !important;
+    color: #667eea !important;
+  }
+  
+  .admin-modal .nav-tabs .nav-link.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3) !important;
+  }
+  
+  @media (max-width: 768px) {
+    .admin-main {
+      margin: 10px;
+      border-radius: 16px;
+    }
+    
+    .admin-header {
+      margin: 10px;
+      padding: 16px;
+    }
+    
+    .modal-xxl {
+      max-width: 95vw !important;
+      width: 95vw !important;
+    }
+    
+    .modal-xxl .modal-dialog {
+      max-width: 95vw !important;
+      width: 95vw !important;
+      margin: 1rem auto;
+      height: 85vh !important;
+      max-height: 85vh !important;
+    }
+    
+    .modal-xxl .modal-content {
+      max-width: 95vw !important;
+      width: 95vw !important;
+      max-height: 85vh !important;
+      height: 85vh !important;
+    }
+    
+    .modal-xxl .modal-body {
+      max-height: 60vh;
+      padding: 1rem;
+    }
+    
+    .admin-modal {
+      max-width: 95vw !important;
+      width: 95vw !important;
+    }
+    
+    .admin-modal .modal-dialog {
+      max-width: 95vw !important;
+      width: 95vw !important;
+      margin: 1rem auto !important;
+      height: 85vh !important;
+      max-height: 85vh !important;
+    }
+    
+    .admin-modal .modal-content {
+      max-width: 95vw !important;
+      width: 95vw !important;
+      max-height: 85vh !important;
+      height: 85vh !important;
+    }
+    
+    .admin-modal .modal-body {
+      max-height: 60vh !important;
+      padding: 1rem !important;
+    }
+  }
+`;
+
+// Inject the styles
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement('style');
+  styleSheet.textContent = modernStyles;
+  document.head.appendChild(styleSheet);
+}
+
+interface User {
+  _id: string;
+  username: string;
+  email: string;
+  role: string;
+  profile?: {
+    firstName?: string;
+    lastName?: string;
+  };
+}
+
+interface Member {
+  _id: string;
+  id?: string; // Backend sometimes returns 'id' instead of '_id'
+  name: string;
+  email: string;
+  classification: string;
+  status: string;
+  isActive: boolean;
+  joinDate?: string;
+  memberSince?: string;
+  createdAt?: string;
+  lastLogin?: string;
+  hasLoggedIn?: boolean;
+  loginStatus?: string;
+  daysSinceLastLogin?: number;
+  lastLoginText?: string;
+  daysSinceSignup?: number;
+  signupText?: string;
+  // Additional member details
+  profileImage?: string;
+  currentDesignation?: string;
+  profession?: string;
+  birthday?: string;
+  hobbies?: string;
+  familyMembers?: FamilyMember[];
+  personalBio?: string;
+  personalDetails?: {
+    address?: string;
+    phone?: string;
+    education?: string;
+    achievements?: string;
+    interests?: string;
+    socialMedia?: {
+      linkedin?: string;
+      facebook?: string;
+      twitter?: string;
+    };
+  };
+  // Legacy fields for backward compatibility
+  image?: string;
+  alt?: string;
+
+  pastPositions?: string[];
+  isPastPresident?: boolean;
+  presidentialYears?: string[];
+  link?: string;
+  bio?: string;
+  family?: FamilyMember[];
+}
+
+interface FamilyMember {
+  id: string;
+  name: string;
+  relationship: string;
+  photo?: string;
+  profession?: string;
+  hobbies?: string;
+  birthday?: string;
+  personalBio?: string;
+  personalDetails?: {
+    address?: string;
+    phone?: string;
+    education?: string;
+    achievements?: string;
+    interests?: string;
+    socialMedia?: {
+      linkedin?: string;
+      facebook?: string;
+      twitter?: string;
+    };
+  };
+  // New fields for member linking
+  memberId?: string; // ID of the member if they are also a member
+  isMember?: boolean; // Flag to indicate if this family member is also a member
+}
+
+interface DashboardStats {
+  members: {
+    total: number;
+    active: number;
+    currentDirectors: number;
+    pastPresidents: number;
+  };
+  users: {
+    total: number;
+    active: number;
+  };
+}
+
+interface MemberStatistics {
+  totalMembers: number;
+  activeMembers: number;
+  membersWithLogin: number;
+  recentLogins: number;
+  loginRate: number;
+}
+
+const Admin: React.FC = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [member, setMember] = useState<any>(null);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [members, setMembers] = useState<Member[]>([]);
+  const [memberStats, setMemberStats] = useState<MemberStatistics | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [sortBy, setSortBy] = useState('createdAt');
+  const [sortOrder, setSortOrder] = useState('desc');
+  const [statusFilter, setStatusFilter] = useState('active'); // New: status filter state
+  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null); // New: search timeout state
+  
+  // New: Cached data for client-side filtering
+  const [cachedMembers, setCachedMembers] = useState<Member[]>([]);
+  const [isDataCached, setIsDataCached] = useState(false);
+  const [useClientSideFiltering, setUseClientSideFiltering] = useState(true);
+  
+  // Edit and Delete states
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [editingMember, setEditingMember] = useState<Member | null>(null);
+  const [deletingMember, setDeletingMember] = useState<Member | null>(null);
+  const [editFormData, setEditFormData] = useState({
+    name: '',
+    email: '',
+    classification: '',
+    status: 'active',
+    joinDate: new Date().toISOString().split('T')[0],
+    memberSince: new Date().getFullYear().toString(),
+    // Additional member details
+    profileImage: '',
+    currentDesignation: '',
+    profession: '',
+    birthday: '',
+    hobbies: '',
+    personalBio: '',
+    personalDetails: {
+      address: '',
+      phone: '',
+      education: '',
+      achievements: '',
+      interests: '',
+      socialMedia: {
+        linkedin: '',
+        facebook: '',
+        twitter: ''
+      }
+    },
+    // Legacy fields
+    pastPositions: [] as string[],
+    isPastPresident: false,
+    presidentialYears: [] as string[],
+    familyMembers: [] as FamilyMember[]
+  });
+  const [addFormData, setAddFormData] = useState({
+    name: '',
+    email: '',
+    classification: '',
+    joinDate: new Date().toISOString().split('T')[0],
+    memberSince: new Date().getFullYear().toString(),
+    // Additional member details
+    profileImage: '',
+    currentDesignation: '',
+    profession: '',
+    birthday: '',
+    hobbies: '',
+    personalBio: '',
+    personalDetails: {
+      address: '',
+      phone: '',
+      education: '',
+      achievements: '',
+      interests: '',
+      socialMedia: {
+        linkedin: '',
+        facebook: '',
+        twitter: ''
+      }
+    },
+    // Legacy fields
+    pastPositions: [] as string[],
+    isPastPresident: false,
+    presidentialYears: [] as string[],
+    familyMembers: [] as FamilyMember[]
+  });
+  const [editLoading, setEditLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [addLoading, setAddLoading] = useState(false);
+  const [editError, setEditError] = useState('');
+  const [deleteError, setDeleteError] = useState('');
+  const [addError, setAddError] = useState('');
+
+  // Family members management
+  const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
+  const [showFamilyModal, setShowFamilyModal] = useState(false);
+  const [editingFamilyMember, setEditingFamilyMember] = useState<FamilyMember | null>(null);
+  const [familyFormData, setFamilyFormData] = useState({
+    name: '',
+    relationship: '',
+    photo: '',
+    profession: '',
+    hobbies: '',
+    birthday: '',
+    personalBio: '',
+    personalDetails: {
+      address: '',
+      phone: '',
+      education: '',
+      achievements: '',
+      interests: '',
+      socialMedia: {
+        linkedin: '',
+        facebook: '',
+        twitter: ''
+      }
+    }
+  });
+
+  // Photo upload states
+  const [familyPhotoPreview, setFamilyPhotoPreview] = useState<string>('');
+  const [memberPhotoPreview, setMemberPhotoPreview] = useState<string>('');
+  
+  // Photo state management per member
+  const [currentMemberPhotoPreview, setCurrentMemberPhotoPreview] = useState<string>('');
+  
+  // Member search for family linking
+  const [showMemberSearchModal, setShowMemberSearchModal] = useState(false);
+
+  // Helper functions for family members
+  const addFamilyMember = () => {
+    setEditingFamilyMember(null);
+    setFamilyFormData({
+      name: '',
+      relationship: '',
+      photo: '',
+      profession: '',
+      hobbies: '',
+      birthday: '',
+      personalBio: '',
+      personalDetails: {
+        address: '',
+        phone: '',
+        education: '',
+        achievements: '',
+        interests: '',
+        socialMedia: {
+          linkedin: '',
+          facebook: '',
+          twitter: ''
+        }
+      }
+    });
+    setShowFamilyModal(true);
+  };
+
+  const editFamilyMember = (familyMember: FamilyMember) => {
+    setEditingFamilyMember(familyMember);
+    setFamilyFormData({
+      name: familyMember.name,
+      relationship: familyMember.relationship,
+      photo: familyMember.photo || '',
+      profession: familyMember.profession || '',
+      hobbies: familyMember.hobbies || '',
+      birthday: familyMember.birthday || '',
+      personalBio: familyMember.personalBio || '',
+      personalDetails: {
+        address: familyMember.personalDetails?.address || '',
+        phone: familyMember.personalDetails?.phone || '',
+        education: familyMember.personalDetails?.education || '',
+        achievements: familyMember.personalDetails?.achievements || '',
+        interests: familyMember.personalDetails?.interests || '',
+        socialMedia: {
+          linkedin: familyMember.personalDetails?.socialMedia?.linkedin || '',
+          facebook: familyMember.personalDetails?.socialMedia?.facebook || '',
+          twitter: familyMember.personalDetails?.socialMedia?.twitter || ''
+        }
+      }
+    });
+    setShowFamilyModal(true);
+  };
+
+  const saveFamilyMember = () => {
+    if (editingFamilyMember) {
+      // Update existing family member
+      setFamilyMembers(prev => prev.map(fm => 
+        fm.id === editingFamilyMember.id ? { ...familyFormData, id: fm.id } : fm
+      ));
+    } else {
+      // Add new family member
+      const newFamilyMember: FamilyMember = {
+        ...familyFormData,
+        id: Date.now().toString() // Simple ID generation
+      };
+      setFamilyMembers(prev => [...prev, newFamilyMember]);
+    }
+    setShowFamilyModal(false);
+  };
+
+  const removeFamilyMember = (id: string) => {
+    setFamilyMembers(prev => prev.filter(fm => fm.id !== id));
+  };
+
+  // Photo upload handlers
+  const handleFamilyPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        setFamilyPhotoPreview(result);
+        setFamilyFormData(prev => ({ ...prev, photo: result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleMemberPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        setMemberPhotoPreview(result);
+        setCurrentMemberPhotoPreview(result);
+        setEditFormData(prev => ({ ...prev, profileImage: result }));
+        setAddFormData(prev => ({ ...prev, profileImage: result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const clearFamilyPhoto = () => {
+    setFamilyPhotoPreview('');
+    setFamilyFormData(prev => ({ ...prev, photo: '' }));
+  };
+
+  const clearMemberPhoto = () => {
+    setMemberPhotoPreview('');
+    setCurrentMemberPhotoPreview('');
+    setEditFormData(prev => ({ ...prev, profileImage: '' }));
+    setAddFormData(prev => ({ ...prev, profileImage: '' }));
+  };
+
+  // Member search functions for family linking
+  const linkMemberAsFamily = async (member: Member, relationship: string) => {
+    try {
+      // Get the current member ID from the editing member
+      const currentMemberId = editingMember?._id || editingMember?.id;
+      
+      if (!currentMemberId) {
+        // Fallback to local state update if we can't get the member ID
+        const newFamilyMember: FamilyMember = {
+          id: `family-${Date.now()}`,
+          name: member.name,
+          relationship: relationship,
+          photo: member.profileImage,
+          profession: member.profession,
+          hobbies: member.hobbies,
+          birthday: member.birthday,
+          personalBio: member.personalBio,
+          personalDetails: member.personalDetails,
+          memberId: member.id || member._id,
+          isMember: true
+        };
+        setFamilyMembers(prev => [...prev, newFamilyMember]);
+        return;
+      }
+
+      // Use the new API endpoint to create bidirectional relationship
+      const memberToken = localStorage.getItem('memberToken');
+      const adminToken = localStorage.getItem('adminToken');
+      const token = memberToken || adminToken;
+      
+      const requestBody = {
+        targetMemberId: member.id || member._id,
+        relationship: relationship
+      };
+      
+      const response = await fetch(`${API_BASE_URL}/members/${currentMemberId}/family/link`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to link family member');
+      }
+
+      await response.json();
+
+      // Update local state with the new family member
+      const newFamilyMember: FamilyMember = {
+        id: `family-${Date.now()}`,
+        name: member.name,
+        relationship: relationship,
+        photo: member.profileImage,
+        profession: member.profession,
+        hobbies: member.hobbies,
+        birthday: member.birthday,
+        personalBio: member.personalBio,
+        personalDetails: member.personalDetails,
+        memberId: member.id || member._id,
+        isMember: true
+      };
+
+      setFamilyMembers(prev => [...prev, newFamilyMember]);
+
+
+
+      // Show success message
+      alert(`Successfully linked ${member.name} as ${relationship.toLowerCase()}. The relationship has been created in both profiles.`);
+    } catch (error) {
+      console.error('Error linking family member:', error);
+      alert('Failed to link family member. Please try again.');
+    }
+  };
+
+  // Add event listener for opening member search modal
+  useEffect(() => {
+    const handleOpenMemberSearch = () => {
+      setShowMemberSearchModal(true);
+    };
+
+    window.addEventListener('openMemberSearch', handleOpenMemberSearch);
+    
+    return () => {
+      window.removeEventListener('openMemberSearch', handleOpenMemberSearch);
+    };
+  }, []);
+  
+
+  
+  const navigate = useNavigate();
+  const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
+
+  // Helper functions for client-side filtering
+  const filterMembersClientSide = useCallback((allMembers: Member[], search: string, status: string, sortBy: string, sortOrder: string): Member[] => {
+    let filtered = allMembers;
+    
+    // Apply status filter
+    if (status === 'active') {
+      filtered = filtered.filter(member => member.isActive && member.status === 'active');
+    } else if (status === 'inactive') {
+      filtered = filtered.filter(member => !member.isActive || member.status !== 'active');
+    }
+    // If status is 'all', include all members
+    
+    // Apply search filter
+    if (search) {
+      const searchLower = search.toLowerCase();
+      filtered = filtered.filter(member => 
+        member.name.toLowerCase().includes(searchLower) ||
+        member.email.toLowerCase().includes(searchLower) ||
+        (member.classification && member.classification.toLowerCase().includes(searchLower))
+      );
+    }
+    
+    // Apply sorting
+    filtered.sort((a, b) => {
+      let aValue, bValue;
+      
+      switch (sortBy) {
+        case 'name':
+          aValue = a.name || '';
+          bValue = b.name || '';
+          break;
+        case 'createdAt':
+          aValue = a.createdAt || '';
+          bValue = b.createdAt || '';
+          break;
+        case 'lastLogin':
+          aValue = a.lastLogin || '';
+          bValue = b.lastLogin || '';
+          break;
+        default:
+          aValue = a.createdAt || '';
+          bValue = b.createdAt || '';
+      }
+      
+      if (sortOrder === 'asc') {
+        return aValue.localeCompare(bValue);
+      } else {
+        return bValue.localeCompare(aValue);
+      }
+    });
+    
+    return filtered;
+  }, []);
+
+  const paginateMembers = useCallback((members: Member[], page: number, limit: number): Member[] => {
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    return members.slice(startIndex, endIndex);
+  }, []);
+
+  const calculateMemberStats = useCallback((members: Member[]): MemberStatistics => {
+    const totalMembers = members.length;
+    const activeMembers = members.filter(m => m.isActive && m.status === 'active').length;
+    const membersWithLogin = members.filter(m => m.hasLoggedIn).length;
+    const recentLogins = members.filter(m => {
+      if (!m.lastLogin) return false;
+      const daysSinceLogin = m.daysSinceLastLogin;
+      return daysSinceLogin !== null && daysSinceLogin !== undefined && daysSinceLogin <= 7;
+    }).length;
+    
+    return {
+      totalMembers,
+      activeMembers,
+      membersWithLogin,
+      recentLogins,
+      loginRate: totalMembers > 0 ? Math.round((membersWithLogin / totalMembers) * 100) : 0
+    };
+  }, []);
+
+  // New: Separate function for client-side filtering updates
+  const updateClientSideFiltering = useCallback(() => {
+    if (useClientSideFiltering && isDataCached && cachedMembers.length > 0) {
+      const filteredMembers = filterMembersClientSide(cachedMembers, searchTerm, statusFilter, sortBy, sortOrder);
+      const paginatedMembers = paginateMembers(filteredMembers, currentPage, 20);
+      
+      setMembers(paginatedMembers);
+      setTotalPages(Math.ceil(filteredMembers.length / 20));
+      
+      // Calculate stats from filtered data
+      const memberStats = calculateMemberStats(filteredMembers);
+      setMemberStats(memberStats);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [useClientSideFiltering, isDataCached, cachedMembers.length, searchTerm, statusFilter, sortBy, sortOrder, currentPage, filterMembersClientSide, paginateMembers, calculateMemberStats, setMembers, setTotalPages, setMemberStats]);
+
+  const loadDashboardData = useCallback(async () => {
+    try {
+      const memberToken = localStorage.getItem('memberToken');
+      const adminToken = localStorage.getItem('adminToken');
+      const token = memberToken || adminToken;
+      
+      // Load dashboard stats
+      const statsResponse = await fetch(`${API_BASE_URL}/admin/dashboard`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (statsResponse.ok) {
+        const statsData = await statsResponse.json();
+        setStats(statsData.statistics);
+      } else {
+        const errorText = await statsResponse.text();
+        console.error('Dashboard stats error:', errorText);
+      }
+
+      // Load members - use client-side filtering if enabled
+      if (useClientSideFiltering && isDataCached && cachedMembers.length > 0) {
+        // Use cached data for client-side filtering
+        updateClientSideFiltering();
+        setLoading(false);
+        return;
+      }
+      
+      // Fetch from server (with or without filters based on approach)
+      const queryParams = useClientSideFiltering 
+        ? '?limit=1000' // Get all data for caching
+        : `?page=${currentPage}&limit=20&sortBy=${sortBy}&sortOrder=${sortOrder}&status=${statusFilter}`;
+        
+      const membersResponse = await fetch(`${API_BASE_URL}/admin/members/all${queryParams}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (membersResponse.ok) {
+        const membersData = await membersResponse.json();
+        
+        if (useClientSideFiltering) {
+          // Cache all data for client-side filtering
+          setCachedMembers(membersData.members || []);
+          setIsDataCached(true);
+          
+          // Apply client-side filtering
+          const filteredMembers = filterMembersClientSide(membersData.members || [], searchTerm, statusFilter, sortBy, sortOrder);
+          const paginatedMembers = paginateMembers(filteredMembers, currentPage, 20);
+          
+          setMembers(paginatedMembers);
+          setTotalPages(Math.ceil(filteredMembers.length / 20));
+          
+          // Calculate stats from filtered data
+          const memberStats = calculateMemberStats(filteredMembers);
+          setMemberStats(memberStats);
+        } else {
+          // Use server-side filtering
+          setMembers(membersData.members || []);
+          setMemberStats(membersData.statistics);
+          setTotalPages(membersData.pagination.pages);
+        }
+      } else {
+        const errorText = await membersResponse.text();
+        console.error('Members error:', errorText);
+      }
+
+      setLoading(false);
+    } catch (error) {
+      console.error('Dashboard load error:', error);
+      setError('Failed to load dashboard data');
+      setLoading(false);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [API_BASE_URL, useClientSideFiltering, isDataCached, cachedMembers, currentPage, searchTerm, statusFilter, sortBy, sortOrder, updateClientSideFiltering, filterMembersClientSide, paginateMembers, calculateMemberStats, setMembers, setTotalPages, setMemberStats, setCachedMembers, setIsDataCached, setStats, setLoading, setError]);
+
+  const checkAuth = useCallback(async () => {
+    const memberToken = localStorage.getItem('memberToken');
+    const adminToken = localStorage.getItem('adminToken');
+    
+    if (!memberToken && !adminToken) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      let response;
+      let data;
+      
+      if (memberToken) {
+        // Check member authentication
+        response = await fetch(`${API_BASE_URL}/auth/member-me`, {
+          headers: {
+            'Authorization': `Bearer ${memberToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          data = await response.json();
+          const memberData = data.member;
+          
+          // Check if member has admin privileges
+          if (memberData.isAdmin) {
+            setMember(memberData);
+            setUser({
+              _id: memberData.id,
+              username: memberData.name,
+              email: memberData.email,
+              role: 'admin',
+              profile: {
+                firstName: memberData.name.split(' ')[0],
+                lastName: memberData.name.split(' ').slice(1).join(' ')
+              }
+            });
+            setIsAuthenticated(true);
+            // Call loadDashboardData directly instead of including it in dependencies
+            // This prevents circular dependency issues
+            setTimeout(() => {
+              loadDashboardData();
+            }, 0);
+          } else {
+            // Member doesn't have admin privileges
+            localStorage.removeItem('memberToken');
+            setLoading(false);
+            navigate('/auth');
+          }
+        } else {
+          localStorage.removeItem('memberToken');
+          setLoading(false);
+          navigate('/auth');
+        }
+      } else if (adminToken) {
+        // Legacy admin authentication
+        response = await fetch(`${API_BASE_URL}/auth/me`, {
+          headers: {
+            'Authorization': `Bearer ${adminToken}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          data = await response.json();
+          setUser(data.user);
+          setIsAuthenticated(true);
+          // Call loadDashboardData directly instead of including it in dependencies
+          // This prevents circular dependency issues
+          setTimeout(() => {
+            loadDashboardData();
+          }, 0);
+        } else {
+          localStorage.removeItem('adminToken');
+          setLoading(false);
+          navigate('/auth');
+        }
+      }
+    } catch (error) {
+      console.error('Auth check error:', error);
+      localStorage.removeItem('memberToken');
+      localStorage.removeItem('adminToken');
+      setLoading(false);
+      navigate('/auth');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [API_BASE_URL, navigate, setMember, setUser, setIsAuthenticated, setLoading]);
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
+  // Cleanup search timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
+    };
+  }, [searchTimeout]);
+
+  // Modal size management - removed manual DOM manipulation
+
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+
+
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('adminToken', data.token);
+        setUser(data.user);
+        setIsAuthenticated(true);
+        loadDashboardData();
+      } else {
+        const errorData = await response.json();
+        console.error('❌ Login failed:', errorData);
+        setError(errorData.message || 'Login failed');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      setError('Login failed. Please try again.');
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('memberToken');
+    localStorage.removeItem('adminToken');
+    setIsAuthenticated(false);
+    setUser(null);
+    setMember(null);
+    setStats(null);
+    setMembers([]);
+    navigate('/');
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setCurrentPage(1);
+    
+    if (useClientSideFiltering && isDataCached && cachedMembers.length > 0) {
+      // Instant client-side filtering
+      updateClientSideFiltering();
+    } else {
+      // Server-side filtering with debouncing
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
+      
+      const timeout = setTimeout(() => {
+        loadDashboardData();
+      }, 500);
+      
+      setSearchTimeout(timeout);
+    }
+  };
+
+  // New: Handle status filter change
+  const handleStatusFilterChange = (newStatus: string) => {
+    setStatusFilter(newStatus);
+    setCurrentPage(1);
+    
+    if (useClientSideFiltering && isDataCached && cachedMembers.length > 0) {
+      // Instant client-side filtering
+      updateClientSideFiltering();
+    } else {
+      // Server-side filtering with debouncing
+      setTimeout(() => {
+        loadDashboardData();
+      }, 300);
+    }
+  };
+
+  // New: Handle sort change
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(field);
+      setSortOrder('desc');
+    }
+    setCurrentPage(1);
+    
+    if (useClientSideFiltering && isDataCached && cachedMembers.length > 0) {
+      // Instant client-side sorting
+      updateClientSideFiltering();
+    } else {
+      // Server-side sorting
+      loadDashboardData();
+    }
+  };
+
+  // Edit and Delete handlers
+  const handleEditClick = (member: Member) => {
+    setEditingMember(member);
+    
+    // Format join date for HTML date input (YYYY-MM-DD)
+    let formattedJoinDate = '';
+    if (member.joinDate) {
+      try {
+        const date = new Date(member.joinDate);
+        if (!isNaN(date.getTime())) {
+          formattedJoinDate = date.toISOString().split('T')[0];
+        }
+      } catch (error) {
+        console.error('Error formatting join date:', error);
+      }
+    }
+    
+    setEditFormData({
+      name: member.name,
+      email: member.email,
+      classification: member.classification,
+      status: member.status,
+      joinDate: formattedJoinDate || new Date().toISOString().split('T')[0],
+      memberSince: member.memberSince || new Date().getFullYear().toString(),
+      // Additional member details
+      profileImage: member.profileImage || '',
+      currentDesignation: member.currentDesignation || '',
+      profession: member.profession || '',
+      birthday: member.birthday || '',
+      hobbies: member.hobbies || '',
+      personalBio: member.personalBio || '',
+      personalDetails: {
+        address: member.personalDetails?.address || '',
+        phone: member.personalDetails?.phone || '',
+        education: member.personalDetails?.education || '',
+        achievements: member.personalDetails?.achievements || '',
+        interests: member.personalDetails?.interests || '',
+        socialMedia: {
+          linkedin: member.personalDetails?.socialMedia?.linkedin || '',
+          facebook: member.personalDetails?.socialMedia?.facebook || '',
+          twitter: member.personalDetails?.socialMedia?.twitter || ''
+        }
+      },
+      // Legacy fields
+      pastPositions: member.pastPositions || [],
+      isPastPresident: member.isPastPresident || false,
+      presidentialYears: member.presidentialYears || [],
+      familyMembers: member.familyMembers || []
+    });
+    setFamilyMembers(member.familyMembers || []); // Set family members for editing
+    
+    // Set photo preview for current member
+    setCurrentMemberPhotoPreview(member.profileImage || '');
+    setMemberPhotoPreview(member.profileImage || '');
+    
+    setEditError('');
+    setShowEditModal(true);
+  };
+
+  const handleDeleteClick = (member: Member) => {
+    setDeletingMember(member);
+    setDeleteError('');
+    setShowDeleteModal(true);
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    setEditLoading(true);
+    setEditError('');
+
+    try {
+      const memberToken = localStorage.getItem('memberToken');
+      const adminToken = localStorage.getItem('adminToken');
+      const token = memberToken || adminToken;
+      
+      const updatedData = {
+        ...editFormData,
+        familyMembers: familyMembers // Include family members in the update
+      };
+
+      const response = await fetch(`${API_BASE_URL}/members/${editingMember?.id || editingMember?._id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updatedData)
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        
+        // Update the member in the local state
+        const updatedMember = data.member;
+        const memberWithCorrectId = {
+          ...updatedMember,
+          _id: updatedMember.id || updatedMember._id
+        };
+        
+        // Use the original editing member's ID to find and update the correct member
+        const originalMemberId = editingMember?._id || editingMember?.id;
+        
+        setMembers(prevMembers => prevMembers.map(member => {
+          const memberId = member._id || member.id;
+          return memberId === originalMemberId ? memberWithCorrectId : member;
+        }));
+        
+        setShowEditModal(false);
+        setEditingMember(null);
+        setEditFormData({ name: '', email: '', classification: '', status: 'active', joinDate: new Date().toISOString().split('T')[0], memberSince: new Date().getFullYear().toString(), profileImage: '', currentDesignation: '', profession: '', birthday: '', hobbies: '', personalBio: '', personalDetails: { address: '', phone: '', education: '', achievements: '', interests: '', socialMedia: { linkedin: '', facebook: '', twitter: '' } }, pastPositions: [], isPastPresident: false, presidentialYears: [], familyMembers: [] });
+        setFamilyMembers([]);
+      } else {
+        const errorData = await response.json();
+        console.error('❌ Update failed:', errorData);
+        setEditError(errorData.message || 'Failed to update member');
+      }
+    } catch (error) {
+      console.error('Update error:', error);
+      setEditError('Failed to update member. Please try again.');
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deletingMember) return;
+
+    setDeleteLoading(true);
+    setDeleteError('');
+
+    try {
+      const memberToken = localStorage.getItem('memberToken');
+      const adminToken = localStorage.getItem('adminToken');
+      const token = memberToken || adminToken;
+      
+      const response = await fetch(`${API_BASE_URL}/members/${deletingMember.id || deletingMember._id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+
+        
+        // Remove the member from the local state
+        setMembers(prevMembers => 
+          prevMembers.filter(member => 
+            member._id !== deletingMember._id && member.id !== deletingMember.id
+          )
+        );
+        
+        setShowDeleteModal(false);
+        setDeletingMember(null);
+      } else {
+        const errorData = await response.json();
+        console.error('❌ Delete failed:', errorData);
+        setDeleteError(errorData.message || 'Failed to delete member');
+      }
+    } catch (error) {
+      console.error('Delete error:', error);
+      setDeleteError('Failed to delete member. Please try again.');
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  // New: Status toggle functionality
+  const handleStatusToggle = async (member: Member) => {
+    try {
+      const memberToken = localStorage.getItem('memberToken');
+      const adminToken = localStorage.getItem('adminToken');
+      const token = memberToken || adminToken;
+      
+      const newStatus = member.status === 'active' ? 'inactive' : 'active';
+      const newIsActive = !member.isActive;
+      
+      const response = await fetch(`${API_BASE_URL}/members/${member.id || member._id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          status: newStatus,
+          isActive: newIsActive
+        })
+      });
+
+      if (response.ok) {
+
+        
+        // Update the member in the local state
+        setMembers(prevMembers => prevMembers.map(m => {
+          const memberId = m._id || m.id;
+          const targetId = member._id || member.id;
+          if (memberId === targetId) {
+            return {
+              ...m,
+              status: newStatus,
+              isActive: newIsActive
+            };
+          }
+          return m;
+        }));
+      } else {
+        const errorData = await response.json();
+        console.error('❌ Status update failed:', errorData);
+        alert(errorData.message || 'Failed to update member status');
+      }
+    } catch (error) {
+      console.error('Status toggle error:', error);
+      alert('Failed to update member status. Please try again.');
+    }
+  };
+
+  const handleEditCancel = () => {
+    setShowEditModal(false);
+    setEditingMember(null);
+            setEditFormData({ name: '', email: '', classification: '', status: 'active', joinDate: new Date().toISOString().split('T')[0], memberSince: new Date().getFullYear().toString(), profileImage: '', currentDesignation: '', profession: '', birthday: '', hobbies: '', personalBio: '', personalDetails: { address: '', phone: '', education: '', achievements: '', interests: '', socialMedia: { linkedin: '', facebook: '', twitter: '' } }, pastPositions: [], isPastPresident: false, presidentialYears: [], familyMembers: [] });
+    setFamilyMembers([]);
+    
+    // Clear photo state
+    setCurrentMemberPhotoPreview('');
+    setMemberPhotoPreview('');
+    
+    setEditError('');
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+    setDeletingMember(null);
+    setDeleteError('');
+  };
+
+  const handleAddClick = () => {
+    setAddFormData({
+      name: '',
+      email: '',
+      classification: '',
+      joinDate: new Date().toISOString().split('T')[0],
+      memberSince: new Date().getFullYear().toString(),
+      // Additional member details
+      profileImage: '',
+      currentDesignation: '',
+      profession: '',
+      birthday: '',
+      hobbies: '',
+      personalBio: '',
+      personalDetails: {
+        address: '',
+        phone: '',
+        education: '',
+        achievements: '',
+        interests: '',
+        socialMedia: {
+          linkedin: '',
+          facebook: '',
+          twitter: ''
+        }
+      },
+      // Legacy fields
+
+      pastPositions: [],
+      isPastPresident: false,
+      presidentialYears: [],
+      familyMembers: []
+    });
+    setFamilyMembers([]); // Clear family members for new member
+    
+    // Clear photo state for new member
+    setCurrentMemberPhotoPreview('');
+    setMemberPhotoPreview('');
+    
+    setAddError('');
+    setShowAddModal(true);
+  };
+
+  const handleAddSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    setAddLoading(true);
+    setAddError('');
+
+    try {
+      const memberToken = localStorage.getItem('memberToken');
+      const adminToken = localStorage.getItem('adminToken');
+      const token = memberToken || adminToken;
+      
+      // Ensure all required fields are present
+      const newData = {
+        ...addFormData,
+        familyMembers: familyMembers, // Include family members in the new member
+        joinDate: addFormData.joinDate || new Date().toISOString().split('T')[0],
+        memberSince: addFormData.memberSince || new Date().getFullYear().toString(),
+        classification: addFormData.classification || 'Member',
+        status: 'active',
+        isActive: true
+      };
+
+      const response = await fetch(`${API_BASE_URL}/members`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newData)
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+
+        
+        // Add the new member to the local state
+        // The backend returns { message: 'Member created successfully', member: {...} }
+        const newMember = data.member;
+        // Map the backend 'id' field to frontend '_id' field for consistency
+        const memberWithCorrectId = {
+          ...newMember,
+          _id: newMember.id || newMember._id
+        };
+        setMembers(prevMembers => [memberWithCorrectId, ...prevMembers]);
+        
+        setShowAddModal(false);
+        setAddFormData({ name: '', email: '', classification: '', joinDate: new Date().toISOString().split('T')[0], memberSince: new Date().getFullYear().toString(), profileImage: '', currentDesignation: '', profession: '', birthday: '', hobbies: '', personalBio: '', personalDetails: { address: '', phone: '', education: '', achievements: '', interests: '', socialMedia: { linkedin: '', facebook: '', twitter: '' } }, pastPositions: [], isPastPresident: false, presidentialYears: [], familyMembers: [] });
+        setFamilyMembers([]);
+      } else {
+        const errorData = await response.json();
+        console.error('❌ Add failed:', errorData);
+        setAddError(errorData.message || 'Failed to add member');
+      }
+    } catch (error) {
+      console.error('Add error:', error);
+      setAddError('Failed to add member. Please try again.');
+    } finally {
+      setAddLoading(false);
+    }
+  };
+
+  const handleAddCancel = () => {
+    setShowAddModal(false);
+    setAddFormData({ name: '', email: '', classification: '', joinDate: new Date().toISOString().split('T')[0], memberSince: new Date().getFullYear().toString(), profileImage: '', currentDesignation: '', profession: '', birthday: '', hobbies: '', personalBio: '', personalDetails: { address: '', phone: '', education: '', achievements: '', interests: '', socialMedia: { linkedin: '', facebook: '', twitter: '' } }, pastPositions: [], isPastPresident: false, presidentialYears: [], familyMembers: [] });
+    setFamilyMembers([]);
+    
+    // Clear photo state
+    setCurrentMemberPhotoPreview('');
+    setMemberPhotoPreview('');
+    
+    setAddError('');
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'active':
+        return <Badge className="admin-badge bg-success px-3 py-2">Active</Badge>;
+      case 'inactive':
+        return <Badge className="admin-badge bg-secondary px-3 py-2">Inactive</Badge>;
+      default:
+        return <Badge className="admin-badge bg-warning px-3 py-2">Unknown</Badge>;
+    }
+  };
+
+  const getLoginStatusBadge = (member: Member) => {
+    if (!member.hasLoggedIn) {
+      return <Badge className="admin-badge bg-danger px-3 py-2">Never Logged In</Badge>;
+    }
+    if (member.daysSinceLastLogin === 0) {
+      return <Badge className="admin-badge bg-success px-3 py-2">Today</Badge>;
+    }
+    if (member.daysSinceLastLogin && member.daysSinceLastLogin <= 7) {
+      return <Badge className="admin-badge bg-info px-3 py-2">{member.lastLoginText}</Badge>;
+    }
+    return <Badge className="admin-badge bg-warning px-3 py-2">{member.lastLoginText}</Badge>;
+  };
+
+  // Calculate dashboard stats from members data
+  const calculateDashboardStats = (members: Member[]) => {
+    const totalMembers = members.length;
+    const activeMembers = members.filter(m => m.status === 'active').length;
+    const currentDirectors = members.filter(m => m.currentDesignation && m.currentDesignation.trim() !== '').length;
+    const pastPresidents = members.filter(m => m.isPastPresident).length;
+    const membersWithLogin = members.filter(m => m.hasLoggedIn).length;
+    const recentLogins = members.filter(m => m.daysSinceLastLogin !== undefined && m.daysSinceLastLogin <= 7).length;
+    const loginRate = totalMembers > 0 ? Math.round((membersWithLogin / totalMembers) * 100) : 0;
+
+    return {
+      members: {
+        total: totalMembers,
+        active: activeMembers,
+        currentDirectors: currentDirectors,
+        pastPresidents: pastPresidents
+      },
+      memberStats: {
+        totalMembers,
+        activeMembers,
+        membersWithLogin,
+        recentLogins,
+        loginRate
+      }
+    };
+  };
+
+  // New: Handle pagination change
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    
+    if (useClientSideFiltering && isDataCached && cachedMembers.length > 0) {
+      // Instant client-side pagination
+      updateClientSideFiltering();
+    } else {
+      // Server-side pagination
+      loadDashboardData();
+    }
+  };
+
+  // New: Handle search input change for real-time filtering
+  const handleSearchInputChange = (value: string) => {
+    setSearchTerm(value);
+    
+    if (useClientSideFiltering && isDataCached && cachedMembers.length > 0) {
+      // Instant client-side filtering on input change
+      updateClientSideFiltering();
+    }
+  };
+
+  // Effect to handle client-side filtering updates
+  useEffect(() => {
+    if (useClientSideFiltering && isDataCached && cachedMembers.length > 0) {
+      updateClientSideFiltering();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [useClientSideFiltering, isDataCached, cachedMembers.length]);
+
+  // Effect to load data when component mounts or when switching modes
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadDashboardData();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated]);
+
+  if (loading) {
+    return (
+      <div className="admin-modern d-flex align-items-center justify-content-center" style={{ minHeight: 'calc(100vh - 200px)', paddingTop: '6rem' }}>
+        <div className="text-center">
+          <div className="admin-stats-icon admin-stats-primary mx-auto mb-4">
+            <IconWrapper icon={FaGear} />
+          </div>
+          <Spinner animation="border" className="admin-spinner" />
+          <p className="mt-4 text-white fw-semibold">Loading Admin Portal...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="admin-modern d-flex align-items-center justify-content-center" style={{ minHeight: 'calc(100vh - 200px)', paddingTop: '6rem' }}>
+        <Container>
+          <Row className="justify-content-center">
+            <Col md={6} lg={5}>
+              <Card className="admin-login-container border-0">
+                <Card.Header className="admin-login-header">
+                  <div className="mb-4">
+                    <div className="admin-stats-icon admin-stats-primary mx-auto">
+                      <IconWrapper icon={FaGear} />
+                    </div>
+                  </div>
+                  <h3 className="mb-2 fw-bold">Admin Portal</h3>
+                  <p className="mb-0 opacity-90">Rotary Club of Cochin Lakeside</p>
+                </Card.Header>
+                <Card.Body className="admin-login-body">
+                  {error && <Alert variant="danger" className="border-0 shadow-sm mb-4">{error}</Alert>}
+                  
+                  <Form onSubmit={handleLogin}>
+                    <Form.Group className="mb-4">
+                      <Form.Label className="fw-semibold text-dark mb-3">
+                        <IconWrapper icon={FaEnvelope} className="me-2" style={{ color: '#667eea' }} />
+                        Email Address
+                      </Form.Label>
+                      <Form.Control
+                        type="email"
+                        name="email"
+                        required
+                        placeholder="Enter admin email"
+                        className="admin-form-control"
+                      />
+                    </Form.Group>
+                    <Form.Group className="mb-4">
+                      <Form.Label className="fw-semibold text-dark mb-3">
+                        <IconWrapper icon={FaGear} className="me-2" style={{ color: '#667eea' }} />
+                        Password
+                      </Form.Label>
+                      <Form.Control
+                        type="password"
+                        name="password"
+                        required
+                        placeholder="Enter admin password"
+                        className="admin-form-control"
+                      />
+                    </Form.Group>
+                    <Button 
+                      type="submit" 
+                      className="admin-btn admin-btn-primary w-100 mb-4"
+                    >
+                      <IconWrapper icon={FaGear} className="me-2" />
+                      Admin Login
+                    </Button>
+                    <div className="text-center">
+                      <Button 
+                        variant="link" 
+                        className="p-0 text-decoration-none admin-text-gradient"
+                        onClick={() => window.location.href = '/auth'}
+                      >
+                        Member Login
+                      </Button>
+                    </div>
+                  </Form>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+        </Container>
+      </div>
+    );
+  }
+
+  return (
+    <div className="admin-modern">
+      <Container fluid>
+        <Row>
+          <Col>
+            {/* Header */}
+            <div className="admin-header">
+              <div className="d-flex justify-content-between align-items-center">
+                <div>
+                  <h2 className="fw-bold admin-text-gradient mb-2">
+                    <IconWrapper icon={FaGear} className="me-3" />
+                    Admin Dashboard
+                  </h2>
+                  <p className="text-white mb-0 opacity-90">
+                    Welcome back, {member?.name || user?.profile?.firstName || user?.username}!
+                  </p>
+                </div>
+                <Button 
+                  className="admin-btn admin-btn-outline"
+                  onClick={handleLogout}
+                >
+                  <IconWrapper icon={FaRightFromBracket} className="me-2" />
+                  Logout
+                </Button>
+              </div>
+            </div>
+
+            {/* Navigation Tabs */}
+            <Card className="admin-nav mb-4">
+              <Card.Body className="p-0">
+                <Nav variant="tabs" activeKey={activeTab} onSelect={(k) => setActiveTab(k || 'dashboard')} className="border-0">
+                  <Nav.Item>
+                    <Nav.Link eventKey="dashboard" className="admin-nav-link">
+                      <IconWrapper icon={FaChartBar} className="me-2" />
+                      Dashboard
+                    </Nav.Link>
+                  </Nav.Item>
+                  <Nav.Item>
+                    <Nav.Link eventKey="members" className="admin-nav-link">
+                      <IconWrapper icon={FaUsers} className="me-2" />
+                      Members
+                    </Nav.Link>
+                  </Nav.Item>
+                  <Nav.Item>
+                    <Nav.Link eventKey="services" className="admin-nav-link">
+                      <IconWrapper icon={FaBriefcase} className="me-2" />
+                      Services
+                    </Nav.Link>
+                  </Nav.Item>
+                  <Nav.Item>
+                    <Nav.Link eventKey="settings" className="admin-nav-link">
+                      <IconWrapper icon={FaGear} className="me-2" />
+                      Settings
+                    </Nav.Link>
+                  </Nav.Item>
+                </Nav>
+              </Card.Body>
+            </Card>
+
+            {/* Content */}
+            <div className="admin-main">
+              <div className="p-4">
+                {activeTab === 'dashboard' && (
+                  <DashboardTab 
+                    stats={stats} 
+                    memberStats={memberStats} 
+                    calculatedStats={calculateDashboardStats(members)}
+                  />
+                )}
+                {activeTab === 'members' && (
+                  <MembersTab 
+                    members={members} 
+                    memberStats={memberStats}
+                    searchTerm={searchTerm}
+                    setSearchTerm={handleSearchInputChange}
+                    currentPage={currentPage}
+                    setCurrentPage={handlePageChange}
+                    totalPages={totalPages}
+                    sortBy={sortBy}
+                    sortOrder={sortOrder}
+                    statusFilter={statusFilter}
+                    onSearch={handleSearch}
+                    onSort={handleSort}
+                    onStatusFilterChange={handleStatusFilterChange}
+                    onStatusToggle={handleStatusToggle}
+                    getStatusBadge={getStatusBadge}
+                    getLoginStatusBadge={getLoginStatusBadge}
+                    onEdit={handleEditClick}
+                    onDelete={handleDeleteClick}
+                    onAdd={handleAddClick}
+                    useClientSideFiltering={useClientSideFiltering}
+                    setUseClientSideFiltering={setUseClientSideFiltering}
+                  />
+                )}
+                {activeTab === 'services' && (
+                  <ServicesTab />
+                )}
+                {activeTab === 'settings' && (
+                  <SettingsTab user={user} />
+                )}
+              </div>
+            </div>
+          </Col>
+        </Row>
+      </Container>
+
+      {/* Edit Member Modal */}
+      <Modal show={showEditModal} onHide={handleEditCancel} centered size="xl" dialogClassName="admin-modal">
+        <Modal.Header closeButton className="admin-modal-header">
+          <div className="d-flex align-items-center">
+            <div className="admin-stats-icon admin-stats-primary me-3">
+              <IconWrapper icon={FaPenToSquare} />
+            </div>
+            <div>
+              <Modal.Title className="fw-bold mb-1 text-white">Edit Member</Modal.Title>
+              <p className="mb-0 opacity-90 text-white">Update member information and details</p>
+            </div>
+          </div>
+        </Modal.Header>
+        <Form onSubmit={handleEditSubmit}>
+          <Modal.Body className="admin-modal-body">
+            {editError && <Alert variant="danger" className="mb-4 border-0 shadow-sm">{editError}</Alert>}
+            <MemberForm
+              formData={editFormData}
+              setFormData={setEditFormData}
+              familyMembers={familyMembers}
+              setFamilyMembers={setFamilyMembers}
+              addFamilyMember={addFamilyMember}
+              editFamilyMember={editFamilyMember}
+              removeFamilyMember={removeFamilyMember}
+              memberPhotoPreview={memberPhotoPreview}
+              currentMemberPhotoPreview={currentMemberPhotoPreview}
+              handleMemberPhotoUpload={handleMemberPhotoUpload}
+              clearMemberPhoto={clearMemberPhoto}
+              isEdit={true}
+
+            />
+          </Modal.Body>
+          <Modal.Footer className="admin-modal-footer d-flex justify-content-center">
+            <div className="d-flex gap-3">
+              <Button className="admin-btn admin-btn-outline" onClick={handleEditCancel} disabled={editLoading}>
+                <IconWrapper icon={FaXmark} className="me-2" />
+                Cancel
+              </Button>
+              <Button className="admin-btn admin-btn-primary" type="submit" disabled={editLoading}>
+                {editLoading ? (
+                  <>
+                    <Spinner animation="border" size="sm" className="me-2" />
+                    Updating...
+                  </>
+                ) : (
+                  <>
+                    <IconWrapper icon={FaFloppyDisk} className="me-2" />
+                    Update Member
+                  </>
+                )}
+              </Button>
+            </div>
+          </Modal.Footer>
+        </Form>
+      </Modal>
+
+      {/* Delete Member Modal */}
+      <Modal show={showDeleteModal} onHide={handleDeleteCancel} centered dialogClassName="admin-modal">
+        <Modal.Header closeButton className="admin-modal-header">
+          <Modal.Title className="fw-bold text-white">Delete Member</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="admin-modal-body">
+          {deleteError && <Alert variant="danger" className="mb-3">{deleteError}</Alert>}
+          <p className="mb-2">Are you sure you want to <strong>permanently delete</strong> <strong>{deletingMember?.name}</strong>?</p>
+          <p className="text-muted mb-0">
+            <strong>Warning:</strong> This action cannot be undone. The member will be completely removed from the system.
+          </p>
+        </Modal.Body>
+        <Modal.Footer className="admin-modal-footer">
+          <Button className="admin-btn admin-btn-outline" onClick={handleDeleteCancel} disabled={deleteLoading}>
+            Cancel
+          </Button>
+          <Button className="admin-btn admin-btn-primary" onClick={handleDeleteConfirm} disabled={deleteLoading}>
+            {deleteLoading ? (
+              <>
+                <Spinner animation="border" size="sm" className="me-2" />
+                Deleting...
+              </>
+            ) : (
+              'Permanently Delete Member'
+            )}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Add Member Modal */}
+      <Modal show={showAddModal} onHide={handleAddCancel} centered size="xl" dialogClassName="admin-modal">
+        <Modal.Header closeButton className="admin-modal-header">
+          <div className="d-flex align-items-center">
+            <div className="admin-stats-icon admin-stats-primary me-3">
+              <IconWrapper icon={FaPlus} />
+            </div>
+            <div>
+              <Modal.Title className="fw-bold mb-1 text-white">Add New Member</Modal.Title>
+              <p className="mb-0 opacity-90 text-white">Create a new member account with complete details</p>
+            </div>
+          </div>
+        </Modal.Header>
+        <Form onSubmit={handleAddSubmit}>
+          <Modal.Body className="admin-modal-body">
+            {addError && <Alert variant="danger" className="mb-4 border-0 shadow-sm">{addError}</Alert>}
+            <MemberForm
+              formData={addFormData}
+              setFormData={setAddFormData}
+              familyMembers={familyMembers}
+              setFamilyMembers={setFamilyMembers}
+              addFamilyMember={addFamilyMember}
+              editFamilyMember={editFamilyMember}
+              removeFamilyMember={removeFamilyMember}
+              memberPhotoPreview={memberPhotoPreview}
+              currentMemberPhotoPreview={currentMemberPhotoPreview}
+              handleMemberPhotoUpload={handleMemberPhotoUpload}
+              clearMemberPhoto={clearMemberPhoto}
+              isEdit={false}
+
+            />
+          </Modal.Body>
+          <Modal.Footer className="admin-modal-footer d-flex justify-content-center">
+            <div className="d-flex gap-3">
+              <Button className="admin-btn admin-btn-outline" onClick={handleAddCancel} disabled={addLoading}>
+                <IconWrapper icon={FaXmark} className="me-2" />
+                Cancel
+              </Button>
+              <Button className="admin-btn admin-btn-primary" type="submit" disabled={addLoading}>
+                {addLoading ? (
+                  <>
+                    <Spinner animation="border" size="sm" className="me-2" />
+                    Adding...
+                  </>
+                ) : (
+                  <>
+                    <IconWrapper icon={FaPlus} className="me-2" />
+                    Add Member
+                  </>
+                )}
+              </Button>
+            </div>
+          </Modal.Footer>
+        </Form>
+      </Modal>
+
+      {/* Family Member Modal */}
+      <Modal show={showFamilyModal} onHide={() => setShowFamilyModal(false)} centered size="xl" dialogClassName="admin-modal">
+        <Modal.Header closeButton className="admin-modal-header">
+          <div className="d-flex align-items-center">
+            <div className="admin-stats-icon admin-stats-primary me-3">
+              <IconWrapper icon={FaUsers} />
+            </div>
+            <div>
+              <Modal.Title className="fw-bold mb-1 text-white">
+                {editingFamilyMember ? 'Edit Family Member' : 'Add Family Member'}
+              </Modal.Title>
+              <p className="mb-0 opacity-90 text-white">
+                {editingFamilyMember ? 'Update family member information' : 'Add a new family member to the profile'}
+              </p>
+            </div>
+          </div>
+        </Modal.Header>
+        <Modal.Body className="admin-modal-body">
+          <Form>
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-semibold text-dark">
+                    <IconWrapper icon={FaUser} className="me-2" style={{ color: '#0066CC' }} />
+                    Name *
+                  </Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={familyFormData.name}
+                    onChange={(e) => setFamilyFormData({...familyFormData, name: e.target.value})}
+                    required
+                    placeholder="Family member name"
+                    className="admin-form-control"
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-semibold text-dark">
+                    <IconWrapper icon={FaUsers} className="me-2" style={{ color: '#0066CC' }} />
+                    Relationship *
+                  </Form.Label>
+                  <Form.Select
+                    value={familyFormData.relationship}
+                    onChange={(e) => setFamilyFormData({...familyFormData, relationship: e.target.value})}
+                    required
+                    className="admin-form-control"
+                  >
+                    <option value="">Select relationship</option>
+                    <option value="Spouse">Spouse</option>
+                    <option value="Fiancé">Fiancé</option>
+                    <option value="Father">Father</option>
+                    <option value="Mother">Mother</option>
+                    <option value="Brother">Brother</option>
+                    <option value="Sister">Sister</option>
+                    <option value="Son">Son</option>
+                    <option value="Daughter">Daughter</option>
+                    <option value="Grandfather">Grandfather</option>
+                    <option value="Grandmother">Grandmother</option>
+                    <option value="Nephew">Nephew</option>
+                    <option value="Niece">Niece</option>
+                    <option value="Brother-In-Law">Brother-In-Law</option>
+                    <option value="Sister-In-Law">Sister-In-Law</option>
+                    <option value="Father-In-Law">Father-In-Law</option>
+                    <option value="Mother-In-Law">Mother-In-Law</option>
+                    <option value="Uncle">Uncle</option>
+                    <option value="Aunt">Aunt</option>
+                    <option value="Cousin">Cousin</option>
+                    <option value="Other">Other</option>
+                  </Form.Select>
+                </Form.Group>
+              </Col>
+            </Row>
+            
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-semibold text-dark">
+                    <IconWrapper icon={FaBriefcase} className="me-2" style={{ color: '#0066CC' }} />
+                    Profession
+                  </Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={familyFormData.profession}
+                    onChange={(e) => setFamilyFormData({...familyFormData, profession: e.target.value})}
+                    placeholder="e.g., Doctor, Engineer, Teacher"
+                    className="admin-form-control"
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-semibold text-dark">
+                    <IconWrapper icon={FaCalendar} className="me-2" style={{ color: '#0066CC' }} />
+                    Birthday
+                  </Form.Label>
+                  <Form.Control
+                    type="date"
+                    value={familyFormData.birthday}
+                    onChange={(e) => setFamilyFormData({...familyFormData, birthday: e.target.value})}
+                    className="admin-form-control"
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <Form.Group className="mb-3">
+              <Form.Label className="fw-semibold text-dark">
+                <IconWrapper icon={FaCamera} className="me-2" style={{ color: '#0066CC' }} />
+                Photo
+              </Form.Label>
+              <div className="d-flex align-items-center gap-3 mb-3">
+                {(familyPhotoPreview || familyFormData.photo) && (
+                  <div className="position-relative">
+                    <img 
+                      src={familyPhotoPreview || familyFormData.photo} 
+                      alt="Family member preview" 
+                      className="rounded-circle"
+                      style={{ width: '60px', height: '60px', objectFit: 'cover' }}
+                    />
+                    <Button 
+                      size="sm" 
+                      variant="danger" 
+                      className="position-absolute top-0 end-0 rounded-circle"
+                      style={{ width: '20px', height: '20px', fontSize: '10px', padding: '0' }}
+                      onClick={clearFamilyPhoto}
+                    >
+                      ×
+                    </Button>
+                  </div>
+                )}
+                <div className="flex-grow-1">
+                  <Form.Control
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFamilyPhotoUpload}
+                    className="admin-form-control"
+                  />
+                  <small className="text-muted">Upload a photo or enter URL below</small>
+                </div>
+              </div>
+              <Form.Control
+                type="url"
+                value={familyFormData.photo}
+                onChange={(e) => setFamilyFormData({...familyFormData, photo: e.target.value})}
+                placeholder="Or enter photo URL: https://example.com/photo.jpg"
+                className="admin-form-control"
+              />
+            </Form.Group>
+
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-semibold text-dark">
+                    <IconWrapper icon={FaHeart} className="me-2" style={{ color: '#0066CC' }} />
+                    Hobbies
+                  </Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={3}
+                    value={familyFormData.hobbies}
+                    onChange={(e) => setFamilyFormData({...familyFormData, hobbies: e.target.value})}
+                    placeholder="e.g., Reading, Travel, Music"
+                    className="admin-form-control"
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-semibold text-dark">
+                    <IconWrapper icon={FaUsers} className="me-2" style={{ color: '#0066CC' }} />
+                    Personal Bio
+                  </Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={3}
+                    value={familyFormData.personalBio}
+                    onChange={(e) => setFamilyFormData({...familyFormData, personalBio: e.target.value})}
+                    placeholder="Tell us about this family member..."
+                    className="admin-form-control"
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <hr className="my-4" />
+
+            <h6 className="mb-4 fw-semibold text-dark">
+              <IconWrapper icon={FaLocationDot} className="me-2" style={{ color: '#0066CC' }} />
+              Additional Details
+            </h6>
+            
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-semibold text-dark">
+                    <IconWrapper icon={FaPhone} className="me-2" style={{ color: '#0066CC' }} />
+                    Phone
+                  </Form.Label>
+                  <Form.Control
+                    type="tel"
+                    value={familyFormData.personalDetails.phone}
+                    onChange={(e) => setFamilyFormData({
+                      ...familyFormData, 
+                      personalDetails: {...familyFormData.personalDetails, phone: e.target.value}
+                    })}
+                    placeholder="Enter phone number"
+                    className="admin-form-control"
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-semibold text-dark">
+                    <IconWrapper icon={FaGraduationCap} className="me-2" style={{ color: '#0066CC' }} />
+                    Education
+                  </Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={familyFormData.personalDetails.education}
+                    onChange={(e) => setFamilyFormData({
+                      ...familyFormData, 
+                      personalDetails: {...familyFormData.personalDetails, education: e.target.value}
+                    })}
+                    placeholder="e.g., Bachelor's in Engineering"
+                    className="admin-form-control"
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <Form.Group className="mb-3">
+              <Form.Label className="fw-semibold text-dark">
+                <IconWrapper icon={FaLocationDot} className="me-2" style={{ color: '#0066CC' }} />
+                Address
+              </Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={2}
+                value={familyFormData.personalDetails.address}
+                onChange={(e) => setFamilyFormData({
+                  ...familyFormData, 
+                  personalDetails: {...familyFormData.personalDetails, address: e.target.value}
+                })}
+                placeholder="Enter address"
+                className="admin-form-control"
+              />
+            </Form.Group>
+
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-semibold text-dark">
+                    <IconWrapper icon={FaTrophy} className="me-2" style={{ color: '#0066CC' }} />
+                    Achievements
+                  </Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={2}
+                    value={familyFormData.personalDetails.achievements}
+                    onChange={(e) => setFamilyFormData({
+                      ...familyFormData, 
+                      personalDetails: {...familyFormData.personalDetails, achievements: e.target.value}
+                    })}
+                    placeholder="List achievements"
+                    className="admin-form-control"
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-semibold text-dark">
+                    <IconWrapper icon={FaStar} className="me-2" style={{ color: '#0066CC' }} />
+                    Interests
+                  </Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={2}
+                    value={familyFormData.personalDetails.interests}
+                    onChange={(e) => setFamilyFormData({
+                      ...familyFormData, 
+                      personalDetails: {...familyFormData.personalDetails, interests: e.target.value}
+                    })}
+                    placeholder="List interests"
+                    className="admin-form-control"
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <hr className="my-4" />
+
+            <h6 className="mb-4 fw-semibold text-dark">
+              <IconWrapper icon={FaLinkedin} className="me-2" style={{ color: '#0066CC' }} />
+              Social Media
+            </h6>
+            
+            <Row>
+              <Col md={4}>
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-semibold text-dark">
+                    <IconWrapper icon={FaLinkedin} className="me-2" style={{ color: '#0066CC' }} />
+                    LinkedIn
+                  </Form.Label>
+                  <Form.Control
+                    type="url"
+                    value={familyFormData.personalDetails.socialMedia.linkedin}
+                    onChange={(e) => setFamilyFormData({
+                      ...familyFormData, 
+                      personalDetails: {
+                        ...familyFormData.personalDetails, 
+                        socialMedia: {...familyFormData.personalDetails.socialMedia, linkedin: e.target.value}
+                      }
+                    })}
+                    placeholder="LinkedIn URL"
+                    className="admin-form-control"
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={4}>
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-semibold text-dark">
+                    <IconWrapper icon={FaFacebook} className="me-2" style={{ color: '#0066CC' }} />
+                    Facebook
+                  </Form.Label>
+                  <Form.Control
+                    type="url"
+                    value={familyFormData.personalDetails.socialMedia.facebook}
+                    onChange={(e) => setFamilyFormData({
+                      ...familyFormData, 
+                      personalDetails: {
+                        ...familyFormData.personalDetails, 
+                        socialMedia: {...familyFormData.personalDetails.socialMedia, facebook: e.target.value}
+                      }
+                    })}
+                    placeholder="Facebook URL"
+                    className="admin-form-control"
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={4}>
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-semibold text-dark">
+                    <IconWrapper icon={FaTwitter} className="me-2" style={{ color: '#0066CC' }} />
+                    Twitter
+                  </Form.Label>
+                  <Form.Control
+                    type="url"
+                    value={familyFormData.personalDetails.socialMedia.twitter}
+                    onChange={(e) => setFamilyFormData({
+                      ...familyFormData, 
+                      personalDetails: {
+                        ...familyFormData.personalDetails, 
+                        socialMedia: {...familyFormData.personalDetails.socialMedia, twitter: e.target.value}
+                      }
+                    })}
+                    placeholder="Twitter URL"
+                    className="admin-form-control"
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer className="admin-modal-footer d-flex justify-content-center">
+          <div className="d-flex gap-3">
+            <Button className="admin-btn admin-btn-outline" onClick={() => setShowFamilyModal(false)}>
+              <IconWrapper icon={FaXmark} className="me-2" />
+              Cancel
+            </Button>
+            <Button className="admin-btn admin-btn-primary" onClick={saveFamilyMember}>
+              <IconWrapper icon={FaFloppyDisk} className="me-2" />
+              {editingFamilyMember ? 'Update Family Member' : 'Add Family Member'}
+            </Button>
+          </div>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Member Search Modal */}
+      <MemberSearchModal
+        show={showMemberSearchModal}
+        onHide={() => setShowMemberSearchModal(false)}
+        onLinkMember={linkMemberAsFamily}
+      />
+    </div>
+  );
+};
+
+const DashboardTab: React.FC<{ 
+  stats: DashboardStats | null; 
+  memberStats: MemberStatistics | null;
+  calculatedStats: {
+    members: {
+      total: number;
+      active: number;
+      currentDirectors: number;
+      pastPresidents: number;
+    };
+    memberStats: {
+      totalMembers: number;
+      activeMembers: number;
+      membersWithLogin: number;
+      recentLogins: number;
+      loginRate: number;
+    };
+  };
+}> = ({ stats, memberStats, calculatedStats }) => {
+  // Use calculated stats for accuracy, fallback to backend stats if available
+  const displayStats = calculatedStats;
+  const displayMemberStats = calculatedStats.memberStats;
+
+  if (!displayStats) return (
+    <div className="text-center py-5">
+      <div className="admin-stats-icon admin-stats-primary mx-auto mb-4">
+        <IconWrapper icon={FaChartBar} />
+      </div>
+      <Spinner animation="border" className="admin-spinner" />
+      <p className="mt-4 text-white fw-semibold">Loading dashboard statistics...</p>
+    </div>
+  );
+
+  return (
+    <div>
+      {/* Main Stats */}
+      <Row className="mb-4">
+        <Col md={3}>
+          <Card className="admin-stats-card text-center">
+            <Card.Body className="p-4">
+              <div className="admin-stats-icon admin-stats-primary mx-auto mb-3">
+                <IconWrapper icon={FaUsers} />
+              </div>
+              <h3 className="fw-bold text-dark mb-2">{displayStats.members.total}</h3>
+              <p className="text-muted mb-0 fw-semibold">Total Members</p>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col md={3}>
+          <Card className="admin-stats-card text-center">
+            <Card.Body className="p-4">
+              <div className="admin-stats-icon admin-stats-success mx-auto mb-3">
+                <IconWrapper icon={FaUserCheck} />
+              </div>
+              <h3 className="fw-bold text-dark mb-2">{displayStats.members.active}</h3>
+              <p className="text-muted mb-0 fw-semibold">Active Members</p>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col md={3}>
+          <Card className="admin-stats-card text-center">
+            <Card.Body className="p-4">
+              <div className="admin-stats-icon admin-stats-info mx-auto mb-3">
+                <IconWrapper icon={FaEye} />
+              </div>
+              <h3 className="fw-bold text-dark mb-2">{displayStats.members.currentDirectors}</h3>
+              <p className="text-muted mb-0 fw-semibold">Current Directors</p>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col md={3}>
+          <Card className="admin-stats-card text-center">
+            <Card.Body className="p-4">
+              <div className="admin-stats-icon admin-stats-warning mx-auto mb-3">
+                <IconWrapper icon={FaCalendar} />
+              </div>
+              <h3 className="fw-bold text-dark mb-2">{displayStats.members.pastPresidents}</h3>
+              <p className="text-muted mb-0 fw-semibold">Past Presidents</p>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Login Activity Stats */}
+      <Row>
+        <Col md={3}>
+          <Card className="admin-stats-card text-center">
+            <Card.Body className="p-4">
+              <div className="admin-stats-icon admin-stats-primary mx-auto mb-3">
+                <IconWrapper icon={FaUserCheck} />
+              </div>
+              <h3 className="fw-bold text-dark mb-2">{displayMemberStats.membersWithLogin}</h3>
+              <p className="text-muted mb-0 fw-semibold">Have Logged In</p>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col md={3}>
+          <Card className="admin-stats-card text-center">
+            <Card.Body className="p-4">
+              <div className="admin-stats-icon admin-stats-success mx-auto mb-3">
+                <IconWrapper icon={FaClock} />
+              </div>
+              <h3 className="fw-bold text-dark mb-2">{displayMemberStats.recentLogins}</h3>
+              <p className="text-muted mb-0 fw-semibold">Recent Logins (7 days)</p>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col md={3}>
+          <Card className="admin-stats-card text-center">
+            <Card.Body className="p-4">
+              <div className="admin-stats-icon admin-stats-info mx-auto mb-3">
+                <IconWrapper icon={FaChartBar} />
+              </div>
+              <h3 className="fw-bold text-dark mb-2">{displayMemberStats.loginRate}%</h3>
+              <p className="text-muted mb-0 fw-semibold">Login Rate</p>
+            </Card.Body>
+          </Card>
+        </Col>
+        <Col md={3}>
+          <Card className="admin-stats-card text-center">
+            <Card.Body className="p-4">
+              <div className="admin-stats-icon admin-stats-danger mx-auto mb-3">
+                <IconWrapper icon={FaUserXmark} />
+              </div>
+              <h3 className="fw-bold text-dark mb-2">{displayMemberStats.totalMembers - displayMemberStats.membersWithLogin}</h3>
+              <p className="text-muted mb-0 fw-semibold">Never Logged In</p>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+    </div>
+  );
+};
+
+const MembersTab: React.FC<{
+  members: Member[];
+  memberStats: MemberStatistics | null;
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
+  totalPages: number;
+  sortBy: string;
+  sortOrder: string;
+  statusFilter: string;
+  onSearch: (e: React.FormEvent) => void;
+  onSort: (field: string) => void;
+  onStatusFilterChange: (newStatus: string) => void;
+  onStatusToggle: (member: Member) => void;
+  getStatusBadge: (status: string) => React.ReactElement;
+  getLoginStatusBadge: (member: Member) => React.ReactElement;
+  onEdit: (member: Member) => void;
+  onDelete: (member: Member) => void;
+  onAdd: () => void;
+  useClientSideFiltering: boolean;
+  setUseClientSideFiltering: (use: boolean) => void;
+}> = ({ 
+  members, 
+  memberStats, 
+  searchTerm, 
+  setSearchTerm, 
+  currentPage, 
+  setCurrentPage, 
+  totalPages, 
+  sortBy, 
+  sortOrder, 
+  statusFilter, 
+  onSearch, 
+  onSort, 
+  onStatusFilterChange, 
+  onStatusToggle, 
+  getStatusBadge, 
+  getLoginStatusBadge, 
+  onEdit, 
+  onDelete, 
+  onAdd,
+  useClientSideFiltering,
+  setUseClientSideFiltering
+}) => {
+  return (
+    <div>
+      {/* Header */}
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h3 className="fw-bold admin-text-gradient mb-2">Members Management</h3>
+          <p className="text-white opacity-90 mb-0">Manage and monitor member accounts</p>
+        </div>
+        <div className="d-flex gap-2">
+          <Button 
+            variant={useClientSideFiltering ? "success" : "outline-success"}
+            size="sm"
+            onClick={() => setUseClientSideFiltering(!useClientSideFiltering)}
+            title={useClientSideFiltering ? "Switch to Server-side Filtering" : "Switch to Client-side Filtering"}
+          >
+            {useClientSideFiltering ? "⚡ Client-side" : "🖥️ Server-side"}
+          </Button>
+          <Button 
+            className="admin-btn admin-btn-primary"
+            onClick={onAdd}
+          >
+            <IconWrapper icon={FaPlus} className="me-2" />
+            Add Member
+          </Button>
+        </div>
+      </div>
+
+      {/* Quick Stats */}
+      {memberStats && (
+        <Row className="mb-4">
+          <Col md={3}>
+            <Card className="admin-stats-card text-center">
+              <Card.Body className="p-3">
+                <h5 className="fw-bold text-dark mb-1">{memberStats.totalMembers}</h5>
+                <p className="text-muted mb-0 small fw-semibold">Total Members</p>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col md={3}>
+            <Card className="admin-stats-card text-center">
+              <Card.Body className="p-3">
+                <h5 className="fw-bold text-dark mb-1">{memberStats.membersWithLogin}</h5>
+                <p className="text-muted mb-0 small fw-semibold">Have Logged In</p>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col md={3}>
+            <Card className="admin-stats-card text-center">
+              <Card.Body className="p-3">
+                <h5 className="fw-bold text-dark mb-1">{memberStats.recentLogins}</h5>
+                <p className="text-muted mb-0 small fw-semibold">Recent Logins</p>
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col md={3}>
+            <Card className="admin-stats-card text-center">
+              <Card.Body className="p-3">
+                <h5 className="fw-bold text-dark mb-1">{memberStats.loginRate}%</h5>
+                <p className="text-muted mb-0 small fw-semibold">Login Rate</p>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      )}
+      
+      {/* Search and Table */}
+      <Card className="admin-card">
+        <Card.Body className="p-4">
+          {/* Search and Filter Bar */}
+          <Row className="mb-4">
+            <Col md={8}>
+              <Form onSubmit={onSearch}>
+                <InputGroup>
+                  <Form.Control
+                    type="text"
+                    placeholder="Search members by name, email, or designation..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="admin-form-control"
+                    style={{ borderRadius: '12px 0 0 12px' }}
+                  />
+                  <Button 
+                    type="submit" 
+                    className="admin-btn admin-btn-outline"
+                    style={{ borderRadius: '0 12px 12px 0' }}
+                  >
+                    <IconWrapper icon={FaMagnifyingGlass} />
+                  </Button>
+                </InputGroup>
+              </Form>
+            </Col>
+            <Col md={4}>
+              <Form.Select
+                value={statusFilter}
+                onChange={(e) => onStatusFilterChange(e.target.value)}
+                className="admin-form-control"
+              >
+                <option value="active">Active Members Only</option>
+                <option value="inactive">Inactive Members Only</option>
+                <option value="all">All Members</option>
+              </Form.Select>
+            </Col>
+          </Row>
+
+          {/* Members Table */}
+          <div className="table-responsive">
+            <Table className="admin-table mb-0">
+              <thead>
+                <tr>
+                  <th>
+                    <Button 
+                      variant="link" 
+                      className="p-0 text-decoration-none fw-semibold text-dark"
+                      onClick={() => onSort('name')}
+                    >
+                      Name {sortBy === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
+                    </Button>
+                  </th>
+                  <th>
+                    <span className="fw-semibold text-dark">Email</span>
+                  </th>
+                  <th>
+                    <span className="fw-semibold text-dark">Current Designation</span>
+                  </th>
+                  <th>
+                    <Button 
+                      variant="link" 
+                      className="p-0 text-decoration-none fw-semibold text-dark"
+                      onClick={() => onSort('createdAt')}
+                    >
+                      Signup Date {sortBy === 'createdAt' && (sortOrder === 'asc' ? '↑' : '↓')}
+                    </Button>
+                  </th>
+                  <th>
+                    <Button 
+                      variant="link" 
+                      className="p-0 text-decoration-none fw-semibold text-dark"
+                      onClick={() => onSort('lastLogin')}
+                    >
+                      Last Login {sortBy === 'lastLogin' && (sortOrder === 'asc' ? '↑' : '↓')}
+                    </Button>
+                  </th>
+                  <th>
+                    <span className="fw-semibold text-dark">Status</span>
+                  </th>
+                  <th>
+                    <span className="fw-semibold text-dark">Actions</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {members.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="text-center py-5">
+                      <div className="text-muted">
+                        <IconWrapper icon={FaUsers} className="fs-1 mb-3" />
+                        <p className="mb-0">No members found</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  members.map((member) => (
+                    <tr key={member._id}>
+                      <td>
+                        <div>
+                          <div className="fw-semibold text-dark">{member.name}</div>
+                        </div>
+                      </td>
+                      <td>
+                        <span className="text-muted">{member.email}</span>
+                      </td>
+                      <td>
+                        <div>
+                          <span className="text-muted">{member.currentDesignation || 'Member'}</span>
+                          {member.currentDesignation && (
+                            <Badge className="admin-badge bg-success ms-2 px-2 py-1" style={{ fontSize: '10px' }}>
+                              Current Director
+                            </Badge>
+                          )}
+                          {member.isPastPresident && (
+                            <Badge className="admin-badge bg-warning ms-2 px-2 py-1" style={{ fontSize: '10px' }}>
+                              Past President
+                            </Badge>
+                          )}
+                        </div>
+                      </td>
+                      <td>
+                        <span className="text-muted">{member.signupText || 'N/A'}</span>
+                      </td>
+                      <td>
+                        {getLoginStatusBadge(member)}
+                      </td>
+                      <td>
+                        {getStatusBadge(member.status)}
+                      </td>
+                      <td>
+                        <div className="d-flex gap-2">
+                          <Button 
+                            size="sm" 
+                            className={`admin-btn ${member.status === 'active' ? 'admin-btn-outline' : 'admin-btn-primary'}`}
+                            onClick={() => onStatusToggle(member)}
+                            title={member.status === 'active' ? 'Deactivate Member' : 'Activate Member'}
+                          >
+                            {member.status === 'active' ? (
+                              <IconWrapper icon={FaUserXmark} />
+                            ) : (
+                              <IconWrapper icon={FaUserCheck} />
+                            )}
+                          </Button>
+                          <Button size="sm" className="admin-btn admin-btn-outline" onClick={() => onEdit(member)}>
+                            <IconWrapper icon={FaPenToSquare} />
+                          </Button>
+                          <Button size="sm" className="admin-btn admin-btn-outline" onClick={() => onDelete(member)}>
+                            <IconWrapper icon={FaTrash} />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </Table>
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="d-flex justify-content-center mt-4">
+              <nav>
+                <ul className="pagination mb-0">
+                  <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                    <Button 
+                      className="page-link border-0" 
+                      variant="link"
+                      onClick={() => setCurrentPage(currentPage - 1)}
+                      disabled={currentPage === 1}
+                    >
+                      Previous
+                    </Button>
+                  </li>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <li key={page} className={`page-item ${currentPage === page ? 'active' : ''}`}>
+                      <Button 
+                        className="page-link border-0" 
+                        variant="link"
+                        onClick={() => setCurrentPage(page)}
+                      >
+                        {page}
+                      </Button>
+                    </li>
+                  ))}
+                  <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                    <Button 
+                      className="page-link border-0" 
+                      variant="link"
+                      onClick={() => setCurrentPage(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                    >
+                      Next
+                    </Button>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+          )}
+        </Card.Body>
+      </Card>
+    </div>
+  );
+};
+
+const ServicesTab: React.FC = () => {
+  const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
+  const [servicesData, setServicesData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [selectedService, setSelectedService] = useState<string | null>(null);
+  const [showAddProjectModal, setShowAddProjectModal] = useState(false);
+  const [showEditProjectModal, setShowEditProjectModal] = useState(false);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [editingProject, setEditingProject] = useState<any>(null);
+  const [deletingProject, setDeletingProject] = useState<{id: string, serviceId: string} | null>(null);
+  const [projectFormData, setProjectFormData] = useState({
+    title: '',
+    date: new Date().toISOString().split('T')[0],
+    description: '',
+    image: '',
+    alt: '',
+    serviceId: ''
+  });
+  const [imagePreview, setImagePreview] = useState<string>('');
+  
+  // Loading states for different actions
+  const [savingProject, setSavingProject] = useState(false);
+  const [deletingProjectLoading, setDeletingProjectLoading] = useState(false);
+  const [refreshingData, setRefreshingData] = useState(false);
+
+  const loadServicesData = useCallback(async () => {
+    try {
+      if (!refreshingData) {
+        setLoading(true);
+      }
+      const memberToken = localStorage.getItem('memberToken');
+      const adminToken = localStorage.getItem('adminToken');
+      const token = memberToken || adminToken;
+      
+      const response = await fetch(`${API_BASE_URL}/services`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setServicesData(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load services data');
+    } finally {
+      setLoading(false);
+      setRefreshingData(false);
+    }
+  }, [API_BASE_URL, refreshingData]);
+
+  useEffect(() => {
+    loadServicesData();
+  }, [loadServicesData]);
+
+  const handleAddProject = () => {
+    setProjectFormData({
+      title: '',
+      date: new Date().toISOString().split('T')[0],
+      description: '',
+      image: '',
+      alt: '',
+      serviceId: selectedService || ''
+    });
+    setImagePreview('');
+    setShowAddProjectModal(true);
+  };
+
+  const handleEditProject = (project: any, serviceId: string) => {
+    setEditingProject(project);
+    setProjectFormData({
+      title: project.title,
+      date: project.date,
+      description: project.description,
+      image: project.image,
+      alt: project.alt,
+      serviceId: serviceId
+    });
+    setImagePreview(project.image || '');
+    setShowEditProjectModal(true);
+  };
+
+  const handleDeleteProject = (projectId: string, serviceId: string) => {
+    setDeletingProject({ id: projectId, serviceId });
+    setShowDeleteConfirmModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingProject) return;
+    
+    try {
+      setDeletingProjectLoading(true);
+      const memberToken = localStorage.getItem('memberToken');
+      const adminToken = localStorage.getItem('adminToken');
+      const token = memberToken || adminToken;
+      
+      const response = await fetch(`${API_BASE_URL}/services/projects/${deletingProject.id}?serviceId=${deletingProject.serviceId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete project');
+      }
+      
+      // Reload services data
+      setRefreshingData(true);
+      await loadServicesData();
+      setShowDeleteConfirmModal(false);
+      setDeletingProject(null);
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      alert(error instanceof Error ? error.message : 'Failed to delete project');
+    } finally {
+      setDeletingProjectLoading(false);
+      setRefreshingData(false);
+    }
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        setImagePreview(result);
+        setProjectFormData(prev => ({ ...prev, image: result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const clearImage = () => {
+    setImagePreview('');
+    setProjectFormData(prev => ({ ...prev, image: '' }));
+  };
+
+  const handleSaveProject = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      setSavingProject(true);
+      const memberToken = localStorage.getItem('memberToken');
+      const adminToken = localStorage.getItem('adminToken');
+      const token = memberToken || adminToken;
+      
+      if (editingProject) {
+        // Update existing project
+        const response = await fetch(`${API_BASE_URL}/services/projects/${editingProject.id}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            serviceId: projectFormData.serviceId,
+            project: {
+              title: projectFormData.title,
+              date: projectFormData.date,
+              description: projectFormData.description,
+              image: projectFormData.image,
+              alt: projectFormData.alt
+            }
+          })
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to update project');
+        }
+        
+        // Reload services data
+        await loadServicesData();
+      } else {
+        // Add new project
+        const response = await fetch(`${API_BASE_URL}/services/projects`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            serviceId: projectFormData.serviceId,
+            project: {
+              title: projectFormData.title,
+              date: projectFormData.date,
+              description: projectFormData.description,
+              image: projectFormData.image,
+              alt: projectFormData.alt
+            }
+          })
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to add project');
+        }
+        
+        // Reload services data
+        await loadServicesData();
+      }
+      
+      setShowAddProjectModal(false);
+      setShowEditProjectModal(false);
+      setEditingProject(null);
+    } catch (error) {
+      console.error('Error saving project:', error);
+      alert(error instanceof Error ? error.message : 'Failed to save project');
+    } finally {
+      setSavingProject(false);
+      setRefreshingData(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="text-center py-5">
+        <Spinner animation="border" className="admin-spinner" />
+        <p className="mt-4 text-white fw-semibold">Loading services...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-5">
+        <Alert variant="danger" className="border-0 shadow-sm">
+          <h4>Error Loading Services</h4>
+          <p>{error}</p>
+        </Alert>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      {/* Header */}
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h3 className="fw-bold admin-text-gradient mb-2">Services Management</h3>
+          <p className="text-white opacity-90 mb-0">Manage service projects and categories</p>
+        </div>
+        <div className="d-flex gap-2">
+          <Button 
+            className="admin-btn admin-btn-primary"
+            onClick={handleAddProject}
+            disabled={!selectedService || savingProject}
+          >
+            {savingProject ? (
+              <>
+                <Spinner animation="border" size="sm" className="me-2" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <IconWrapper icon={FaPlus} className="me-2" />
+                Add Project
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
+
+      {/* Service Categories */}
+      {refreshingData && (
+        <div className="text-center mb-3">
+          <Spinner animation="border" size="sm" className="me-2" />
+          <span className="text-white">Refreshing data...</span>
+        </div>
+      )}
+      <Row className="mb-4">
+        {servicesData?.services?.map((service: any) => (
+          <Col key={service.id} xs={12} md={6} lg={4} className="mb-4">
+            <Card 
+              className={`admin-card h-100 ${selectedService === service.id ? 'border-primary' : ''}`}
+              style={{ cursor: 'pointer' }}
+              onClick={() => setSelectedService(selectedService === service.id ? null : service.id)}
+            >
+              <Card.Body className="text-center p-4">
+                <div className="mb-3" style={{ fontSize: '3rem' }}>
+                  {service.icon}
+                </div>
+                <Card.Title className="fw-bold mb-2">{service.title}</Card.Title>
+                <Card.Text className="text-muted mb-3">{service.description}</Card.Text>
+                <Badge bg="primary" className="px-3 py-2">
+                  {service.projects?.length || 0} {service.projects?.length === 1 ? 'Project' : 'Projects'}
+                </Badge>
+              </Card.Body>
+            </Card>
+          </Col>
+        ))}
+      </Row>
+
+      {/* Projects by Selected Service */}
+      {selectedService && (
+        <Card className="admin-card">
+          <Card.Header className="bg-primary text-white">
+            <div className="d-flex justify-content-between align-items-center">
+              <h5 className="mb-0">
+                {servicesData?.services?.find((s: any) => s.id === selectedService)?.title} Projects
+              </h5>
+              <Button 
+                variant="light" 
+                size="sm"
+                onClick={() => setSelectedService(null)}
+              >
+                ← Back to All Services
+              </Button>
+            </div>
+          </Card.Header>
+          <Card.Body className="p-4">
+            <Row>
+              {servicesData?.services
+                ?.find((s: any) => s.id === selectedService)
+                ?.projects?.map((project: any, index: number) => (
+                  <Col key={project.id} xs={12} md={6} lg={4} className="mb-4">
+                    <Card className="h-100">
+                      <img 
+                        src={project.image} 
+                        alt={project.alt}
+                        className="card-img-top"
+                        style={{ height: '200px', objectFit: 'cover' }}
+                      />
+                      <Card.Body>
+                        <h6 className="fw-bold">{project.title}</h6>
+                        <p className="text-muted small mb-2">{project.date}</p>
+                        <p className="small">{project.description}</p>
+                        <div className="d-flex gap-2">
+                          <Button 
+                            size="sm" 
+                            variant="outline-primary"
+                            onClick={() => handleEditProject(project, selectedService)}
+                            disabled={savingProject}
+                          >
+                            <IconWrapper icon={FaPenToSquare} className="me-1" />
+                            Edit
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline-danger"
+                            onClick={() => handleDeleteProject(project.id, selectedService)}
+                            disabled={deletingProjectLoading}
+                          >
+                            {deletingProjectLoading && deletingProject?.id === project.id ? (
+                              <>
+                                <Spinner animation="border" size="sm" className="me-1" />
+                                Deleting...
+                              </>
+                            ) : (
+                              <>
+                                <IconWrapper icon={FaTrash} className="me-1" />
+                                Delete
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </Card.Body>
+                    </Card>
+                  </Col>
+                ))}
+            </Row>
+          </Card.Body>
+        </Card>
+      )}
+
+      {/* Add Project Modal */}
+      <Modal show={showAddProjectModal} onHide={() => setShowAddProjectModal(false)} centered size="lg" dialogClassName="admin-modal">
+        <Modal.Header closeButton className="admin-modal-header">
+          <Modal.Title className="fw-bold text-white">Add New Project</Modal.Title>
+        </Modal.Header>
+        <Form onSubmit={handleSaveProject}>
+          <Modal.Body className="admin-modal-body">
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-semibold">Project Title *</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={projectFormData.title}
+                    onChange={(e) => setProjectFormData({...projectFormData, title: e.target.value})}
+                    required
+                    className="admin-form-control"
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-semibold">Date *</Form.Label>
+                  <Form.Control
+                    type="date"
+                    value={projectFormData.date}
+                    onChange={(e) => setProjectFormData({...projectFormData, date: e.target.value})}
+                    required
+                    className="admin-form-control"
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+            <Form.Group className="mb-3">
+              <Form.Label className="fw-semibold">Description *</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                value={projectFormData.description}
+                onChange={(e) => setProjectFormData({...projectFormData, description: e.target.value})}
+                required
+                className="admin-form-control"
+              />
+            </Form.Group>
+            
+            {/* Image Upload Section */}
+            <Form.Group className="mb-3">
+              <Form.Label className="fw-semibold">Project Image</Form.Label>
+              <div className="d-flex align-items-center gap-3 mb-3">
+                {(imagePreview || projectFormData.image) && (
+                  <div className="position-relative">
+                    <img 
+                      src={imagePreview || projectFormData.image} 
+                      alt="Project preview" 
+                      className="rounded"
+                      style={{ width: '80px', height: '80px', objectFit: 'cover' }}
+                    />
+                    <Button 
+                      size="sm" 
+                      variant="danger" 
+                      className="position-absolute top-0 end-0 rounded-circle"
+                      style={{ width: '20px', height: '20px', fontSize: '10px', padding: '0' }}
+                      onClick={clearImage}
+                    >
+                      ×
+                    </Button>
+                  </div>
+                )}
+                <div className="flex-grow-1">
+                  <Form.Control
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="admin-form-control"
+                  />
+                  <small className="text-muted">Upload an image or enter URL below</small>
+                </div>
+              </div>
+              <Form.Control
+                type="url"
+                value={projectFormData.image}
+                onChange={(e) => setProjectFormData({...projectFormData, image: e.target.value})}
+                placeholder="Or enter image URL: https://example.com/image.jpg"
+                className="admin-form-control"
+              />
+            </Form.Group>
+            
+            <Form.Group className="mb-3">
+              <Form.Label className="fw-semibold">Alt Text</Form.Label>
+              <Form.Control
+                type="text"
+                value={projectFormData.alt}
+                onChange={(e) => setProjectFormData({...projectFormData, alt: e.target.value})}
+                placeholder="Image description for accessibility"
+                className="admin-form-control"
+              />
+            </Form.Group>
+          </Modal.Body>
+          <Modal.Footer className="admin-modal-footer">
+            <Button className="admin-btn admin-btn-outline" onClick={() => setShowAddProjectModal(false)} disabled={savingProject}>
+              Cancel
+            </Button>
+            <Button className="admin-btn admin-btn-primary" type="submit" disabled={savingProject}>
+              {savingProject ? (
+                <>
+                  <Spinner animation="border" size="sm" className="me-2" />
+                  Adding Project...
+                </>
+              ) : (
+                'Add Project'
+              )}
+            </Button>
+          </Modal.Footer>
+        </Form>
+      </Modal>
+
+      {/* Edit Project Modal */}
+      <Modal show={showEditProjectModal} onHide={() => setShowEditProjectModal(false)} centered size="lg" dialogClassName="admin-modal">
+        <Modal.Header closeButton className="admin-modal-header">
+          <Modal.Title className="fw-bold text-white">Edit Project</Modal.Title>
+        </Modal.Header>
+        <Form onSubmit={handleSaveProject}>
+          <Modal.Body className="admin-modal-body">
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-semibold">Project Title *</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={projectFormData.title}
+                    onChange={(e) => setProjectFormData({...projectFormData, title: e.target.value})}
+                    required
+                    className="admin-form-control"
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-semibold">Date *</Form.Label>
+                  <Form.Control
+                    type="date"
+                    value={projectFormData.date}
+                    onChange={(e) => setProjectFormData({...projectFormData, date: e.target.value})}
+                    required
+                    className="admin-form-control"
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+            <Form.Group className="mb-3">
+              <Form.Label className="fw-semibold">Description *</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                value={projectFormData.description}
+                onChange={(e) => setProjectFormData({...projectFormData, description: e.target.value})}
+                required
+                className="admin-form-control"
+              />
+            </Form.Group>
+            
+            {/* Image Upload Section */}
+            <Form.Group className="mb-3">
+              <Form.Label className="fw-semibold">Project Image</Form.Label>
+              <div className="d-flex align-items-center gap-3 mb-3">
+                {(imagePreview || projectFormData.image) && (
+                  <div className="position-relative">
+                    <img 
+                      src={imagePreview || projectFormData.image} 
+                      alt="Project preview" 
+                      className="rounded"
+                      style={{ width: '80px', height: '80px', objectFit: 'cover' }}
+                    />
+                    <Button 
+                      size="sm" 
+                      variant="danger" 
+                      className="position-absolute top-0 end-0 rounded-circle"
+                      style={{ width: '20px', height: '20px', fontSize: '10px', padding: '0' }}
+                      onClick={clearImage}
+                    >
+                      ×
+                    </Button>
+                  </div>
+                )}
+                <div className="flex-grow-1">
+                  <Form.Control
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="admin-form-control"
+                  />
+                  <small className="text-muted">Upload an image or enter URL below</small>
+                </div>
+              </div>
+              <Form.Control
+                type="url"
+                value={projectFormData.image}
+                onChange={(e) => setProjectFormData({...projectFormData, image: e.target.value})}
+                placeholder="Or enter image URL: https://example.com/image.jpg"
+                className="admin-form-control"
+              />
+            </Form.Group>
+            
+            <Form.Group className="mb-3">
+              <Form.Label className="fw-semibold">Alt Text</Form.Label>
+              <Form.Control
+                type="text"
+                value={projectFormData.alt}
+                onChange={(e) => setProjectFormData({...projectFormData, alt: e.target.value})}
+                placeholder="Image description for accessibility"
+                className="admin-form-control"
+              />
+            </Form.Group>
+          </Modal.Body>
+          <Modal.Footer className="admin-modal-footer">
+            <Button className="admin-btn admin-btn-outline" onClick={() => setShowEditProjectModal(false)} disabled={savingProject}>
+              Cancel
+            </Button>
+            <Button className="admin-btn admin-btn-primary" type="submit" disabled={savingProject}>
+              {savingProject ? (
+                <>
+                  <Spinner animation="border" size="sm" className="me-2" />
+                  Updating Project...
+                </>
+              ) : (
+                'Update Project'
+              )}
+            </Button>
+          </Modal.Footer>
+        </Form>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      <Modal show={showDeleteConfirmModal} onHide={() => setShowDeleteConfirmModal(false)} centered dialogClassName="admin-modal">
+        <Modal.Header closeButton className="admin-modal-header">
+          <Modal.Title className="fw-bold text-white">Delete Project</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="admin-modal-body">
+          <p className="mb-0">Are you sure you want to delete this project? This action cannot be undone.</p>
+        </Modal.Body>
+        <Modal.Footer className="admin-modal-footer">
+          <Button className="admin-btn admin-btn-outline" onClick={() => setShowDeleteConfirmModal(false)} disabled={deletingProjectLoading}>
+            Cancel
+          </Button>
+          <Button className="admin-btn admin-btn-primary" onClick={handleConfirmDelete} disabled={deletingProjectLoading}>
+            {deletingProjectLoading ? (
+              <>
+                <Spinner animation="border" size="sm" className="me-2" />
+                Deleting Project...
+              </>
+            ) : (
+              'Delete Project'
+            )}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </div>
+  );
+};
+
+const SettingsTab: React.FC<{ user: User | null }> = ({ user }) => {
+  return (
+    <Card className="admin-card">
+      <Card.Header className="admin-modal-header">
+        <h5 className="fw-bold mb-0 text-white">Account Settings</h5>
+      </Card.Header>
+      <Card.Body className="p-4">
+        <Form>
+          <Row>
+            <Col md={6}>
+              <Form.Group className="mb-4">
+                <Form.Label className="fw-semibold text-dark">Username</Form.Label>
+                <Form.Control 
+                  type="text" 
+                  value={user?.username || ''} 
+                  readOnly 
+                  className="admin-form-control"
+                />
+              </Form.Group>
+            </Col>
+            <Col md={6}>
+              <Form.Group className="mb-4">
+                <Form.Label className="fw-semibold text-dark">Email</Form.Label>
+                <Form.Control 
+                  type="email" 
+                  value={user?.email || ''} 
+                  readOnly 
+                  className="admin-form-control"
+                />
+              </Form.Group>
+            </Col>
+          </Row>
+          <Row>
+            <Col md={6}>
+              <Form.Group className="mb-4">
+                <Form.Label className="fw-semibold text-dark">Role</Form.Label>
+                <Form.Control 
+                  type="text" 
+                  value={user?.role || ''} 
+                  readOnly 
+                  className="admin-form-control"
+                />
+              </Form.Group>
+            </Col>
+          </Row>
+          <Button 
+            className="admin-btn admin-btn-primary"
+          >
+            Update Profile
+          </Button>
+        </Form>
+      </Card.Body>
+    </Card>
+  );
+};
+
+// Comprehensive Member Form Component
+const MemberForm: React.FC<{
+  formData: any;
+  setFormData: (data: any) => void;
+  familyMembers: FamilyMember[];
+  setFamilyMembers: (members: FamilyMember[]) => void;
+  addFamilyMember: () => void;
+  editFamilyMember: (member: FamilyMember) => void;
+  removeFamilyMember: (id: string) => void;
+  memberPhotoPreview: string;
+  currentMemberPhotoPreview: string;
+  handleMemberPhotoUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  clearMemberPhoto: () => void;
+  isEdit?: boolean;
+  showMemberSearch?: boolean;
+  setShowMemberSearch?: (show: boolean) => void;
+  memberSearchResults?: Member[];
+  memberSearchTerm?: string;
+  setMemberSearchTerm?: (term: string) => void;
+  handleMemberSearch?: (e: React.FormEvent) => void;
+  linkMemberAsFamily?: (member: Member, relationship: string) => Promise<void>;
+}> = ({ 
+  formData, 
+  setFormData, 
+  familyMembers, 
+  setFamilyMembers, 
+  addFamilyMember, 
+  editFamilyMember, 
+  removeFamilyMember,
+  memberPhotoPreview,
+  currentMemberPhotoPreview,
+  handleMemberPhotoUpload,
+  clearMemberPhoto,
+  isEdit = false 
+}) => {
+  const [activeTab, setActiveTab] = useState('basic');
+
+  return (
+    <div>
+      {/* Tab Navigation */}
+      <Nav variant="tabs" className="mb-4">
+        <Nav.Item>
+          <Nav.Link 
+            active={activeTab === 'basic'} 
+            onClick={() => setActiveTab('basic')}
+            className="border-0 px-4 py-3 fw-semibold"
+          >
+            <IconWrapper icon={FaUser} className="me-2" />
+            Basic Info
+          </Nav.Link>
+        </Nav.Item>
+        <Nav.Item>
+          <Nav.Link 
+            active={activeTab === 'personal'} 
+            onClick={() => setActiveTab('personal')}
+            className="border-0 px-4 py-3 fw-semibold"
+          >
+            <IconWrapper icon={FaLocationDot} className="me-2" />
+            Personal Details
+          </Nav.Link>
+        </Nav.Item>
+        <Nav.Item>
+          <Nav.Link 
+            active={activeTab === 'family'} 
+            onClick={() => setActiveTab('family')}
+            className="border-0 px-4 py-3 fw-semibold"
+          >
+            <IconWrapper icon={FaUsers} className="me-2" />
+            Family Members
+          </Nav.Link>
+        </Nav.Item>
+        <Nav.Item>
+          <Nav.Link 
+            active={activeTab === 'social'} 
+            onClick={() => setActiveTab('social')}
+            className="border-0 px-4 py-3 fw-semibold"
+          >
+            <IconWrapper icon={FaLinkedin} className="me-2" />
+            Social Media
+          </Nav.Link>
+        </Nav.Item>
+      </Nav>
+
+      {/* Basic Information Tab */}
+      {activeTab === 'basic' && (
+        <div>
+          <Card className="shadow-sm border-0 mb-4" style={{ borderRadius: '15px' }}>
+            <Card.Header className="bg-light border-0" style={{ borderRadius: '15px 15px 0 0' }}>
+              <h6 className="fw-bold mb-0">
+                <IconWrapper icon={FaUser} className="me-2" style={{ color: '#0066CC' }} />
+                Basic Information
+              </h6>
+            </Card.Header>
+            <Card.Body className="p-4">
+              <Row>
+                <Col md={6}>
+                  <Form.Group className="mb-5">
+                    <Form.Label className="fw-semibold text-dark">
+                      <IconWrapper icon={FaUser} className="me-2" style={{ color: '#0066CC' }} />
+                      Full Name *
+                    </Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={formData.name}
+                      onChange={(e) => setFormData({...formData, name: e.target.value})}
+                      required
+                      placeholder="Enter full name"
+                      className="admin-form-control"
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group className="mb-5">
+                    <Form.Label className="fw-semibold text-dark">
+                      <IconWrapper icon={FaEnvelope} className="me-2" style={{ color: '#0066CC' }} />
+                      Email Address *
+                    </Form.Label>
+                    <Form.Control
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({...formData, email: e.target.value})}
+                      required
+                      placeholder="Enter email address"
+                      className="admin-form-control"
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+              
+              <Row>
+                <Col md={6}>
+                  <Form.Group className="mb-5">
+                    <Form.Label className="fw-semibold text-dark">
+                      <IconWrapper icon={FaTag} className="me-2" style={{ color: '#0066CC' }} />
+                      Classification *
+                    </Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={formData.classification}
+                      onChange={(e) => setFormData({...formData, classification: e.target.value})}
+                      required
+                      placeholder="e.g., Member, Honorary, Charter"
+                      className="admin-form-control"
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group className="mb-5">
+                    <Form.Label className="fw-semibold text-dark">
+                      <IconWrapper icon={FaCalendar} className="me-2" style={{ color: '#0066CC' }} />
+                      Join Date *
+                    </Form.Label>
+                    <Form.Control
+                      type="date"
+                      value={formData.joinDate}
+                      onChange={(e) => setFormData({...formData, joinDate: e.target.value})}
+                      required
+                      className="admin-form-control"
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+          
+          <Row>
+            <Col md={12}>
+              <Form.Group className="mb-4">
+                <Form.Label className="fw-semibold text-dark">
+                  <IconWrapper icon={FaCamera} className="me-2" style={{ color: '#0066CC' }} />
+                  Profile Picture
+                </Form.Label>
+                <div className="d-flex align-items-center gap-3 mb-3">
+                  {(currentMemberPhotoPreview || formData.profileImage) && (
+                    <div className="position-relative">
+                      <img 
+                        src={currentMemberPhotoPreview || formData.profileImage} 
+                        alt="Profile preview" 
+                        className="rounded-circle"
+                        style={{ width: '80px', height: '80px', objectFit: 'cover' }}
+                      />
+                      <Button 
+                        size="sm" 
+                        variant="danger" 
+                        className="position-absolute top-0 end-0 rounded-circle"
+                        style={{ width: '24px', height: '24px', fontSize: '12px', padding: '0' }}
+                        onClick={clearMemberPhoto}
+                      >
+                        ×
+                      </Button>
+                    </div>
+                  )}
+                  <div className="flex-grow-1">
+                    <Form.Control
+                      type="file"
+                      accept="image/*"
+                      onChange={handleMemberPhotoUpload}
+                      className="admin-form-control"
+                    />
+                    <small className="text-muted">Upload a profile picture or enter URL below</small>
+                  </div>
+                </div>
+                <Form.Control
+                  type="url"
+                  value={formData.profileImage}
+                  onChange={(e) => setFormData({...formData, profileImage: e.target.value})}
+                  placeholder="Or enter image URL: https://example.com/profile.jpg"
+                  className="admin-form-control"
+                />
+              </Form.Group>
+            </Col>
+          </Row>
+          
+          <Row>
+            <Col md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label className="fw-semibold text-dark">
+                  <IconWrapper icon={FaBriefcase} className="me-2" style={{ color: '#0066CC' }} />
+                  Current Designation
+                </Form.Label>
+                <Form.Control
+                  type="text"
+                  value={formData.currentDesignation}
+                  onChange={(e) => setFormData({...formData, currentDesignation: e.target.value})}
+                  placeholder="e.g., President, Secretary, Treasurer"
+                  className="admin-form-control"
+                />
+              </Form.Group>
+            </Col>
+            <Col md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label className="fw-semibold text-dark">
+                  <IconWrapper icon={FaGraduationCap} className="me-2" style={{ color: '#0066CC' }} />
+                  Profession
+                </Form.Label>
+                <Form.Control
+                  type="text"
+                  value={formData.profession}
+                  onChange={(e) => setFormData({...formData, profession: e.target.value})}
+                  placeholder="e.g., Doctor, Engineer, Business Owner"
+                  className="admin-form-control"
+                />
+              </Form.Group>
+            </Col>
+          </Row>
+          
+          <Row>
+            <Col md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label className="fw-semibold text-dark">
+                  <IconWrapper icon={FaCalendar} className="me-2" style={{ color: '#0066CC' }} />
+                  Birthday
+                </Form.Label>
+                <Form.Control
+                  type="date"
+                  value={formData.birthday}
+                  onChange={(e) => setFormData({...formData, birthday: e.target.value})}
+                  className="admin-form-control"
+                />
+              </Form.Group>
+            </Col>
+            <Col md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label className="fw-semibold text-dark">
+                  <IconWrapper icon={FaHeart} className="me-2" style={{ color: '#0066CC' }} />
+                  Hobbies
+                </Form.Label>
+                <Form.Control
+                  type="text"
+                  value={formData.hobbies}
+                  onChange={(e) => setFormData({...formData, hobbies: e.target.value})}
+                  placeholder="e.g., Reading, Travel, Music"
+                  className="admin-form-control"
+                />
+              </Form.Group>
+            </Col>
+          </Row>
+          
+          <Form.Group className="mb-3">
+            <Form.Label className="fw-semibold text-dark">
+              <IconWrapper icon={FaUsers} className="me-2" style={{ color: '#0066CC' }} />
+              Personal Bio
+            </Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={4}
+              value={formData.personalBio}
+              onChange={(e) => setFormData({...formData, personalBio: e.target.value})}
+              placeholder="Tell us about yourself..."
+              className="admin-form-control"
+            />
+          </Form.Group>
+          
+          <hr className="my-4" />
+          
+          <Row>
+            <Col md={6}>
+              <Form.Group className="mb-3">
+                <Form.Check
+                  type="checkbox"
+                  id="isPastPresident"
+                  checked={formData.isPastPresident}
+                  onChange={(e) => setFormData({...formData, isPastPresident: e.target.checked})}
+                  label={
+                    <span className="fw-semibold text-dark">
+                      <IconWrapper icon={FaTrophy} className="me-2" style={{ color: '#0066CC' }} />
+                      Past President
+                    </span>
+                  }
+                  className="mb-3"
+                />
+              </Form.Group>
+            </Col>
+            <Col md={6}>
+              {formData.isPastPresident && (
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-semibold text-dark">
+                    <IconWrapper icon={FaCalendar} className="me-2" style={{ color: '#0066CC' }} />
+                    Presidential Years
+                  </Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={formData.presidentialYears?.join(', ') || ''}
+                    onChange={(e) => {
+                      const input = e.target.value;
+                      // Split by comma and clean up each entry
+                      const years = input.split(',')
+                        .map(year => year.trim())
+                        .filter(year => year.length > 0);
+                      setFormData({
+                        ...formData, 
+                        presidentialYears: years
+                      });
+                    }}
+                    placeholder="e.g., 2020-2021, 2022-2023, 2024-2025"
+                    className="admin-form-control"
+                  />
+                  <small className="text-muted">
+                    Enter presidential years separated by commas. You can use ranges like "2020-2021" or single years like "2020".
+                  </small>
+                </Form.Group>
+              )}
+            </Col>
+          </Row>
+            </Card.Body>
+          </Card>
+        </div>
+      )}
+
+      {/* Personal Details Tab */}
+      {activeTab === 'personal' && (
+        <div>
+          <Form.Group className="mb-3">
+            <Form.Label className="fw-semibold text-dark">
+              <IconWrapper icon={FaLocationDot} className="me-2" style={{ color: '#0066CC' }} />
+              Address
+            </Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={3}
+              value={formData.personalDetails.address}
+              onChange={(e) => setFormData({
+                ...formData, 
+                personalDetails: {...formData.personalDetails, address: e.target.value}
+              })}
+              placeholder="Enter your address"
+              className="admin-form-control"
+            />
+          </Form.Group>
+          
+          <Row>
+            <Col md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label className="fw-semibold text-dark">
+                  <IconWrapper icon={FaPhone} className="me-2" style={{ color: '#0066CC' }} />
+                  Phone
+                </Form.Label>
+                <Form.Control
+                  type="tel"
+                  value={formData.personalDetails.phone}
+                  onChange={(e) => setFormData({
+                    ...formData, 
+                    personalDetails: {...formData.personalDetails, phone: e.target.value}
+                  })}
+                  placeholder="Enter phone number"
+                  className="admin-form-control"
+                />
+              </Form.Group>
+            </Col>
+            <Col md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label className="fw-semibold text-dark">
+                  <IconWrapper icon={FaGraduationCap} className="me-2" style={{ color: '#0066CC' }} />
+                  Education
+                </Form.Label>
+                <Form.Control
+                  type="text"
+                  value={formData.personalDetails.education}
+                  onChange={(e) => setFormData({
+                    ...formData, 
+                    personalDetails: {...formData.personalDetails, education: e.target.value}
+                  })}
+                  placeholder="e.g., Bachelor's in Engineering"
+                  className="admin-form-control"
+                />
+              </Form.Group>
+            </Col>
+          </Row>
+          
+          <Row>
+            <Col md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label className="fw-semibold text-dark">
+                  <IconWrapper icon={FaTrophy} className="me-2" style={{ color: '#0066CC' }} />
+                  Achievements
+                </Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={3}
+                  value={formData.personalDetails.achievements}
+                  onChange={(e) => setFormData({
+                    ...formData, 
+                    personalDetails: {...formData.personalDetails, achievements: e.target.value}
+                  })}
+                  placeholder="List your achievements"
+                  className="admin-form-control"
+                />
+              </Form.Group>
+            </Col>
+            <Col md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label className="fw-semibold text-dark">
+                  <IconWrapper icon={FaStar} className="me-2" style={{ color: '#0066CC' }} />
+                  Interests
+                </Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={3}
+                  value={formData.personalDetails.interests}
+                  onChange={(e) => setFormData({
+                    ...formData, 
+                    personalDetails: {...formData.personalDetails, interests: e.target.value}
+                  })}
+                  placeholder="List your interests"
+                  className="admin-form-control"
+                />
+              </Form.Group>
+            </Col>
+          </Row>
+        </div>
+      )}
+
+      {/* Family Members Tab */}
+      {activeTab === 'family' && (
+        <div>
+          <div className="d-flex align-items-center justify-content-between mb-3">
+            <h6 className="fw-semibold text-dark mb-0">
+              <IconWrapper icon={FaUsers} className="me-2" style={{ color: '#0066CC' }} />
+              Family Members
+            </h6>
+            <Button 
+              variant="outline-primary" 
+              size="sm"
+              onClick={addFamilyMember}
+              className="rounded-pill"
+            >
+              <IconWrapper icon={FaPlus} className="me-2" />
+              Add Family Member
+            </Button>
+          </div>
+          
+          {familyMembers.length === 0 ? (
+            <div className="text-center py-5 text-muted">
+              <p className="mb-3">No family members added yet.</p>
+              <div className="d-flex justify-content-center gap-3">
+                <Button variant="outline-primary" onClick={addFamilyMember} size="lg" className="rounded-pill">
+                  <IconWrapper icon={FaPlus} className="me-2" />
+                  Add Family Member
+                </Button>
+                <Button variant="outline-success" onClick={() => window.dispatchEvent(new CustomEvent('openMemberSearch'))} size="lg" className="rounded-pill">
+                  <IconWrapper icon={FaUsers} className="me-2" />
+                  Link Existing Member
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div>
+              {familyMembers.map((familyMember, index) => (
+                <div key={familyMember.id} className="d-flex align-items-center justify-content-between bg-white rounded-3 p-3 mb-3 border shadow-sm">
+                  <div className="d-flex align-items-center">
+                    <div className="position-relative me-3">
+                      <div className="bg-light rounded-circle d-flex align-items-center justify-content-center" 
+                           style={{ width: '40px', height: '40px' }}>
+                        {familyMember.photo ? (
+                          <img 
+                            src={familyMember.photo} 
+                            alt={familyMember.name} 
+                            className="rounded-circle"
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          />
+                        ) : (
+                          <IconWrapper icon={FaUser} className="text-muted" />
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="fw-semibold text-dark">{familyMember.name}</div>
+                      <small className="text-muted">{familyMember.relationship}</small>
+                      {familyMember.profession && (
+                        <small className="text-muted d-block">{familyMember.profession}</small>
+                      )}
+                    </div>
+                  </div>
+                  <div className="d-flex gap-1">
+                    <Button 
+                      variant="outline-primary" 
+                      size="sm"
+                      onClick={() => editFamilyMember(familyMember)}
+                      className="rounded-pill"
+                      title="Edit"
+                    >
+                      <IconWrapper icon={FaPenToSquare} style={{ fontSize: '10px' }} />
+                    </Button>
+                    <Button 
+                      variant="outline-danger" 
+                      size="sm"
+                      onClick={() => removeFamilyMember(familyMember.id)}
+                      className="rounded-pill"
+                      title="Remove"
+                    >
+                      <IconWrapper icon={FaXmark} style={{ fontSize: '10px' }} />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Social Media Tab */}
+      {activeTab === 'social' && (
+        <div>
+          <Row>
+            <Col md={4}>
+              <Form.Group className="mb-3">
+                <Form.Label className="fw-semibold text-dark">
+                  <IconWrapper icon={FaLinkedin} className="me-2" style={{ color: '#0066CC' }} />
+                  LinkedIn URL
+                </Form.Label>
+                <Form.Control
+                  type="url"
+                  value={formData.personalDetails.socialMedia.linkedin}
+                  onChange={(e) => setFormData({
+                    ...formData, 
+                    personalDetails: {
+                      ...formData.personalDetails, 
+                      socialMedia: {...formData.personalDetails.socialMedia, linkedin: e.target.value}
+                    }
+                  })}
+                  placeholder="https://linkedin.com/in/username"
+                  className="admin-form-control"
+                />
+              </Form.Group>
+            </Col>
+            <Col md={4}>
+              <Form.Group className="mb-3">
+                <Form.Label className="fw-semibold text-dark">
+                  <IconWrapper icon={FaFacebook} className="me-2" style={{ color: '#0066CC' }} />
+                  Facebook URL
+                </Form.Label>
+                <Form.Control
+                  type="url"
+                  value={formData.personalDetails.socialMedia.facebook}
+                  onChange={(e) => setFormData({
+                    ...formData, 
+                    personalDetails: {
+                      ...formData.personalDetails, 
+                      socialMedia: {...formData.personalDetails.socialMedia, facebook: e.target.value}
+                    }
+                  })}
+                  placeholder="https://facebook.com/username"
+                  className="admin-form-control"
+                />
+              </Form.Group>
+            </Col>
+            <Col md={4}>
+              <Form.Group className="mb-3">
+                <Form.Label className="fw-semibold text-dark">
+                  <IconWrapper icon={FaTwitter} className="me-2" style={{ color: '#0066CC' }} />
+                  Twitter URL
+                </Form.Label>
+                <Form.Control
+                  type="url"
+                  value={formData.personalDetails.socialMedia.twitter}
+                  onChange={(e) => setFormData({
+                    ...formData, 
+                    personalDetails: {
+                      ...formData.personalDetails, 
+                      socialMedia: {...formData.personalDetails.socialMedia, twitter: e.target.value}
+                    }
+                  })}
+                  placeholder="https://twitter.com/username"
+                  className="admin-form-control"
+                />
+              </Form.Group>
+            </Col>
+          </Row>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Admin; 

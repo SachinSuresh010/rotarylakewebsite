@@ -121,8 +121,8 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="mb-3">
-                                            <label for="currentPosition" class="form-label">Current Position</label>
-                                            <input type="text" class="form-control" id="currentPosition" placeholder="e.g., President, Secretary, or leave empty">
+                                                    <label for="currentDesignation" class="form-label">Current Designation</label>
+        <input type="text" class="form-control" id="currentDesignation" placeholder="e.g., President, Secretary, or leave empty">
                                         </div>
                                         <div class="mb-3">
                                             <label for="pastPositions" class="form-label">Past Positions (comma separated)</label>
@@ -245,7 +245,7 @@
                     name: document.getElementById('memberName').value,
                     image: document.getElementById('memberImage').value,
                     alt: document.getElementById('memberAlt').value,
-                    currentPosition: document.getElementById('currentPosition').value || null,
+                    currentDesignation: document.getElementById('currentDesignation').value || null,
                     pastPositions: document.getElementById('pastPositions').value ? 
                         document.getElementById('pastPositions').value.split(',').map(pos => pos.trim()) : [],
                     isPastPresident: document.getElementById('isPastPresident').checked,
@@ -284,7 +284,7 @@
                 const container = document.getElementById('currentDirectorsList');
                 container.innerHTML = '<h3>Current Directors & Office Bearers</h3>';
                 
-                const currentDirectors = this.membersData.members.filter(member => member.currentPosition !== null);
+                const currentDirectors = this.membersData.members.filter(member => member.currentDesignation !== null);
                 currentDirectors.forEach((member, index) => {
                     const card = this.createMemberCard(member, index);
                     container.appendChild(card);
@@ -306,9 +306,9 @@
                 const card = document.createElement('div');
                 card.className = 'member-card';
                 
-                // Show current position badge if they have a current position
-                const currentPositionBadge = member.currentPosition ? 
-                    `<span class="position-badge">${member.currentPosition}</span>` : '';
+                // Show current designation badge if they have a current designation
+                const currentDesignationBadge = member.currentDesignation ? 
+                    `<span class="position-badge">${member.currentDesignation}</span>` : '';
                 
                 // Show past positions badges (excluding "President" if they're a past president)
                 const pastPositionsBadges = member.pastPositions
@@ -330,7 +330,7 @@
                         <div class="col-md-6">
                             <h5>${member.name}</h5>
                             <p class="mb-1">
-                                ${currentPositionBadge}
+                                ${currentDesignationBadge}
                                 ${pastPositionsBadges}
                                 ${pastPresidentBadge}
                             </p>
@@ -371,7 +371,7 @@
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label class="form-label">Current Position</label>
-                                        <input type="text" class="form-control" id="edit-currentPosition-${index}" value="${member.currentPosition || ''}" placeholder="Leave empty for no current position">
+                                        <input type="text" class="form-control" id="edit-currentDesignation-${index}" value="${member.currentDesignation || ''}" placeholder="Leave empty for no current designation">
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label">Past Positions (comma separated)</label>
@@ -442,7 +442,7 @@
                 member.name = document.getElementById(`edit-name-${index}`).value;
                 member.image = document.getElementById(`edit-image-${index}`).value;
                 member.alt = document.getElementById(`edit-alt-${index}`).value;
-                member.currentPosition = document.getElementById(`edit-currentPosition-${index}`).value || null;
+                                    member.currentDesignation = document.getElementById(`edit-currentDesignation-${index}`).value || null;
                 member.pastPositions = document.getElementById(`edit-pastPositions-${index}`).value ? 
                     document.getElementById(`edit-pastPositions-${index}`).value.split(',').map(pos => pos.trim()) : [];
                 member.isPastPresident = document.getElementById(`edit-isPastPresident-${index}`).checked;

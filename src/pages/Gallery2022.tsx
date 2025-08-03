@@ -4,14 +4,6 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { getEventsByYear } from '../data/eventData';
 
-interface GalleryItem {
-  id: string;
-  title: string;
-  image: string;
-  alt: string;
-  description?: string;
-}
-
 const Gallery2022: React.FC = () => {
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
 

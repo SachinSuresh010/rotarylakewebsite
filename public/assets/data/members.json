@@ -5,7 +5,7 @@
       "name": "Rtn Sachin V Suresh",
       "image": "/assets/images/photo-816x817.jpeg",
       "alt": "Sachin",
-      "currentPosition": "President",
+      "currentDesignation": "President",
       "pastPositions": ["International Service Director", "Club Administrator", "Club Secretary", "Vice President"],
       "isPastPresident": false,
       "presidentialYears": [],
@@ -70,7 +70,7 @@
       "name": "Rtn Varghese Joy",
       "image": "/assets/images/photo-2024-06-28-10-13-23-816x965.jpeg",
       "alt": "Varghese Joy",
-      "currentPosition": "Secretary",
+      "currentDesignation": "Secretary",
       "pastPositions": [],
       "isPastPresident": false,
       "presidentialYears": []
@@ -80,7 +80,7 @@
       "name": "Rtn Jayaram Sethuraman",
       "image": "/assets/images/jayaram-1-816x733.jpeg",
       "alt": "Jayaram",
-      "currentPosition": "Treasurer",
+      "currentDesignation": "Treasurer",
       "pastPositions": [],
       "isPastPresident": false,
       "presidentialYears": []
@@ -90,7 +90,7 @@
       "name": "Rtn Joseph George",
       "image": "/assets/images/img-5218-3648x2432.jpeg",
       "alt": "Joseph George",
-      "currentPosition": "Immediate Past President",
+      "currentDesignation": "Immediate Past President",
       "pastPositions": ["President"],
       "isPastPresident": true,
       "presidentialYears": ["2023-2024"]
@@ -100,7 +100,7 @@
       "name": "Rtn Pauls Kalarickal",
       "image": "/assets/images/img-5064-3648x5472.jpeg",
       "alt": "Pauls Kalarickal",
-      "currentPosition": "Projects Chair",
+      "currentDesignation": "Projects Chair",
       "pastPositions": ["President"],
       "isPastPresident": true,
       "presidentialYears": ["2020-2021", "2021-2022"]
@@ -110,7 +110,7 @@
       "name": "Rtn K J Saju",
       "image": "/assets/images/kj-saju-634x641.png",
       "alt": "KJ Saju",
-      "currentPosition": "TRF Chair/Sgt. At Arms",
+      "currentDesignation": "TRF Chair/Sgt. At Arms",
       "pastPositions": ["President"],
       "isPastPresident": true,
       "presidentialYears": ["2022-2023"]
@@ -120,7 +120,7 @@
       "name": "Rtn Iby Pauls",
       "image": "/assets/images/img-5069-838x559.jpeg",
       "alt": "Iby Pauls",
-      "currentPosition": "Membership Development",
+      "currentDesignation": "Membership Development",
       "pastPositions": [],
       "isPastPresident": false,
       "presidentialYears": []
@@ -130,7 +130,7 @@
       "name": "Rtn Ajai Raghu",
       "image": "/assets/images/whatsapp-image-2024-07-22-at-18.38.21-778x518.jpeg",
       "alt": "Ajai Raghu",
-      "currentPosition": "Club Administration",
+      "currentDesignation": "Club Administration",
       "pastPositions": [],
       "isPastPresident": false,
       "presidentialYears": []
@@ -140,7 +140,7 @@
       "name": "Rtn Nandakumar Nair",
       "image": "/assets/images/whatsapp-image-2024-07-22-at-18.39.51-778x518.jpeg",
       "alt": "Nandakumar Nair",
-      "currentPosition": "Public Image Chair",
+      "currentDesignation": "Public Image Chair",
       "pastPositions": [],
       "isPastPresident": false,
       "presidentialYears": []
@@ -150,7 +150,7 @@
       "name": "Rtn Manju Mathew",
       "image": "/assets/images/whatsapp-image-2024-07-22-at-18.39.51-1-778x518.jpeg",
       "alt": "Manju Mathew",
-      "currentPosition": "Program Chair",
+      "currentDesignation": "Program Chair",
       "pastPositions": [],
       "isPastPresident": false,
       "presidentialYears": []
@@ -160,7 +160,7 @@
       "name": "Rtn Mercy Saju",
       "image": "/assets/images/img-5296-3648x2432.jpeg",
       "alt": "Mercy Saju",
-      "currentPosition": "Joint Secretary",
+      "currentDesignation": "Joint Secretary",
       "pastPositions": [],
       "isPastPresident": false,
       "presidentialYears": []
@@ -170,7 +170,7 @@
       "name": "Rtn George Palathingal",
       "image": "/assets/images/img-5085-3648x5472.jpeg",
       "alt": "George Palathingal",
-      "currentPosition": null,
+      "currentDesignation": null,
       "pastPositions": ["President"],
       "isPastPresident": true,
       "presidentialYears": ["2019-2020"]
@@ -180,7 +180,7 @@
       "name": "Rtn Usha George",
       "image": "/assets/images/img-5086-3648x5472.jpeg",
       "alt": "Usha George",
-      "currentPosition": null,
+      "currentDesignation": null,
       "pastPositions": [],
       "isPastPresident": false,
       "presidentialYears": []
@@ -190,7 +190,7 @@
       "name": "Rtn Varghese MP",
       "image": "/assets/images/img-5319-3648x2432.jpeg",
       "alt": "Varghese MP",
-      "currentPosition": null,
+      "currentDesignation": null,
       "pastPositions": [],
       "isPastPresident": false,
       "presidentialYears": []
@@ -200,7 +200,7 @@
       "name": "Rtn Denrhea Marianna Spadigam",
       "image": "/assets/images/ria-1-596x718.jpeg",
       "alt": "Denrhea Spadigam",
-      "currentPosition": null,
+      "currentDesignation": null,
       "pastPositions": [],
       "isPastPresident": false,
       "presidentialYears": []
@@ -210,7 +210,7 @@
       "name": "Rtn Jeslin Sleeba",
       "image": "/assets/images/whatsapp-image-2024-07-22-at-00.13.01-596x795.jpeg",
       "alt": "Jeslin Sleeba",
-      "currentPosition": null,
+      "currentDesignation": null,
       "pastPositions": [],
       "isPastPresident": false,
       "presidentialYears": []
@@ -220,7 +220,7 @@
       "name": "Rtn Shine Mathews",
       "image": "/assets/images/img-5214-3648x2432.jpeg",
       "alt": "Shine Mathews",
-      "currentPosition": null,
+      "currentDesignation": null,
       "pastPositions": [],
       "isPastPresident": false,
       "presidentialYears": []
@@ -230,7 +230,7 @@
       "name": "Rtn Sleeba Varghese",
       "image": "/assets/images/4f4cfe6b-4c25-4a4d-99e0-a7eb1cc90dd3-1600x1200.jpeg",
       "alt": "Sleeba Varghese",
-      "currentPosition": null,
+      "currentDesignation": null,
       "pastPositions": [],
       "isPastPresident": false,
       "presidentialYears": []
@@ -240,7 +240,7 @@
       "name": "Rtn Jojo Kurian",
       "image": "/assets/images/399cbe5a-e9f5-4ffe-b670-553347a15bfd-596x447.jpeg",
       "alt": "Jojo Kurian",
-      "currentPosition": null,
+      "currentDesignation": null,
       "pastPositions": [],
       "isPastPresident": false,
       "presidentialYears": []
@@ -250,7 +250,7 @@
       "name": "Rtn Prasad Kumar",
       "image": "/assets/images/beena-and-prasad-596x397.jpeg",
       "alt": "Prasad Kumar",
-      "currentPosition": null,
+      "currentDesignation": null,
       "pastPositions": [],
       "isPastPresident": false,
       "presidentialYears": []
@@ -260,7 +260,7 @@
       "name": "Rtn Saju Navodaya",
       "image": "/assets/images/saju-navodaya-1-600x450.jpeg",
       "alt": "Saju Navodaya",
-      "currentPosition": null,
+      "currentDesignation": null,
       "pastPositions": [],
       "isPastPresident": false,
       "presidentialYears": []
@@ -270,7 +270,7 @@
       "name": "Rtn Sunil P S",
       "image": "/assets/images/sunil-edited-288x216.jpg",
       "alt": "Sunil P S",
-      "currentPosition": null,
+      "currentDesignation": null,
       "pastPositions": [],
       "isPastPresident": false,
       "presidentialYears": []
@@ -280,7 +280,7 @@
       "name": "Rtn Beena Prasad",
       "image": "/assets/images/beena-and-prasad-596x397.jpeg",
       "alt": "Beena Prasad",
-      "currentPosition": null,
+      "currentDesignation": null,
       "pastPositions": [],
       "isPastPresident": false,
       "presidentialYears": []
@@ -290,7 +290,7 @@
       "name": "Rtn Capt. Ayyappan Satish Pillai",
       "image": "/assets/images/whatsapp-image-2024-07-22-at-18.37.33-596x397.jpeg",
       "alt": "Captain Ayyappan",
-      "currentPosition": null,
+      "currentDesignation": null,
       "pastPositions": [],
       "isPastPresident": false,
       "presidentialYears": []

@@ -1,8 +1,103 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import { motion } from 'framer-motion';
 
+interface Member {
+  id: string;
+  name: string;
+  email: string;
+  classification?: string;
+  status?: string;
+  isAdmin?: boolean;
+  createdAt?: Date;
+  lastLogin?: Date;
+  joinDate?: string;
+  memberSince?: string;
+  profileImage?: string;
+  currentDesignation?: string;
+  profession?: string;
+  birthday?: string;
+  hobbies?: string;
+  familyMembers?: any[];
+  personalBio?: string;
+  personalDetails?: {
+    address?: string;
+    phone?: string;
+    education?: string;
+    achievements?: string;
+    interests?: string;
+    socialMedia?: {
+      linkedin?: string;
+      facebook?: string;
+      twitter?: string;
+    };
+  };
+  // Legacy fields for backward compatibility
+  image?: string;
+  alt?: string;
+  pastPositions?: string[];
+  isPastPresident?: boolean;
+  presidentialYears?: string[];
+  link?: string;
+}
+
 const About: React.FC = () => {
+  const [members, setMembers] = useState<Member[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Load members data from API
+  useEffect(() => {
+    const loadMembersData = async () => {
+      try {
+        const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+        const response = await fetch(`${API_BASE_URL}/members?sortBy=joinDate&sortOrder=asc`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setMembers(data.members || []);
+      } catch (err) {
+        console.error('Error loading members data:', err);
+        console.error('Failed to load members data:', err instanceof Error ? err.message : 'Unknown error');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMembersData();
+  }, []);
+
+  // Get current president
+  const currentPresident = members.find(member => 
+    member.currentDesignation === 'President'
+  );
+
+  // Get current year
+  const currentYear = new Date().getFullYear();
+  const nextYear = currentYear + 1;
+  const yearRange = `${currentYear}-${nextYear.toString().slice(-2)}`;
+
+  // Calculate president number (assuming 2019 was the first year)
+  const getPresidentNumber = () => {
+    const startYear = 2019;
+    const yearsSinceStart = currentYear - startYear;
+    return yearsSinceStart + 1; // +1 because 2019 was the first year
+  };
+
+  const presidentNumber = getPresidentNumber();
+
+  // Helper to get ordinal suffix (st, nd, rd, th)
+  const getOrdinalSuffix = (num: number) => {
+    if (num > 3 && num < 21) return 'th';
+    switch (num % 10) {
+      case 1:  return 'st';
+      case 2:  return 'nd';
+      case 3:  return 'rd';
+      default: return 'th';
+    }
+  };
+
   return (
     <div style={{ paddingTop: '80px', backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
       <Container>
@@ -11,6 +106,7 @@ const About: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className="text-center mb-5"
+          style={{ padding: '40px 0 20px 0' }}
         >
           <h2 className="mbr-fonts-style display-2 mb-3">
             <strong>About Us</strong>
@@ -67,8 +163,13 @@ const About: React.FC = () => {
                     Our club ID is <strong>90322</strong> and we are part of <strong>Rotary International District 3201</strong>.
                   </p>
                   <p className="mb-0">
-                    <strong>Rtn Sachin V Suresh</strong> is our 6th President (2024-25). We meet at <strong>Hotel Hill Palace, Irumpanam</strong> on Thursdays. 
-                    We are a couple club with a large number of active lady rotarians.
+                    {loading ? (
+                      <span>Loading current president information...</span>
+                    ) : currentPresident ? (
+                      <><strong>Rtn. {currentPresident.name.replace('Rtn ', '')}</strong> is our {presidentNumber}{getOrdinalSuffix(presidentNumber)} President ({yearRange}). We meet at <strong>Hotel Hill Palace, Irumpanam</strong> on Thursdays. </>
+                    ) : (
+                      <>We meet at <strong>Hotel Hill Palace, Irumpanam</strong> on Thursdays. </>
+                    )}
                   </p>
                 </div>
               </div>
@@ -198,7 +299,13 @@ const About: React.FC = () => {
                       Current President
                     </h6>
                     <p className="mbr-text mbr-fonts-style" style={{ fontSize: '0.95rem', marginBottom: '0', color: '#666' }}>
-                      Rtn Sachin V Suresh (2024-25)
+                      {loading ? (
+                        'Loading...'
+                      ) : currentPresident ? (
+                        `Rtn. ${currentPresident.name.replace('Rtn ', '')} (${yearRange})`
+                      ) : (
+                        'Not available'
+                      )}
                     </p>
                   </div>
                 </Col>

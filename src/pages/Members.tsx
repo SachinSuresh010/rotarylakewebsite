@@ -6,34 +6,59 @@ import { motion } from 'framer-motion';
 interface Member {
   id: string;
   name: string;
-  image: string;
-  alt: string;
-  currentPosition: string | null;
-  pastPositions: string[];
-  isPastPresident: boolean;
-  presidentialYears: string[];
+  email: string;
+  classification?: string;
+  status?: string;
+  isAdmin?: boolean;
+  createdAt?: Date;
+  lastLogin?: Date;
+  joinDate?: string; // Add join date field
+  memberSince?: string; // Add member since field
+  profileImage?: string;
+  currentDesignation?: string;
+  profession?: string;
+  birthday?: string;
+  hobbies?: string;
+  familyMembers?: any[];
+  personalBio?: string;
+  personalDetails?: {
+    address?: string;
+    phone?: string;
+    education?: string;
+    achievements?: string;
+    interests?: string;
+    socialMedia?: {
+      linkedin?: string;
+      facebook?: string;
+      twitter?: string;
+    };
+  };
+  // Legacy fields for backward compatibility
+  image?: string;
+  alt?: string;
+
+  pastPositions?: string[];
+  isPastPresident?: boolean;
+  presidentialYears?: string[];
   link?: string;
 }
 
-interface MembersData {
-  members: Member[];
-}
-
 const Members: React.FC = () => {
-  const [membersData, setMembersData] = useState<MembersData | null>(null);
+  const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadMembersData = async () => {
       try {
-        const response = await fetch('/assets/data/members.json');
+        const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+        const response = await fetch(`${API_BASE_URL}/members?sortBy=joinDate&sortOrder=asc`);
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        setMembersData(data);
+        setMembers(data.members || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load members data');
       } finally {
@@ -75,14 +100,14 @@ const Members: React.FC = () => {
     );
   }
 
-  if (!membersData) {
+  if (!members || members.length === 0) {
     return (
       <div style={{ paddingTop: '80px', backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
         <Container>
           <div className="text-center">
             <div className="alert alert-warning" role="alert">
-              <h4>No Data Available</h4>
-              <p>No members data found.</p>
+              <h4>No Members Found</h4>
+              <p>No members data available at the moment.</p>
             </div>
           </div>
         </Container>
@@ -98,80 +123,118 @@ const Members: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="mbr-section-head"
+            className="mbr-section-head text-center"
           >
             <h4 className="mbr-section-title mbr-fonts-style align-center mb-0 display-2">
               <strong>Members</strong>
             </h4>
             <p style={{ textAlign: 'center', marginTop: '10px', color: '#666' }}>
-              Found {membersData.members.length} members
+              Found {members.length} members
             </p>
           </motion.div>
           
-          <Row className="mt-4">
-            {membersData.members.map((member, index) => (
-              <Col key={member.id || index} xs={12} md={6} lg={3} className="item features-image">
+          <Row className="mt-4 justify-content-center">
+            {members.map((member, index) => (
+              <Col key={member.id || index} xs={12} sm={6} md={4} lg={3} className="item features-image mb-4">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
-                  className="item-wrapper"
+                  className="item-wrapper h-100"
                   style={{
                     background: 'white',
-                    borderRadius: '10px',
-                    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                    borderRadius: '15px',
+                    boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
                     padding: '20px',
-                    marginBottom: '20px',
                     textAlign: 'center',
-                    border: '1px solid #eee'
+                    border: 'none',
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between'
                   }}
                 >
-                  <div className="item-img" style={{ marginBottom: '15px' }}>
+                  <div className="item-img d-flex justify-content-center" style={{ marginBottom: '15px' }}>
                     <Link to={`/members/${member.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                      <img 
-                        src={member.image} 
-                        alt={member.alt || member.name}
-                        style={{
-                          width: '100%',
-                          maxWidth: '200px',
-                          height: 'auto',
-                          borderRadius: '8px',
-                          cursor: 'pointer',
-                          transition: 'transform 0.2s ease-in-out'
-                        }}
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = '/assets/images/placeholder.jpg';
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = 'scale(1.05)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = 'scale(1)';
-                        }}
-                      />
+                      {member.profileImage ? (
+                        <img 
+                          src={member.profileImage} 
+                          alt={member.name}
+                          style={{
+                            width: '150px',
+                            height: '150px',
+                            objectFit: 'cover',
+                            borderRadius: '50%',
+                            cursor: 'pointer',
+                            transition: 'transform 0.2s ease-in-out',
+                            boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                            imageRendering: 'auto',
+                            backfaceVisibility: 'hidden',
+                            transform: 'translateZ(0)'
+                          }}
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = '/assets/images/placeholder.jpg';
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.05)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'scale(1)';
+                          }}
+                        />
+                      ) : (
+                        <div 
+                          style={{
+                            width: '150px',
+                            height: '150px',
+                            backgroundColor: '#f8f9fa',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            transition: 'transform 0.2s ease-in-out',
+                            border: '2px dashed #dee2e6'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.05)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'scale(1)';
+                          }}
+                        >
+                          <span style={{ fontSize: '2.5rem', color: '#6c757d' }}>👤</span>
+                        </div>
+                      )}
                     </Link>
                   </div>
-                  <div className="item-content">
+                  <div className="item-content flex-grow-1 d-flex flex-column justify-content-center">
                     <Link to={`/members/${member.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                      <h5 className="item-title mbr-fonts-style display-7" style={{ fontWeight: 'bold', marginBottom: '10px', fontSize: '1.1rem', cursor: 'pointer' }}>
+                      <h5 className="item-title mbr-fonts-style display-7" style={{ fontWeight: 'bold', marginBottom: '10px', fontSize: '1.1rem', cursor: 'pointer', color: '#0066CC' }}>
                         <strong>{member.name}</strong>
                       </h5>
                     </Link>
-                    {member.currentPosition && (
-                      <p className="mbr-text mbr-fonts-style mt-3 display-7" style={{ color: '#666', marginBottom: '5px', fontSize: '0.9rem' }}>
-                        {member.currentPosition}
+                    {member.currentDesignation && (
+                      <p className="mbr-text mbr-fonts-style mt-2 display-7" style={{ color: '#666', marginBottom: '8px', fontSize: '0.9rem' }}>
+                        {member.currentDesignation}
+                      </p>
+                    )}
+                    {member.profession && (
+                      <p className="mbr-text mbr-fonts-style mt-1 display-7" style={{ color: '#28a745', marginBottom: '5px', fontSize: '0.8rem' }}>
+                        {member.profession}
                       </p>
                     )}
                     {member.isPastPresident && (
-                      <p className="mbr-text mbr-fonts-style mt-2 display-7" style={{ marginBottom: '5px' }}>
+                      <p className="mbr-text mbr-fonts-style mt-2 display-7" style={{ marginBottom: '0' }}>
                         <span 
                           style={{
                             backgroundColor: '#ffc107',
                             color: '#000',
                             fontSize: '0.7rem',
-                            padding: '2px 6px',
-                            borderRadius: '10px'
+                            padding: '3px 8px',
+                            borderRadius: '12px',
+                            fontWeight: 'bold'
                           }}
                         >
                           Past President

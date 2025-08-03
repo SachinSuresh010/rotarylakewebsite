@@ -3,52 +3,96 @@ import { Container, Row, Col, Carousel, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
-interface Member {
+interface Director {
   id: string;
   name: string;
-  image: string;
-  alt: string;
-  currentPosition: string | null;
-  pastPositions: string[];
-  isPastPresident: boolean;
-  presidentialYears: string[];
-  link?: string;
+  profileImage?: string;
+  image?: string; // Legacy field for backward compatibility
+  alt?: string;
+  currentDesignation?: string;
+  isPastPresident?: boolean;
+  presidentialYears?: string[];
+  profession?: string;
+  hobbies?: string;
+  birthday?: string;
+  bio?: string;
 }
 
-interface MembersData {
-  members: Member[];
+interface DirectorsResponse {
+  directors: Director[];
 }
 
 const Home: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const [slidesToShow, setSlidesToShow] = useState(3);
-  const [membersData, setMembersData] = useState<MembersData | null>(null);
+  const [directorsData, setDirectorsData] = useState<DirectorsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Load members data
+  // Load directors data from backend API
   useEffect(() => {
-    const loadMembersData = async () => {
+    const loadDirectorsData = async () => {
       try {
-        const response = await fetch('/assets/data/members.json');
+        const response = await fetch('/api/members/directors/current');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        setMembersData(data);
+        setDirectorsData(data);
       } catch (err) {
-        console.error('Error loading members data:', err);
+        console.error('Error loading directors data:', err);
+        // Fallback to static data if API fails
+        try {
+          const fallbackResponse = await fetch('/assets/data/members.json');
+          if (fallbackResponse.ok) {
+            const fallbackData = await fallbackResponse.json();
+            // Filter for directors from static data
+            const directors = fallbackData.members.filter((member: any) => 
+              member.currentDesignation && member.currentDesignation.trim() !== ''
+            );
+            setDirectorsData({ directors });
+          }
+        } catch (fallbackErr) {
+          console.error('Error loading fallback data:', fallbackErr);
+        }
       } finally {
         setLoading(false);
       }
     };
 
-    loadMembersData();
+    loadDirectorsData();
   }, []);
 
-  // Filter members who have current positions (directors and office bearers)
-  const directors = membersData ? membersData.members.filter(member => member.currentPosition !== null) : [];
+  const directors = directorsData?.directors || [];
+
+  // Sort directors to show President, Secretary, Treasurer first, then others
+  const sortedDirectors = directors.sort((a, b) => {
+    const priorityOrder: { [key: string]: number } = {
+      'President': 1,
+      'Secretary': 2,
+      'Treasurer': 3,
+      'president': 1,
+      'secretary': 2,
+      'treasurer': 3,
+      'PRESIDENT': 1,
+      'SECRETARY': 2,
+      'TREASURER': 3
+    };
+    
+    const aDesignation = a.currentDesignation || '';
+    const bDesignation = b.currentDesignation || '';
+    
+    const aPriority = priorityOrder[aDesignation] || 999;
+    const bPriority = priorityOrder[bDesignation] || 999;
+    
+    if (aPriority !== bPriority) {
+      return aPriority - bPriority;
+    }
+    
+    // If same priority, sort alphabetically by name
+    return a.name.localeCompare(b.name);
+  });
 
   const services = [
     {
@@ -110,7 +154,7 @@ const Home: React.FC = () => {
   useEffect(() => {
     if (isAutoPlaying) {
       autoPlayRef.current = setInterval(() => {
-        setCurrentSlide((prev) => (prev + 1) % Math.max(1, directors.length - slidesToShow + 1));
+        setCurrentSlide((prev) => (prev + 1) % Math.max(1, sortedDirectors.length - slidesToShow + 1));
       }, 7000);
     }
 
@@ -119,18 +163,18 @@ const Home: React.FC = () => {
         clearInterval(autoPlayRef.current);
       }
     };
-  }, [isAutoPlaying, directors.length, slidesToShow]);
+  }, [isAutoPlaying, sortedDirectors.length, slidesToShow]);
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % Math.max(1, directors.length - slidesToShow + 1));
+    setCurrentSlide((prev) => (prev + 1) % Math.max(1, sortedDirectors.length - slidesToShow + 1));
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + Math.max(1, directors.length - slidesToShow + 1)) % Math.max(1, directors.length - slidesToShow + 1));
+    setCurrentSlide((prev) => (prev - 1 + Math.max(1, sortedDirectors.length - slidesToShow + 1)) % Math.max(1, sortedDirectors.length - slidesToShow + 1));
   };
 
   const goToSlide = (index: number) => {
-    setCurrentSlide(Math.min(index, directors.length - slidesToShow));
+    setCurrentSlide(Math.min(index, sortedDirectors.length - slidesToShow));
   };
 
   return (
@@ -251,7 +295,7 @@ const Home: React.FC = () => {
               </div>
               <p className="mt-3">Loading directors...</p>
             </div>
-          ) : directors.length === 0 ? (
+          ) : sortedDirectors.length === 0 ? (
             <div className="text-center py-5">
               <div className="alert alert-warning" role="alert">
                 <h4>No Directors Data</h4>
@@ -269,7 +313,7 @@ const Home: React.FC = () => {
                     transform: `translateX(-${currentSlide * (100 / slidesToShow)}%)`
                   }}
                 >
-                  {directors.map((director, index) => (
+                  {sortedDirectors.map((director, index) => (
                     <div 
                       key={director.id || index} 
                       className="embla__slide slider-image item" 
@@ -287,7 +331,7 @@ const Home: React.FC = () => {
                           <Link to={`/members/${director.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                             <div className="item-wrapper position-relative">
                               <img 
-                                src={director.image} 
+                                src={director.profileImage || director.image || '/assets/images/placeholder.jpg'} 
                                 alt={director.alt || director.name}
                                 data-slide-to={index}
                                 data-bs-slide-to={index}
@@ -336,7 +380,7 @@ const Home: React.FC = () => {
                           </div>
                         </Link>
                         <div className="user_desk mbr-fonts-style display-7">
-                          {director.currentPosition}
+                          {director.currentDesignation}
                         </div>
                       </div>
                     </div>
@@ -434,7 +478,7 @@ const Home: React.FC = () => {
               display: 'flex',
               gap: '8px'
             }}>
-              {Array.from({ length: Math.max(1, directors.length - slidesToShow + 1) }, (_, index) => (
+              {Array.from({ length: Math.max(1, sortedDirectors.length - slidesToShow + 1) }, (_, index) => (
                 <button
                   key={index}
                   onClick={() => goToSlide(index)}

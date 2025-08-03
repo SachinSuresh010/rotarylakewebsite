@@ -69,7 +69,7 @@ Each member in the JSON has the following properties:
 - `name`: Full name with "Rtn" prefix
 - `image`: Path to the member's photo
 - `alt`: Alt text for the image
-- `currentPosition`: Current position/title (null if no current position)
+- `currentDesignation`: Current designation/title (null if no current designation)
 - `pastPositions`: Array of past positions held
 - `isPastPresident`: Boolean indicating if they were a past president
 - `presidentialYears`: Array of years they served as president (if applicable)
@@ -95,7 +95,7 @@ Each member in the JSON has the following properties:
 ### Managing Member Information
 
 1. **Current Position Changes:**
-   - Update the `currentPosition` field in the JSON
+   - Update the `currentDesignation` field in the JSON
    - Set to `null` if member no longer holds a position
 
 2. **Adding Past Presidents:**

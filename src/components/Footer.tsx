@@ -3,7 +3,7 @@ import { Container, Row, Col } from 'react-bootstrap';
 
 const Footer: React.FC = () => {
   return (
-    <footer className="footer footer4 cid-tnERSFypqt" id="contact">
+    <footer className="footer footer4 cid-tnERSFypqt" id="contact" style={{ marginBottom: 0, paddingBottom: '20px' }}>
       <Container>
         <Row className="mbr-white">
           {/* Logo Section */}

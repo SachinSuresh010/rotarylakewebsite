@@ -17,6 +17,9 @@ import Gallery2024 from './pages/Gallery2024';
 import Gallery2023 from './pages/Gallery2023';
 import Gallery2022 from './pages/Gallery2022';
 import EventPage from './pages/EventPage';
+import Admin from './pages/Admin';
+import MemberAuth from './pages/MemberAuth';
+import Profile from './pages/Profile';
 import Footer from './components/Footer';
 
 function App() {
@@ -37,6 +40,9 @@ function App() {
           <Route path="/gallery/2023-2024" element={<Gallery2023 />} />
           <Route path="/gallery/2022-2023" element={<Gallery2022 />} />
           <Route path="/gallery/:year/:eventId" element={<EventPage />} />
+          <Route path="/auth" element={<MemberAuth />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/admin" element={<Admin />} />
         </Routes>
         <Footer />
       </div>

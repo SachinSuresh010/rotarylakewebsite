@@ -32,15 +32,37 @@ const Services: React.FC = () => {
   useEffect(() => {
     const loadServicesData = async () => {
       try {
-        const response = await fetch('/assets/data/services.json');
+        // Try to fetch from backend API first
+        const response = await fetch('/api/services');
         
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          throw new Error(`API error! status: ${response.status}`);
         }
+        
+        // Check if response is JSON
+        const contentType = response.headers.get('content-type');
+        
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error('API returned non-JSON response');
+        }
+        
         const data = await response.json();
         setServicesData(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load services data');
+        console.error('API failed, trying static file:', err);
+        
+        try {
+          // Fallback to static JSON file if API fails
+          const fallbackResponse = await fetch('/assets/data/services.json');
+          if (!fallbackResponse.ok) {
+            throw new Error(`Static file error! status: ${fallbackResponse.status}`);
+          }
+          const data = await fallbackResponse.json();
+          setServicesData(data);
+        } catch (fallbackErr) {
+          console.error('Both API and static file failed:', fallbackErr);
+          setError('Failed to load services data. Please try refreshing the page.');
+        }
       } finally {
         setLoading(false);
       }
@@ -99,7 +121,7 @@ const Services: React.FC = () => {
 
   return (
     <div style={{ paddingTop: '80px', backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
-      <Container>
+      <Container className="py-5">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -143,7 +165,7 @@ const Services: React.FC = () => {
                     e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
                   }}
                 >
-                  <Card.Body className="text-center">
+                  <Card.Body className="text-center p-4">
                     <div className="mb-3" style={{ fontSize: '3rem' }}>
                       {service.icon}
                     </div>
@@ -213,7 +235,7 @@ const Services: React.FC = () => {
                             }}
                           />
                         </div>
-                        <Card.Body>
+                        <Card.Body className="p-4">
                           <h5 className="item-title mbr-fonts-style display-7">
                             <strong>{project.title}</strong>
                           </h5>
@@ -274,7 +296,7 @@ const Services: React.FC = () => {
                           }}
                         />
                       </div>
-                      <Card.Body>
+                      <Card.Body className="p-4">
                         <Badge bg="secondary" className="mb-2">
                           {project.serviceTitle}
                         </Badge>

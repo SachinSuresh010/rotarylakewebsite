@@ -6,42 +6,47 @@ import { motion } from 'framer-motion';
 interface Member {
   id: string;
   name: string;
-  image: string;
-  alt: string;
-  currentPosition: string | null;
-  pastPositions: string[];
-  isPastPresident: boolean;
-  presidentialYears: string[];
+  profileImage?: string;
+  image?: string; // Legacy field
+  alt?: string;
+  positions?: {
+    isCurrent: boolean;
+    title?: string;
+    year?: string;
+  }[];
+  currentDesignation?: string; // Legacy field
+  isPastPresident?: boolean;
+  pastPresidentYears?: string[];
   link?: string;
 }
 
-interface MembersData {
-  members: Member[];
+interface DirectorsData {
+  directors: Member[];
 }
 
 const Directors: React.FC = () => {
-  const [membersData, setMembersData] = useState<MembersData | null>(null);
+  const [directorsData, setDirectorsData] = useState<DirectorsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadMembersData = async () => {
+    const loadDirectorsData = async () => {
       try {
-        const response = await fetch('/assets/data/members.json');
+        const response = await fetch('http://localhost:5001/api/members/directors/current');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        setMembersData(data);
+        setDirectorsData(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load members data');
-        console.error('Error loading members data:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load directors data');
+        console.error('Error loading directors data:', err);
       } finally {
         setLoading(false);
       }
     };
 
-    loadMembersData();
+    loadDirectorsData();
   }, []);
 
   if (loading) {
@@ -75,14 +80,14 @@ const Directors: React.FC = () => {
     );
   }
 
-  if (!membersData) {
+  if (!directorsData || directorsData.directors.length === 0) {
     return (
       <div style={{ paddingTop: '80px' }}>
         <Container>
           <div className="text-center">
             <div className="alert alert-warning" role="alert">
-              <h4>No Data Available</h4>
-              <p>No directors data found.</p>
+              <h4>No Directors Available</h4>
+              <p>No current directors found.</p>
             </div>
           </div>
         </Container>
@@ -90,8 +95,46 @@ const Directors: React.FC = () => {
     );
   }
 
-  // Filter members who have current positions (directors and office bearers)
-  const currentDirectors = membersData.members.filter(member => member.currentPosition !== null);
+  // Helper function to get member image
+  const getMemberImage = (member: Member) => {
+    return member.profileImage || member.image || '/assets/images/placeholder.jpg';
+  };
+
+  // Helper function to get member position
+  const getMemberPosition = (member: Member) => {
+    if (member.positions && member.positions.length > 0) {
+      const currentPosition = member.positions.find(pos => pos.isCurrent);
+      return currentPosition?.title || 'Director';
+    }
+    return member.currentDesignation || 'Director';
+  };
+
+  // Separate directors into board members (President, Secretary, Treasurer) and office bearers (rest)
+  const boardMembers = directorsData.directors.filter(member => {
+    const position = getMemberPosition(member).toLowerCase();
+    return position === 'president' || position === 'secretary' || position === 'treasurer';
+  }).sort((a, b) => {
+    const positionA = getMemberPosition(a).toLowerCase();
+    const positionB = getMemberPosition(b).toLowerCase();
+    
+    // President comes first
+    if (positionA === 'president') return -1;
+    if (positionB === 'president') return 1;
+    
+    // Secretary comes second
+    if (positionA === 'secretary') return -1;
+    if (positionB === 'secretary') return 1;
+    
+    // Treasurer comes third
+    if (positionA === 'treasurer') return -1;
+    if (positionB === 'treasurer') return 1;
+    
+    return 0;
+  });
+  const officeBearers = directorsData.directors.filter(member => {
+    const position = getMemberPosition(member).toLowerCase();
+    return position !== 'president' && position !== 'secretary' && position !== 'treasurer';
+  });
 
   return (
     <div style={{ paddingTop: '80px' }}>
@@ -110,7 +153,7 @@ const Directors: React.FC = () => {
           </motion.div>
           
           <Row className="mt-4">
-            {currentDirectors.slice(0, 3).map((member, index) => (
+            {boardMembers.map((member, index) => (
               <Col key={member.id || index} xs={12} md={6} lg={4} className="item features-image">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -120,24 +163,39 @@ const Directors: React.FC = () => {
                 >
                   <div className="item-img">
                     <Link to={`/members/${member.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                      <img 
-                        src={member.image} 
-                        alt={member.alt || member.name}
-                        style={{
-                          cursor: 'pointer',
-                          transition: 'transform 0.2s ease-in-out'
-                        }}
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = '/assets/images/placeholder.jpg';
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = 'scale(1.05)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = 'scale(1)';
-                        }}
-                      />
+                      <div style={{
+                        width: '100%',
+                        height: '300px',
+                        overflow: 'hidden',
+                        borderRadius: '8px',
+                        backgroundColor: '#f8f9fa',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        <img 
+                          src={getMemberImage(member)} 
+                          alt={member.alt || member.name}
+                          style={{
+                            cursor: 'pointer',
+                            transition: 'transform 0.2s ease-in-out',
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'contain',
+                            objectPosition: 'center'
+                          }}
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = '/assets/images/placeholder.jpg';
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.05)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.transform = 'scale(1)';
+                          }}
+                        />
+                      </div>
                     </Link>
                   </div>
                   <div className="item-content">
@@ -147,21 +205,7 @@ const Directors: React.FC = () => {
                       </h5>
                     </Link>
                     <p className="mbr-text mbr-fonts-style mt-3 display-7">
-                      {member.currentPosition}
-                      {member.isPastPresident && (
-                        <span 
-                          style={{
-                            backgroundColor: '#ffc107',
-                            color: '#000',
-                            fontSize: '0.7rem',
-                            padding: '2px 6px',
-                            borderRadius: '10px',
-                            marginLeft: '5px'
-                          }}
-                        >
-                          Past President
-                        </span>
-                      )}
+                      {getMemberPosition(member)}
                     </p>
                   </div>
                 </motion.div>
@@ -172,80 +216,83 @@ const Directors: React.FC = () => {
       </section>
 
       {/* Office Bearers Section */}
-      <section className="gallery3 cid-tnW97qq4aO" id="gallery3-1a">
-        <Container fluid>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="mbr-section-head"
-          >
-            <h5 className="mbr-section-subtitle mbr-fonts-style align-center mb-0 mt-2 display-5">
-              Office Bearers
-            </h5>
-          </motion.div>
-          
-          <Row className="mt-4">
-            {currentDirectors.slice(3).map((member, index) => (
-              <Col key={member.id || index} xs={12} md={6} lg={3} className="item features-image">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: (index + 3) * 0.1 }}
-                  className="item-wrapper"
-                >
-                  <div className="item-img">
-                    <Link to={`/members/${member.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                      <img 
-                        src={member.image} 
-                        alt={member.alt || member.name}
-                        style={{
-                          cursor: 'pointer',
-                          transition: 'transform 0.2s ease-in-out'
-                        }}
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = '/assets/images/placeholder.jpg';
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = 'scale(1.05)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = 'scale(1)';
-                        }}
-                      />
-                    </Link>
-                  </div>
-                  <div className="item-content">
-                    <Link to={`/members/${member.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                      <h5 className="item-title mbr-fonts-style display-7" style={{ cursor: 'pointer' }}>
-                        <strong>{member.name}</strong>
-                      </h5>
-                    </Link>
-                    <p className="mbr-text mbr-fonts-style mt-3 display-7">
-                      {member.currentPosition}
-                      {member.isPastPresident && (
-                        <span 
-                          style={{
-                            backgroundColor: '#ffc107',
-                            color: '#000',
-                            fontSize: '0.7rem',
-                            padding: '2px 6px',
-                            borderRadius: '10px',
-                            marginLeft: '5px'
-                          }}
-                        >
-                          Past President
-                        </span>
-                      )}
-                    </p>
-                  </div>
-                </motion.div>
-              </Col>
-            ))}
-          </Row>
-        </Container>
-      </section>
+      {officeBearers.length > 0 && (
+        <section className="gallery3 cid-tnW97qq4aO" id="gallery3-1a">
+          <Container fluid>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="mbr-section-head"
+            >
+              <h5 className="mbr-section-subtitle mbr-fonts-style align-center mb-0 mt-2 display-5">
+                Office Bearers
+              </h5>
+            </motion.div>
+            
+            <Row className="mt-4">
+              {officeBearers.map((member, index) => (
+                <Col key={member.id || index} xs={12} md={6} lg={3} className="item features-image">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: (index + 3) * 0.1 }}
+                    className="item-wrapper"
+                  >
+                    <div className="item-img">
+                      <Link to={`/members/${member.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                        <div style={{
+                          width: '100%',
+                          height: '300px',
+                          overflow: 'hidden',
+                          borderRadius: '8px',
+                          backgroundColor: '#f8f9fa',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <img 
+                            src={getMemberImage(member)} 
+                            alt={member.alt || member.name}
+                            style={{
+                              cursor: 'pointer',
+                              transition: 'transform 0.2s ease-in-out',
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'contain',
+                              objectPosition: 'center'
+                            }}
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = '/assets/images/placeholder.jpg';
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.transform = 'scale(1.05)';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.transform = 'scale(1)';
+                            }}
+                          />
+                        </div>
+                      </Link>
+                    </div>
+                    <div className="item-content">
+                      <Link to={`/members/${member.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                        <h5 className="item-title mbr-fonts-style display-7" style={{ cursor: 'pointer' }}>
+                          <strong>{member.name}</strong>
+                        </h5>
+                      </Link>
+                      <p className="mbr-text mbr-fonts-style mt-3 display-7">
+                        {getMemberPosition(member)}
+                      </p>
+                    </div>
+                  </motion.div>
+                </Col>
+              ))}
+            </Row>
+          </Container>
+        </section>
+      )}
     </div>
   );
 };
