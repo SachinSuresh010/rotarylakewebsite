@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 interface Member {
   id: string;
@@ -44,6 +45,8 @@ interface Member {
 }
 
 const Members: React.FC = () => {
+  usePageTitle('Members');
+  
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

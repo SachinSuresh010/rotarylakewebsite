@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 interface Member {
   id: string;
@@ -25,6 +26,8 @@ interface DirectorsData {
 }
 
 const Directors: React.FC = () => {
+  usePageTitle('Directors');
+  
   const [directorsData, setDirectorsData] = useState<DirectorsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

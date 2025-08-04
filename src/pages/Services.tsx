@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Badge, Button } from 'react-bootstrap';
 import { motion, AnimatePresence } from 'framer-motion';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 interface Project {
   id: string;
@@ -24,6 +25,8 @@ interface ServicesData {
 }
 
 const Services: React.FC = () => {
+  usePageTitle('Services');
+  
   const [servicesData, setServicesData] = useState<ServicesData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Form, Alert, Badge } from 'react-bootstrap';
 import { FaUser, FaEnvelope, FaCalendar, FaCrown, FaPenToSquare, FaFloppyDisk, FaXmark, FaCamera, FaBriefcase, FaGraduationCap, FaHeart, FaUsers, FaLocationDot, FaPhone, FaTrophy, FaStar, FaLinkedin, FaFacebook, FaTwitter } from 'react-icons/fa6';
 import { useNavigate } from 'react-router-dom';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 // Icon wrapper component
 const IconWrapper: React.FC<{ icon: any; className?: string; style?: React.CSSProperties }> = ({ icon: Icon, className, style }) => <Icon className={className} style={style} />;
@@ -42,6 +43,8 @@ interface Member {
 }
 
 const Profile: React.FC = () => {
+  usePageTitle('Profile');
+  
   const [member, setMember] = useState<Member | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');

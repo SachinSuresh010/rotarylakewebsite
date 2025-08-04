@@ -3,8 +3,11 @@ import { Container, Row, Col, Card } from 'react-bootstrap';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { getEventsByYear } from '../data/eventData';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 const Gallery2022: React.FC = () => {
+  usePageTitle('Gallery 2022-2023');
+  
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
 
   const events = getEventsByYear("2022-2023");

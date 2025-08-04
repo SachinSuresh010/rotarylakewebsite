@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Form, Alert, Nav, Table, Badge, InputGroup, Spinner, Modal } from 'react-bootstrap';
-import { FaUsers, FaChartBar, FaGear, FaRightFromBracket, FaPlus, FaPenToSquare, FaTrash, FaMagnifyingGlass, FaClock, FaUserCheck, FaUserXmark, FaEye, FaCalendar, FaEnvelope, FaUser, FaBriefcase, FaGraduationCap, FaHeart, FaLocationDot, FaPhone, FaTrophy, FaStar, FaXmark, FaLinkedin, FaFacebook, FaTwitter, FaCamera, FaFloppyDisk, FaTag } from 'react-icons/fa6';
+import { FaUsers, FaChartBar, FaGear, FaRightFromBracket, FaPlus, FaPenToSquare, FaTrash, FaMagnifyingGlass, FaClock, FaUserCheck, FaUserXmark, FaEye, FaCalendar, FaEnvelope, FaUser, FaBriefcase, FaGraduationCap, FaHeart, FaLocationDot, FaPhone, FaTrophy, FaStar, FaXmark, FaLinkedin, FaFacebook, FaTwitter, FaCamera, FaFloppyDisk, FaTag, FaImages, FaCalendarDay, FaImage } from 'react-icons/fa6';
 import MemberSearchModal from '../components/MemberSearchModal';
+import { usePageTitle } from '../hooks/usePageTitle';
+
 
 // Icon wrapper components to fix TypeScript issues
 const IconWrapper: React.FC<{ icon: any; className?: string; style?: React.CSSProperties }> = ({ icon: Icon, className, style }) => <Icon className={className} style={style} />;
@@ -35,6 +37,10 @@ const modernStyles = `
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
   }
   
+  .admin-content {
+    margin: 0 20px;
+  }
+  
   .admin-header {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
@@ -65,6 +71,7 @@ const modernStyles = `
     border-radius: 16px;
     border: none;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    margin: 0 20px;
   }
   
   .admin-nav .nav-link {
@@ -615,7 +622,772 @@ interface MemberStatistics {
   loginRate: number;
 }
 
+interface GalleryYear {
+  id: string;
+  year: string;
+  title: string;
+  description: string;
+  image: string;
+  alt: string;
+  isActive: boolean;
+  createdAt?: string;
+}
+
+interface GalleryEvent {
+  id: string;
+  year: string;
+  name: string;
+  description: string;
+  thumbnail: string;
+  images: {
+    id: string;
+    src: string;
+    alt: string;
+  }[];
+  isActive: boolean;
+  createdAt?: string;
+}
+
+const GalleryTab: React.FC<{
+  galleryYears: GalleryYear[];
+  galleryEvents: GalleryEvent[];
+  loading: boolean;
+  error: string | null;
+  success: string | null;
+  showYearModal: boolean;
+  setShowYearModal: (show: boolean) => void;
+  showEventModal: boolean;
+  setShowEventModal: (show: boolean) => void;
+  newYear: any;
+  setNewYear: (year: any) => void;
+  newEvent: any;
+  setNewEvent: (event: any) => void;
+  handleCreateYear: (e: React.FormEvent) => void;
+  handleCreateEvent: (e: React.FormEvent) => void;
+  handleEditYear: (year: GalleryYear) => void;
+  handleDeleteYear: (yearId: string) => void;
+  handleEditEvent: (event: GalleryEvent) => void;
+  handleDeleteEvent: (eventId: string) => void;
+  yearImage: File | null;
+  setYearImage: (file: File | null) => void;
+  eventThumbnail: File | null;
+  setEventThumbnail: (file: File | null) => void;
+  eventImages: File[];
+  setEventImages: (files: File[]) => void;
+  editingYear: GalleryYear | null;
+  editingEvent: GalleryEvent | null;
+  setEditingYear: (year: GalleryYear | null) => void;
+  setEditingEvent: (event: GalleryEvent | null) => void;
+  existingEventImages: { id: string; src: string; alt: string }[];
+  setExistingEventImages: (images: { id: string; src: string; alt: string }[]) => void;
+}> = ({ 
+  galleryYears, 
+  galleryEvents, 
+  loading, 
+  error, 
+  success,
+  showYearModal,
+  setShowYearModal,
+  showEventModal,
+  setShowEventModal,
+  newYear,
+  setNewYear,
+  newEvent,
+  setNewEvent,
+  handleCreateYear,
+  handleCreateEvent,
+  handleEditYear,
+  handleDeleteYear,
+  handleEditEvent,
+  handleDeleteEvent,
+  yearImage,
+  setYearImage,
+  eventThumbnail,
+  setEventThumbnail,
+  eventImages,
+  setEventImages,
+  editingYear,
+  editingEvent,
+  setEditingYear,
+  setEditingEvent,
+  existingEventImages,
+  setExistingEventImages
+}) => {
+  // State for image previews
+  const [yearImagePreview, setYearImagePreview] = React.useState<string>('');
+  const [eventThumbnailPreview, setEventThumbnailPreview] = React.useState<string>('');
+  const [eventImagesPreviews, setEventImagesPreviews] = React.useState<string[]>([]);
+
+  // Handle year image preview
+  React.useEffect(() => {
+    if (yearImage) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setYearImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(yearImage);
+    } else {
+      setYearImagePreview('');
+    }
+  }, [yearImage]);
+
+  // Handle event thumbnail preview
+  React.useEffect(() => {
+    if (eventThumbnail) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setEventThumbnailPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(eventThumbnail);
+    } else {
+      setEventThumbnailPreview('');
+    }
+  }, [eventThumbnail]);
+
+  // Handle event images previews
+  React.useEffect(() => {
+    const previews: string[] = [];
+    eventImages.forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        previews.push(e.target?.result as string);
+        if (previews.length === eventImages.length) {
+          setEventImagesPreviews([...previews]);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+    if (eventImages.length === 0) {
+      setEventImagesPreviews([]);
+    }
+  }, [eventImages]);
+
+  // Set existing event images when editing
+  React.useEffect(() => {
+    if (editingEvent) {
+      setExistingEventImages(editingEvent.images || []);
+    } else {
+      setExistingEventImages([]);
+    }
+  }, [editingEvent, setExistingEventImages]);
+
+  const handleYearImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setYearImage(file);
+  };
+
+  const handleEventThumbnailUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setEventThumbnail(file);
+  };
+
+  const handleEventImagesUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []) as File[];
+    setEventImages(files);
+  };
+
+  const removeExistingEventImage = (imageId: string) => {
+    setExistingEventImages(existingEventImages.filter(img => img.id !== imageId));
+  };
+
+  const clearYearImage = () => {
+    setYearImage(null);
+    setYearImagePreview('');
+  };
+
+  const clearEventThumbnail = () => {
+    setEventThumbnail(null);
+    setEventThumbnailPreview('');
+  };
+
+  const clearEventImages = () => {
+    setEventImages([]);
+    setEventImagesPreviews([]);
+  };
+
+  return (
+    <div>
+      {error && <Alert variant="danger" className="mb-4">{error}</Alert>}
+      {success && <Alert variant="success" className="mb-4">{success}</Alert>}
+
+      <Row>
+        <Col lg={12}>
+          <Card className="admin-stats-card mb-4">
+            <Card.Header className="admin-modal-header">
+              <div className="d-flex align-items-center">
+                <div className="admin-stats-icon admin-stats-primary me-3">
+                  <IconWrapper icon={FaImages} />
+                </div>
+                <div>
+                  <h5 className="mb-1 text-white fw-bold">Gallery Management</h5>
+                  <p className="mb-0 opacity-90 text-white">Manage gallery years and events with images</p>
+                </div>
+              </div>
+            </Card.Header>
+            <Card.Body className="p-4">
+              <Row>
+                <Col lg={6}>
+                  <Card className="admin-stats-card h-100">
+                    <Card.Header className="d-flex justify-content-between align-items-center">
+                      <h6 className="mb-0 fw-bold">
+                                                 <IconWrapper icon={FaCalendar} className="me-2" />
+                        Gallery Years
+                      </h6>
+                      <Button 
+                        variant="success" 
+                        size="sm" 
+                        onClick={() => {
+                          setEditingYear(null);
+                          setNewYear({ year: '', title: '', description: '', alt: '' });
+                          setYearImage(null);
+                          setYearImagePreview('');
+                          setShowYearModal(true);
+                        }}
+                      >
+                        <IconWrapper icon={FaPlus} className="me-1" />
+                        Add Year
+                      </Button>
+                    </Card.Header>
+                    <Card.Body>
+                      {loading ? (
+                        <div className="text-center py-4">
+                          <Spinner animation="border" size="sm" />
+                          <p className="mt-2 text-muted">Loading gallery years...</p>
+                        </div>
+                      ) : galleryYears.length === 0 ? (
+                        <div className="text-center py-4">
+                          <IconWrapper icon={FaImages} className="text-muted mb-3" style={{ fontSize: '3rem' }} />
+                          <p className="text-muted">No gallery years found</p>
+                          <Button 
+                            variant="outline-primary" 
+                            size="sm"
+                            onClick={() => {
+                              setEditingYear(null);
+                              setNewYear({ year: '', title: '', description: '', alt: '' });
+                              setYearImage(null);
+                              setYearImagePreview('');
+                              setShowYearModal(true);
+                            }}
+                          >
+                            <IconWrapper icon={FaPlus} className="me-1" />
+                            Create First Year
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="row g-3">
+                          {galleryYears.map(year => (
+                            <div key={year.id} className="col-12">
+                              <Card className="border-0 shadow-sm">
+                                <Card.Body className="p-3">
+                                  <div className="d-flex align-items-center">
+                                    <div className="me-3">
+                                      <img 
+                                        src={year.image} 
+                                        alt={year.alt || year.title}
+                                        className="rounded"
+                                        style={{ width: '60px', height: '60px', objectFit: 'cover' }}
+                                      />
+                                    </div>
+                                    <div className="flex-grow-1">
+                                      <h6 className="mb-1 fw-bold">{year.title}</h6>
+                                      <p className="mb-1 text-muted small">{year.year}</p>
+                                      <span className={`badge ${year.isActive ? 'bg-success' : 'bg-secondary'}`}>
+                                        {year.isActive ? 'Active' : 'Inactive'}
+                                      </span>
+                                    </div>
+                                    <div className="btn-group" role="group">
+                                      <Button 
+                                        variant="outline-primary" 
+                                        size="sm"
+                                        onClick={() => handleEditYear(year)}
+                                        title="Edit Year"
+                                      >
+                                        <IconWrapper icon={FaPenToSquare} />
+                                      </Button>
+                                      <Button 
+                                        variant="outline-danger" 
+                                        size="sm"
+                                        onClick={() => handleDeleteYear(year.id)}
+                                        title="Delete Year"
+                                      >
+                                        <IconWrapper icon={FaTrash} />
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </Card.Body>
+                              </Card>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </Card.Body>
+                  </Card>
+                </Col>
+                
+                <Col lg={6}>
+                  <Card className="admin-stats-card h-100">
+                    <Card.Header className="d-flex justify-content-between align-items-center">
+                      <h6 className="mb-0 fw-bold">
+                        <IconWrapper icon={FaCalendarDay} className="me-2" />
+                        Gallery Events
+                      </h6>
+                      <Button 
+                        variant="success" 
+                        size="sm" 
+                        onClick={() => {
+                          setEditingEvent(null);
+                          setNewEvent({ year: '', name: '', description: '' });
+                          setEventThumbnail(null);
+                          setEventThumbnailPreview('');
+                          setEventImages([]);
+                          setEventImagesPreviews([]);
+                          setExistingEventImages([]);
+                          setShowEventModal(true);
+                        }}
+                      >
+                        <IconWrapper icon={FaPlus} className="me-1" />
+                        Add Event
+                      </Button>
+                    </Card.Header>
+                    <Card.Body>
+                      {loading ? (
+                        <div className="text-center py-4">
+                          <Spinner animation="border" size="sm" />
+                          <p className="mt-2 text-muted">Loading gallery events...</p>
+                        </div>
+                      ) : galleryEvents.length === 0 ? (
+                        <div className="text-center py-4">
+                          <IconWrapper icon={FaCalendarDay} className="text-muted mb-3" style={{ fontSize: '3rem' }} />
+                          <p className="text-muted">No gallery events found</p>
+                          <Button 
+                            variant="outline-primary" 
+                            size="sm"
+                            onClick={() => {
+                              setEditingEvent(null);
+                              setNewEvent({ year: '', name: '', description: '' });
+                              setEventThumbnail(null);
+                              setEventThumbnailPreview('');
+                              setEventImages([]);
+                              setEventImagesPreviews([]);
+                              setExistingEventImages([]);
+                              setShowEventModal(true);
+                            }}
+                          >
+                            <IconWrapper icon={FaPlus} className="me-1" />
+                            Create First Event
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="row g-3">
+                          {galleryEvents.map(event => (
+                            <div key={event.id} className="col-12">
+                              <Card className="border-0 shadow-sm">
+                                <Card.Body className="p-3">
+                                  <div className="d-flex align-items-center">
+                                    <div className="me-3">
+                                      <img 
+                                        src={event.thumbnail} 
+                                        alt={event.name}
+                                        className="rounded"
+                                        style={{ width: '60px', height: '60px', objectFit: 'cover' }}
+                                      />
+                                    </div>
+                                    <div className="flex-grow-1">
+                                      <h6 className="mb-1 fw-bold">{event.name}</h6>
+                                      <p className="mb-1 text-muted small">{event.year}</p>
+                                      <span className="badge bg-info">
+                                        {event.images?.length || 0} images
+                                      </span>
+                                    </div>
+                                    <div className="btn-group" role="group">
+                                      <Button 
+                                        variant="outline-primary" 
+                                        size="sm"
+                                        onClick={() => handleEditEvent(event)}
+                                        title="Edit Event"
+                                      >
+                                        <IconWrapper icon={FaPenToSquare} />
+                                      </Button>
+                                      <Button 
+                                        variant="outline-danger" 
+                                        size="sm"
+                                        onClick={() => handleDeleteEvent(event.id)}
+                                        title="Delete Event"
+                                      >
+                                        <IconWrapper icon={FaTrash} />
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </Card.Body>
+                              </Card>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </Card.Body>
+                  </Card>
+                </Col>
+              </Row>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Add/Edit Year Modal */}
+      <Modal show={showYearModal} onHide={() => setShowYearModal(false)} centered size="xl" dialogClassName="admin-modal">
+        <Modal.Header closeButton className="admin-modal-header">
+          <div className="d-flex align-items-center">
+            <div className="admin-stats-icon admin-stats-primary me-3">
+                             <IconWrapper icon={editingYear ? FaPenToSquare : FaPlus} />
+            </div>
+            <div>
+              <Modal.Title className="fw-bold mb-1 text-white">
+                {editingYear ? 'Edit Gallery Year' : 'Add New Gallery Year'}
+              </Modal.Title>
+              <p className="mb-0 opacity-90 text-white">
+                {editingYear ? 'Update year information and image' : 'Create a new gallery year with image'}
+              </p>
+            </div>
+          </div>
+        </Modal.Header>
+        <Form onSubmit={handleCreateYear}>
+          <Modal.Body className="admin-modal-body">
+            <Row>
+              <Col lg={8}>
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-bold">Year</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="e.g., 2025-2026"
+                    value={newYear.year}
+                    onChange={(e) => setNewYear({ ...newYear, year: e.target.value })}
+                    required
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-bold">Title</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="e.g., 2025-2026 Rotary Year"
+                    value={newYear.title}
+                    onChange={(e) => setNewYear({ ...newYear, title: e.target.value })}
+                    required
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-bold">Description</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={4}
+                    placeholder="Brief description of the year and its significance"
+                    value={newYear.description}
+                    onChange={(e) => setNewYear({ ...newYear, description: e.target.value })}
+                    required
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-bold">Alt Text</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="Alt text for the image (for accessibility)"
+                    value={newYear.alt}
+                    onChange={(e) => setNewYear({ ...newYear, alt: e.target.value })}
+                  />
+                </Form.Group>
+              </Col>
+              <Col lg={4}>
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-bold">Year Image</Form.Label>
+                  <div className="border rounded p-3 text-center">
+                    {yearImagePreview ? (
+                      <div className="mb-3">
+                        <img 
+                          src={yearImagePreview} 
+                          alt="Preview" 
+                          className="img-fluid rounded mb-2"
+                          style={{ maxHeight: '200px' }}
+                        />
+                        <div className="d-flex gap-2 justify-content-center">
+                          <Button 
+                            variant="outline-danger" 
+                            size="sm"
+                            onClick={clearYearImage}
+                          >
+                            <IconWrapper icon={FaTrash} />
+                          </Button>
+                        </div>
+                      </div>
+                    ) : editingYear?.image ? (
+                      <div className="mb-3">
+                        <img 
+                          src={editingYear.image} 
+                          alt={editingYear.alt || editingYear.title}
+                          className="img-fluid rounded mb-2"
+                          style={{ maxHeight: '200px' }}
+                        />
+                        <p className="text-muted small">Current image</p>
+                      </div>
+                    ) : (
+                      <div className="py-4">
+                        <IconWrapper icon={FaImage} className="text-muted mb-2" style={{ fontSize: '3rem' }} />
+                        <p className="text-muted small">No image selected</p>
+                      </div>
+                    )}
+                    <Form.Control
+                      type="file"
+                      accept="image/*"
+                      onChange={handleYearImageUpload}
+                      required={!editingYear}
+                    />
+                    <small className="text-muted">
+                      Recommended: 800x600px or larger
+                    </small>
+                  </div>
+                </Form.Group>
+              </Col>
+            </Row>
+          </Modal.Body>
+          <Modal.Footer className="admin-modal-footer d-flex justify-content-center">
+            <div className="d-flex gap-3">
+              <Button className="admin-btn admin-btn-outline" onClick={() => setShowYearModal(false)}>
+                <IconWrapper icon={FaXmark} className="me-2" />
+                Cancel
+              </Button>
+              <Button className="admin-btn admin-btn-primary" type="submit" disabled={loading}>
+                {loading ? (
+                  <>
+                    <Spinner animation="border" size="sm" className="me-2" />
+                    {editingYear ? 'Updating...' : 'Creating...'}
+                  </>
+                ) : (
+                  <>
+                    <IconWrapper icon={editingYear ? FaFloppyDisk : FaPlus} className="me-2" />
+                    {editingYear ? 'Update Year' : 'Create Year'}
+                  </>
+                )}
+              </Button>
+            </div>
+          </Modal.Footer>
+        </Form>
+      </Modal>
+
+      {/* Add/Edit Event Modal */}
+      <Modal show={showEventModal} onHide={() => setShowEventModal(false)} centered size="xl" dialogClassName="admin-modal">
+        <Modal.Header closeButton className="admin-modal-header">
+          <div className="d-flex align-items-center">
+            <div className="admin-stats-icon admin-stats-primary me-3">
+                             <IconWrapper icon={editingEvent ? FaPenToSquare : FaPlus} />
+            </div>
+            <div>
+              <Modal.Title className="fw-bold mb-1 text-white">
+                {editingEvent ? 'Edit Gallery Event' : 'Add New Gallery Event'}
+              </Modal.Title>
+              <p className="mb-0 opacity-90 text-white">
+                {editingEvent ? 'Update event information and images' : 'Create a new gallery event with images'}
+              </p>
+            </div>
+          </div>
+        </Modal.Header>
+        <Form onSubmit={handleCreateEvent}>
+          <Modal.Body className="admin-modal-body">
+            <Row>
+              <Col lg={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-bold">Year</Form.Label>
+                  <Form.Select
+                    value={newEvent.year}
+                    onChange={(e) => setNewEvent({ ...newEvent, year: e.target.value })}
+                    required
+                  >
+                    <option value="">Select Year</option>
+                    {galleryYears.filter(year => year.isActive).map(year => (
+                      <option key={year.id} value={year.year}>
+                        {year.year} - {year.title}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-bold">Event Name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder="e.g., Installation Ceremony"
+                    value={newEvent.name}
+                    onChange={(e) => setNewEvent({ ...newEvent, name: e.target.value })}
+                    required
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-bold">Description</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    rows={4}
+                    placeholder="Brief description of the event"
+                    value={newEvent.description}
+                    onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
+                    required
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-bold">Event Thumbnail</Form.Label>
+                  <div className="border rounded p-3 text-center">
+                    {eventThumbnailPreview ? (
+                      <div className="mb-3">
+                        <img 
+                          src={eventThumbnailPreview} 
+                          alt="Preview" 
+                          className="img-fluid rounded mb-2"
+                          style={{ maxHeight: '150px' }}
+                        />
+                        <div className="d-flex gap-2 justify-content-center">
+                          <Button 
+                            variant="outline-danger" 
+                            size="sm"
+                            onClick={clearEventThumbnail}
+                          >
+                            <IconWrapper icon={FaTrash} />
+                          </Button>
+                        </div>
+                      </div>
+                    ) : editingEvent?.thumbnail ? (
+                      <div className="mb-3">
+                        <img 
+                          src={editingEvent.thumbnail} 
+                          alt={editingEvent.name}
+                          className="img-fluid rounded mb-2"
+                          style={{ maxHeight: '150px' }}
+                        />
+                        <p className="text-muted small">Current thumbnail</p>
+                      </div>
+                    ) : (
+                      <div className="py-3">
+                        <IconWrapper icon={FaImage} className="text-muted mb-2" style={{ fontSize: '2rem' }} />
+                        <p className="text-muted small">No thumbnail selected</p>
+                      </div>
+                    )}
+                                         <Form.Control
+                       type="file"
+                       accept="image/*"
+                       onChange={handleEventThumbnailUpload}
+                     />
+                    <small className="text-muted">
+                      Recommended: 400x300px or larger
+                    </small>
+                  </div>
+                </Form.Group>
+              </Col>
+              <Col lg={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-bold">Event Images</Form.Label>
+                  
+                  {/* Existing Images */}
+                  {existingEventImages.length > 0 && (
+                    <div className="mb-3">
+                      <h6 className="mb-2">Existing Images</h6>
+                      <div className="row g-2">
+                        {existingEventImages.map((image) => (
+                          <div key={image.id} className="col-4">
+                            <div className="position-relative">
+                              <img 
+                                src={image.src} 
+                                alt={image.alt}
+                                className="img-fluid rounded"
+                                style={{ height: '100px', width: '100%', objectFit: 'cover' }}
+                              />
+                              <Button
+                                variant="danger"
+                                size="sm"
+                                className="position-absolute top-0 end-0"
+                                style={{ transform: 'translate(25%, -25%)' }}
+                                onClick={() => removeExistingEventImage(image.id)}
+                                title="Remove image"
+                              >
+                                                                 <IconWrapper icon={FaXmark} />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* New Images */}
+                  <div className="border rounded p-3 text-center">
+                    {eventImagesPreviews.length > 0 ? (
+                      <div className="mb-3">
+                        <div className="row g-2">
+                          {eventImagesPreviews.map((preview, index) => (
+                            <div key={index} className="col-4">
+                              <img 
+                                src={preview} 
+                                alt={`Preview ${index + 1}`}
+                                className="img-fluid rounded"
+                                style={{ height: '100px', width: '100%', objectFit: 'cover' }}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                        <div className="d-flex gap-2 justify-content-center">
+                          <Button 
+                            variant="outline-danger" 
+                            size="sm"
+                            onClick={clearEventImages}
+                          >
+                            <IconWrapper icon={FaTrash} />
+                            Clear All
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="py-3">
+                        <IconWrapper icon={FaImages} className="text-muted mb-2" style={{ fontSize: '2rem' }} />
+                        <p className="text-muted small">No new images selected</p>
+                      </div>
+                    )}
+                    <Form.Control
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleEventImagesUpload}
+                      required={!editingEvent && existingEventImages.length === 0}
+                    />
+                    <small className="text-muted">
+                      Select multiple images. Recommended: 1200x800px or larger
+                    </small>
+                  </div>
+                </Form.Group>
+              </Col>
+            </Row>
+          </Modal.Body>
+          <Modal.Footer className="admin-modal-footer d-flex justify-content-center">
+            <div className="d-flex gap-3">
+              <Button className="admin-btn admin-btn-outline" onClick={() => setShowEventModal(false)}>
+                <IconWrapper icon={FaXmark} className="me-2" />
+                Cancel
+              </Button>
+              <Button className="admin-btn admin-btn-primary" type="submit" disabled={loading}>
+                {loading ? (
+                  <>
+                    <Spinner animation="border" size="sm" className="me-2" />
+                    {editingEvent ? 'Updating...' : 'Creating...'}
+                  </>
+                ) : (
+                  <>
+                    <IconWrapper icon={editingEvent ? FaFloppyDisk : FaPlus} className="me-2" />
+                    {editingEvent ? 'Update Event' : 'Create Event'}
+                  </>
+                )}
+              </Button>
+            </div>
+          </Modal.Footer>
+        </Form>
+      </Modal>
+    </div>
+  );
+};
+
 const Admin: React.FC = () => {
+  usePageTitle('Admin');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [member, setMember] = useState<any>(null);
@@ -623,7 +1395,7 @@ const Admin: React.FC = () => {
   const [members, setMembers] = useState<Member[]>([]);
   const [memberStats, setMemberStats] = useState<MemberStatistics | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -713,6 +1485,10 @@ const Admin: React.FC = () => {
   const [editError, setEditError] = useState('');
   const [deleteError, setDeleteError] = useState('');
   const [addError, setAddError] = useState('');
+  const [success, setSuccess] = useState<string | null>(null);
+  
+  // Gallery state
+  const [existingEventImages, setExistingEventImages] = useState<{ id: string; src: string; alt: string }[]>([]);
 
   // Family members management
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
@@ -749,6 +1525,36 @@ const Admin: React.FC = () => {
   
   // Member search for family linking
   const [showMemberSearchModal, setShowMemberSearchModal] = useState(false);
+
+  // Gallery management states
+  const [galleryYears, setGalleryYears] = useState<GalleryYear[]>([]);
+  const [galleryEvents, setGalleryEvents] = useState<GalleryEvent[]>([]);
+  const [showYearModal, setShowYearModal] = useState(false);
+  const [showEventModal, setShowEventModal] = useState(false);
+  const [editingYear, setEditingYear] = useState<GalleryYear | null>(null);
+  const [editingEvent, setEditingEvent] = useState<GalleryEvent | null>(null);
+
+  
+  // Form states for new year
+  const [newYear, setNewYear] = useState({
+    year: '',
+    title: '',
+    description: '',
+    alt: ''
+  });
+  
+  // Form states for new event
+  const [newEvent, setNewEvent] = useState({
+    year: '',
+    name: '',
+    description: '',
+    images: [] as { src: string; alt: string }[]
+  });
+  
+  // File upload states
+  const [yearImage, setYearImage] = useState<File | null>(null);
+  const [eventThumbnail, setEventThumbnail] = useState<File | null>(null);
+  const [eventImages, setEventImages] = useState<File[]>([]);
 
   // Helper functions for family members
   const addFamilyMember = () => {
@@ -1787,6 +2593,323 @@ const Admin: React.FC = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
+  useEffect(() => {
+    if (activeTab === 'gallery') {
+      fetchGalleryData();
+    }
+  }, [activeTab]);
+
+  const fetchGalleryData = async () => {
+    try {
+      setLoading(true);
+      
+      const memberToken = localStorage.getItem('memberToken');
+      const adminToken = localStorage.getItem('adminToken');
+      const token = memberToken || adminToken;
+      
+      // Fetch years
+      const yearsResponse = await fetch('/api/gallery/admin/years', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (yearsResponse.ok) {
+        const yearsData = await yearsResponse.json();
+        setGalleryYears(yearsData.years);
+      }
+      
+      // Fetch events
+      const eventsResponse = await fetch('/api/gallery/admin/events', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (eventsResponse.ok) {
+        const eventsData = await eventsResponse.json();
+        setGalleryEvents(eventsData.events);
+      }
+    } catch (err) {
+      console.error('Error fetching gallery data:', err);
+      setError('Failed to load gallery data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateYear = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setLoading(true);
+      setError(null);
+      
+      console.log('Creating/updating gallery year with data:', {
+        newYear,
+        yearImage: yearImage ? yearImage.name : 'No image',
+        editingYear: editingYear?.id
+      });
+      
+      // Create FormData for multipart upload
+      const formData = new FormData();
+      formData.append('year', newYear.year);
+      formData.append('title', newYear.title);
+      formData.append('description', newYear.description);
+      formData.append('alt', newYear.alt || '');
+      
+      // Add image file if selected
+      if (yearImage) {
+        formData.append('image', yearImage);
+      }
+      
+      const memberToken = localStorage.getItem('memberToken');
+      const adminToken = localStorage.getItem('adminToken');
+      const token = memberToken || adminToken;
+      
+      const url = editingYear 
+        ? `/api/gallery/years/${editingYear.id}`
+        : '/api/gallery/years';
+      const method = editingYear ? 'PUT' : 'POST';
+      
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Success response:', data);
+        setSuccess(editingYear ? 'Gallery year updated successfully!' : 'Gallery year created successfully!');
+        setShowYearModal(false);
+        setNewYear({ year: '', title: '', description: '', alt: '' });
+        setYearImage(null);
+        setEditingYear(null);
+        fetchGalleryData();
+      } else {
+        const errorData = await response.json();
+        console.error('Error response:', errorData);
+        setError(errorData.message || (editingYear ? 'Failed to update gallery year' : 'Failed to create gallery year'));
+      }
+    } catch (err) {
+      console.error('Exception during gallery year operation:', err);
+      setError(editingYear ? 'Failed to update gallery year' : 'Failed to create gallery year');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateEvent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Create FormData for multipart upload
+      const formData = new FormData();
+      formData.append('year', newEvent.year);
+      formData.append('name', newEvent.name);
+      formData.append('description', newEvent.description);
+      
+
+      
+      // Add thumbnail if selected
+      if (eventThumbnail) {
+        formData.append('thumbnail', eventThumbnail);
+      }
+      
+      // Add event images if selected
+      if (eventImages && eventImages.length > 0) {
+        eventImages.forEach((image, index) => {
+          formData.append('images', image);
+        });
+      }
+
+      // Add existing images that weren't removed
+      if (existingEventImages && existingEventImages.length > 0) {
+        formData.append('existingImages', JSON.stringify(existingEventImages));
+      }
+      
+      const memberToken = localStorage.getItem('memberToken');
+      const adminToken = localStorage.getItem('adminToken');
+      const token = memberToken || adminToken;
+      
+      let url = '/api/gallery/events';
+      let method = 'POST';
+      
+      // If editing an existing event, use PUT method
+      if (editingEvent) {
+        url = `/api/gallery/events/${editingEvent.id}`;
+        method = 'PUT';
+      }
+      
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+      
+      if (response.ok) {
+        setSuccess(editingEvent ? 'Gallery event updated successfully!' : 'Gallery event created successfully!');
+        setShowEventModal(false);
+        setNewEvent({
+          year: '',
+          name: '',
+          description: '',
+          images: []
+        });
+        setEventThumbnail(null);
+        setEventImages([]);
+        setExistingEventImages([]);
+        setEditingEvent(null);
+        fetchGalleryData();
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || (editingEvent ? 'Failed to update gallery event' : 'Failed to create gallery event'));
+      }
+    } catch (err) {
+      setError(editingEvent ? 'Failed to update gallery event' : 'Failed to create gallery event');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // These functions are currently unused but may be needed for future gallery event management
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const addImageField = () => {
+    setNewEvent(prev => ({
+      ...prev,
+      images: [...prev.images, { src: '', alt: '' }]
+    }));
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const removeImageField = (index: number) => {
+    setNewEvent(prev => ({
+      ...prev,
+      images: prev.images.filter((_: any, i: number) => i !== index)
+    }));
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const updateImageField = (index: number, field: 'src' | 'alt', value: string) => {
+    setNewEvent(prev => ({
+      ...prev,
+      images: prev.images.map((img: any, i: number) => 
+        i === index ? { ...img, [field]: value } : img
+      )
+    }));
+  };
+
+  const handleEditYear = (year: GalleryYear) => {
+    setEditingYear(year);
+    setNewYear({
+      year: year.year,
+      title: year.title,
+      description: year.description,
+      alt: year.alt || ''
+    });
+    setYearImage(null);
+    setShowYearModal(true);
+  };
+
+  const handleDeleteYear = async (yearId: string) => {
+    if (!window.confirm('Are you sure you want to delete this gallery year?')) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
+      const memberToken = localStorage.getItem('memberToken');
+      const adminToken = localStorage.getItem('adminToken');
+      const token = memberToken || adminToken;
+      
+      console.log('Deleting year:', yearId);
+      console.log('Using token:', token ? 'Token exists' : 'No token');
+      
+      const response = await fetch(`/api/gallery/years/${yearId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      console.log('Delete response status:', response.status);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Delete success:', data);
+        setSuccess('Gallery year deleted successfully!');
+        fetchGalleryData();
+      } else {
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        console.error('Delete failed:', errorData);
+        setError(`Failed to delete gallery year: ${errorData.message || 'Unknown error'}`);
+      }
+    } catch (err) {
+      console.error('Delete exception:', err);
+      setError(`Failed to delete gallery year: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditEvent = (event: GalleryEvent) => {
+    setEditingEvent(event);
+    setNewEvent({
+      year: event.year,
+      name: event.name,
+      description: event.description,
+      images: event.images || []
+    });
+    setEventThumbnail(null);
+    setEventImages([]);
+    setShowEventModal(true);
+  };
+
+  const handleDeleteEvent = async (eventId: string) => {
+    if (!window.confirm('Are you sure you want to delete this event?')) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
+      const memberToken = localStorage.getItem('memberToken');
+      const adminToken = localStorage.getItem('adminToken');
+      const token = memberToken || adminToken;
+      
+      console.log('Deleting event:', eventId);
+      console.log('Using token:', token ? 'Token exists' : 'No token');
+      
+      const response = await fetch(`/api/gallery/events/${eventId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      console.log('Delete response status:', response.status);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Delete success:', data);
+        setSuccess('Event deleted successfully!');
+        fetchGalleryData();
+      } else {
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        console.error('Delete failed:', errorData);
+        setError(`Failed to delete event: ${errorData.message || 'Unknown error'}`);
+      }
+    } catch (err) {
+      console.error('Delete exception:', err);
+      setError(`Failed to delete event: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="admin-modern d-flex align-items-center justify-content-center" style={{ minHeight: 'calc(100vh - 200px)', paddingTop: '6rem' }}>
@@ -1923,6 +3046,12 @@ const Admin: React.FC = () => {
                     </Nav.Link>
                   </Nav.Item>
                   <Nav.Item>
+                    <Nav.Link eventKey="gallery" className="admin-nav-link">
+                      <IconWrapper icon={FaCamera} className="me-2" />
+                      Gallery
+                    </Nav.Link>
+                  </Nav.Item>
+                  <Nav.Item>
                     <Nav.Link eventKey="settings" className="admin-nav-link">
                       <IconWrapper icon={FaGear} className="me-2" />
                       Settings
@@ -1969,6 +3098,41 @@ const Admin: React.FC = () => {
                 )}
                 {activeTab === 'services' && (
                   <ServicesTab />
+                )}
+                {activeTab === 'gallery' && (
+                  <GalleryTab 
+                    galleryYears={galleryYears}
+                    galleryEvents={galleryEvents}
+                    loading={loading}
+                    error={error}
+                    success={success}
+                    showYearModal={showYearModal}
+                    setShowYearModal={setShowYearModal}
+                    showEventModal={showEventModal}
+                    setShowEventModal={setShowEventModal}
+                    newYear={newYear}
+                    setNewYear={setNewYear}
+                    newEvent={newEvent}
+                    setNewEvent={setNewEvent}
+                    handleCreateYear={handleCreateYear}
+                    handleCreateEvent={handleCreateEvent}
+                    handleEditYear={handleEditYear}
+                    handleDeleteYear={handleDeleteYear}
+                    handleEditEvent={handleEditEvent}
+                    handleDeleteEvent={handleDeleteEvent}
+                    yearImage={yearImage}
+                    setYearImage={setYearImage}
+                    eventThumbnail={eventThumbnail}
+                    setEventThumbnail={setEventThumbnail}
+                    eventImages={eventImages}
+                    setEventImages={setEventImages}
+                    editingYear={editingYear}
+                    editingEvent={editingEvent}
+                    setEditingYear={setEditingYear}
+                    setEditingEvent={setEditingEvent}
+                    existingEventImages={existingEventImages}
+                    setExistingEventImages={setExistingEventImages}
+                  />
                 )}
                 {activeTab === 'settings' && (
                   <SettingsTab user={user} />
@@ -2542,7 +3706,7 @@ const DashboardTab: React.FC<{
   );
 
   return (
-    <div>
+    <div className="admin-content">
       {/* Main Stats */}
       <Row className="mb-4">
         <Col md={3}>
@@ -2688,7 +3852,7 @@ const MembersTab: React.FC<{
   setUseClientSideFiltering
 }) => {
   return (
-    <div>
+    <div className="admin-content">
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -3200,7 +4364,7 @@ const ServicesTab: React.FC = () => {
   }
 
   return (
-    <div>
+    <div className="admin-content">
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -3592,7 +4756,8 @@ const ServicesTab: React.FC = () => {
 
 const SettingsTab: React.FC<{ user: User | null }> = ({ user }) => {
   return (
-    <Card className="admin-card">
+    <div className="admin-content">
+      <Card className="admin-card">
       <Card.Header className="admin-modal-header">
         <h5 className="fw-bold mb-0 text-white">Account Settings</h5>
       </Card.Header>
@@ -3643,6 +4808,7 @@ const SettingsTab: React.FC<{ user: User | null }> = ({ user }) => {
         </Form>
       </Card.Body>
     </Card>
+    </div>
   );
 };
 

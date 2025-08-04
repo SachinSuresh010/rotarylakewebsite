@@ -80,54 +80,65 @@ router.get('/', async (req, res) => {
         id: "community-service",
         title: "Community Service",
         description: "Serving our local community through various initiatives and projects that address local needs.",
-        icon: "🏘️",
-        projects: []
+        icon: "🏘️"
       },
       {
         id: "vocational-service",
         title: "Vocational Service",
         description: "Promoting vocational excellence and professional development through mentorship and training programs.",
-        icon: "💼",
-        projects: []
+        icon: "💼"
       },
       {
         id: "international-service",
         title: "International Service",
         description: "Building international understanding and cooperation through global projects and partnerships.",
-        icon: "🌍",
-        projects: []
+        icon: "🌍"
       },
       {
         id: "youth-service",
         title: "Youth Service",
         description: "Empowering young people through leadership development, scholarships, and service opportunities.",
-        icon: "👨‍🎓",
-        projects: []
+        icon: "👨‍🎓"
       },
       {
         id: "club-service",
         title: "Club Service",
         description: "Strengthening our club through effective administration, fellowship, and member development.",
-        icon: "🤝",
-        projects: []
+        icon: "🤝"
       }
     ];
     
-    // Merge existing data with expected services
-    const mergedServices = expectedServices.map(expectedService => {
+    // Merge existing data with expected services and fetch projects from subcollections
+    const mergedServices = await Promise.all(expectedServices.map(async (expectedService) => {
       const existingService = servicesData.services.find(s => s.id === expectedService.id);
+      
+      // Fetch projects from subcollection
+      let projects = [];
+      try {
+        const projectsSnapshot = await db.collection('services').doc(expectedService.id).collection('projects').get();
+        projects = projectsSnapshot.docs.map(doc => doc.data());
+      } catch (error) {
+        console.error(`Error fetching projects for ${expectedService.id}:`, error);
+        // If subcollection doesn't exist, try to get projects from existing service data
+        if (existingService && existingService.projects) {
+          projects = existingService.projects;
+        }
+      }
+      
       if (existingService) {
         return {
           ...expectedService,
-          projects: existingService.projects || []
+          projects: projects
         };
       }
-      return expectedService;
-    });
+      return {
+        ...expectedService,
+        projects: projects
+      };
+    }));
     
     servicesData.services = mergedServices;
     
-
     res.json(servicesData);
   } catch (error) {
     console.error('Error fetching services:', error);
@@ -183,36 +194,31 @@ router.post('/projects', authenticateToken, async (req, res) => {
           id: "community-service",
           title: "Community Service",
           description: "Serving our local community through various initiatives and projects that address local needs.",
-          icon: "🏘️",
-          projects: []
+          icon: "🏘️"
         },
         vocational_service: {
           id: "vocational-service",
           title: "Vocational Service",
           description: "Promoting vocational excellence and professional development through mentorship and training programs.",
-          icon: "💼",
-          projects: []
+          icon: "💼"
         },
         international_service: {
           id: "international-service",
           title: "International Service",
           description: "Building international understanding and cooperation through global projects and partnerships.",
-          icon: "🌍",
-          projects: []
+          icon: "🌍"
         },
         youth_service: {
           id: "youth-service",
           title: "Youth Service",
           description: "Empowering young people through leadership development, scholarships, and service opportunities.",
-          icon: "👨‍🎓",
-          projects: []
+          icon: "👨‍🎓"
         },
         club_service: {
           id: "club-service",
           title: "Club Service",
           description: "Strengthening our club through effective administration, fellowship, and member development.",
-          icon: "🤝",
-          projects: []
+          icon: "🤝"
         }
       };
       
@@ -220,9 +226,11 @@ router.post('/projects', authenticateToken, async (req, res) => {
         id: serviceId,
         title: serviceId.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()),
         description: "Service description",
-        icon: "📋",
-        projects: []
+        icon: "📋"
       };
+      
+      // Create the service document
+      await serviceDoc.set(serviceData);
     } else {
       serviceData = serviceSnapshot.data();
     }
@@ -231,13 +239,12 @@ router.post('/projects', authenticateToken, async (req, res) => {
     const projectId = `project-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const newProject = {
       id: projectId,
-      ...project
+      ...project,
+      createdAt: admin.firestore.FieldValue.serverTimestamp()
     };
     
-    serviceData.projects.push(newProject);
-    
-    // Save to database
-    await serviceDoc.set(serviceData);
+    // Store project in subcollection to avoid document size limits
+    await serviceDoc.collection('projects').doc(projectId).set(newProject);
     
     res.json({ message: 'Project added successfully', project: newProject });
   } catch (error) {
@@ -265,23 +272,23 @@ router.put('/projects/:projectId', authenticateToken, async (req, res) => {
       return res.status(404).json({ message: 'Service not found' });
     }
     
-    const serviceData = serviceSnapshot.data();
+    // Update project in subcollection
+    const projectRef = serviceDoc.collection('projects').doc(projectId);
+    const projectSnapshot = await projectRef.get();
     
-    // Find and update the project
-    const projectIndex = serviceData.projects.findIndex(p => p.id === projectId);
-    if (projectIndex === -1) {
+    if (!projectSnapshot.exists) {
       return res.status(404).json({ message: 'Project not found' });
     }
     
-    serviceData.projects[projectIndex] = {
+    const updatedProject = {
       id: projectId,
-      ...project
+      ...project,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
     };
     
-    // Save to database
-    await serviceDoc.set(serviceData);
+    await projectRef.set(updatedProject);
     
-    res.json({ message: 'Project updated successfully', project: serviceData.projects[projectIndex] });
+    res.json({ message: 'Project updated successfully', project: updatedProject });
   } catch (error) {
     console.error('Error updating project:', error);
     res.status(500).json({ message: 'Failed to update project' });
@@ -307,19 +314,18 @@ router.delete('/projects/:projectId', authenticateToken, async (req, res) => {
       return res.status(404).json({ message: 'Service not found' });
     }
     
-    const serviceData = serviceSnapshot.data();
+    // Get project from subcollection before deleting
+    const projectRef = serviceDoc.collection('projects').doc(projectId);
+    const projectSnapshot = await projectRef.get();
     
-    // Find and remove the project
-    const projectIndex = serviceData.projects.findIndex(p => p.id === projectId);
-    if (projectIndex === -1) {
+    if (!projectSnapshot.exists) {
       return res.status(404).json({ message: 'Project not found' });
     }
     
-    const deletedProject = serviceData.projects[projectIndex];
-    serviceData.projects.splice(projectIndex, 1);
+    const deletedProject = projectSnapshot.data();
     
-    // Save to database
-    await serviceDoc.set(serviceData);
+    // Delete project from subcollection
+    await projectRef.delete();
     
     res.json({ message: 'Project deleted successfully', project: deletedProject });
   } catch (error) {

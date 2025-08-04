@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { Container, Row, Col, Card } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { Container, Row, Col, Card, Spinner, Alert } from 'react-bootstrap';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 interface GalleryYear {
   id: string;
@@ -11,40 +12,101 @@ interface GalleryYear {
   image: string;
   alt: string;
   link: string;
+  isStatic?: boolean;
+}
+
+interface GalleryResponse {
+  years: GalleryYear[];
+  total: number;
 }
 
 const Gallery: React.FC = () => {
+  usePageTitle('Gallery');
+  
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
+  const [galleryYears, setGalleryYears] = useState<GalleryYear[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const galleryYears: GalleryYear[] = [
-    {
-      id: "2024-2025",
-      year: "2024-2025",
-      title: "2024-2025",
-      description: "Current year activities and events",
-      image: "/assets/images/29cce85f-3867-4dff-b9d0-00549b5eef17-1-1280x853.jpg",
-      alt: "2024-2025 Gallery",
-      link: "/gallery/2024-2025"
-    },
-    {
-      id: "2023-2024",
-      year: "2023-2024",
-      title: "2023-2024",
-      description: "A walk through our journey this year",
-      image: "/assets/images/whatsapp-image-2023-06-25-at-12.53.19-pm-816x614.jpg",
-      alt: "2023-2024 Gallery",
-      link: "/gallery/2023-2024"
-    },
-    {
-      id: "2022-2023",
-      year: "2022-2023",
-      title: "2022-2023",
-      description: "A Collection of our memories",
-      image: "/assets/images/img-5252-816x544.jpeg",
-      alt: "2022-2023 Gallery",
-      link: "/gallery/2022-2023"
-    }
-  ];
+  useEffect(() => {
+    const fetchGalleryYears = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/gallery');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch gallery data');
+        }
+        
+        const data: GalleryResponse = await response.json();
+        console.log('Gallery API response:', data);
+        
+        // Ensure we have a valid array of years
+        if (data && Array.isArray(data.years)) {
+          setGalleryYears(data.years);
+        } else {
+          console.warn('Invalid gallery data structure:', data);
+          setGalleryYears([]);
+        }
+      } catch (err) {
+        console.error('Error fetching gallery years:', err);
+        setError('Failed to load gallery. Please try again later.');
+        
+        // Fallback to static data if API fails
+        setGalleryYears([
+          {
+            id: "2024-2025",
+            year: "2024-2025",
+            title: "2024-2025",
+            description: "Current year activities and events",
+            image: "/assets/images/29cce85f-3867-4dff-b9d0-00549b5eef17-1-1280x853.jpg",
+            alt: "2024-2025 Gallery",
+            link: "/gallery/2024-2025",
+            isStatic: true
+          },
+          {
+            id: "2023-2024",
+            year: "2023-2024",
+            title: "2023-2024",
+            description: "A walk through our journey this year",
+            image: "/assets/images/whatsapp-image-2023-06-25-at-12.53.19-pm-816x614.jpg",
+            alt: "2023-2024 Gallery",
+            link: "/gallery/2023-2024",
+            isStatic: true
+          },
+          {
+            id: "2022-2023",
+            year: "2022-2023",
+            title: "2022-2023",
+            description: "A Collection of our memories",
+            image: "/assets/images/img-5252-816x544.jpeg",
+            alt: "2022-2023 Gallery",
+            link: "/gallery/2022-2023",
+            isStatic: true
+          }
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGalleryYears();
+  }, []);
+
+  if (loading) {
+    return (
+      <div style={{ paddingTop: '80px', backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
+        <Container>
+          <div className="text-center py-5">
+            <Spinner animation="border" role="status" variant="primary">
+              <span className="visually-hidden">Loading...</span>
+            </Spinner>
+            <p className="mt-3">Loading gallery...</p>
+          </div>
+        </Container>
+      </div>
+    );
+  }
 
   return (
     <div style={{ paddingTop: '80px', backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
@@ -70,8 +132,16 @@ const Gallery: React.FC = () => {
           }}></div>
         </motion.div>
 
+        {error && (
+          <Alert variant="warning" className="mb-4">
+            <Alert.Heading>Notice</Alert.Heading>
+            <p>{error}</p>
+            <p className="mb-0">Showing static gallery data.</p>
+          </Alert>
+        )}
+
         <Row>
-          {galleryYears.map((year, index) => (
+          {galleryYears && galleryYears.length > 0 ? galleryYears.map((year, index) => (
             <Col key={year.id} xs={12} md={6} lg={4} className="mb-4">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -131,6 +201,21 @@ const Gallery: React.FC = () => {
                     }}>
                       {year.year}
                     </div>
+                    {!year.isStatic && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '15px',
+                        left: '15px',
+                        backgroundColor: 'rgba(40, 167, 69, 0.9)',
+                        color: 'white',
+                        padding: '4px 8px',
+                        borderRadius: '12px',
+                        fontSize: '0.7rem',
+                        fontWeight: 'bold'
+                      }}>
+                        NEW
+                      </div>
+                    )}
                   </div>
                   
                   <Card.Body className="text-center" style={{ padding: '25px' }}>
@@ -159,10 +244,15 @@ const Gallery: React.FC = () => {
                       View Gallery →
                     </Link>
                   </Card.Body>
-                </Card>
-              </motion.div>
-            </Col>
-          ))}
+                              </Card>
+            </motion.div>
+          </Col>
+        )) : (
+          <Col xs={12} className="text-center py-5">
+            <h4>No gallery years available</h4>
+            <p className="text-muted">Please check back later.</p>
+          </Col>
+        )}
         </Row>
 
         {/* Quick Preview Section */}

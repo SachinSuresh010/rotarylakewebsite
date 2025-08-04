@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Form, Alert, Nav } from 'react-bootstrap';
 import { FaUser, FaLock, FaKey, FaEnvelope, FaUserPlus, FaRightToBracket } from 'react-icons/fa6';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 // Icon wrapper component
 const IconWrapper: React.FC<{ icon: any; className?: string; style?: React.CSSProperties }> = ({ icon: Icon, className, style }) => <Icon className={className} style={style} />;
 
 const MemberAuth: React.FC = () => {
+  usePageTitle('Member Login');
+  
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');

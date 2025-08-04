@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import { motion } from 'framer-motion';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 interface Member {
   id: string;
@@ -42,6 +43,8 @@ interface Member {
 }
 
 const About: React.FC = () => {
+  usePageTitle('About');
+  
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
 

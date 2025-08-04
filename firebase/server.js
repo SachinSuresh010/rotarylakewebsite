@@ -3,11 +3,13 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const admin = require('firebase-admin');
-const { createTestUsers } = require('./setup-users');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 5001;
+
+// Trust proxy for rate limiting
+app.set('trust proxy', 1);
 
 // Initialize Firebase Admin
 const serviceAccount = require('./serviceAccountKey.json');
@@ -71,13 +73,6 @@ app.use('*', (req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
-app.listen(PORT, async () => {
+app.listen(PORT, () => {
   console.log(`Firebase server running on port ${PORT}`);
-  
-  // Create test users on startup
-  try {
-    await createTestUsers(db);
-  } catch (error) {
-    console.error('Error setting up test users:', error);
-  }
 }); 

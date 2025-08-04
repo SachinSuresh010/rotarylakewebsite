@@ -17,6 +17,7 @@ import Gallery2024 from './pages/Gallery2024';
 import Gallery2023 from './pages/Gallery2023';
 import Gallery2022 from './pages/Gallery2022';
 import EventPage from './pages/EventPage';
+import EventGallery from './pages/EventGallery';
 import Admin from './pages/Admin';
 import MemberAuth from './pages/MemberAuth';
 import Profile from './pages/Profile';
@@ -39,6 +40,7 @@ function App() {
           <Route path="/gallery/2024-2025" element={<Gallery2024 />} />
           <Route path="/gallery/2023-2024" element={<Gallery2023 />} />
           <Route path="/gallery/2022-2023" element={<Gallery2022 />} />
+          <Route path="/gallery/:year" element={<EventGallery />} />
           <Route path="/gallery/:year/:eventId" element={<EventPage />} />
           <Route path="/auth" element={<MemberAuth />} />
           <Route path="/profile" element={<Profile />} />

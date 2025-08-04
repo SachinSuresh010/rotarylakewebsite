@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Container, Row, Col } from 'react-bootstrap';
 import { motion } from 'framer-motion';
+import { usePageTitle } from '../hooks/usePageTitle';
 
 interface Member {
   id: string;
@@ -77,6 +78,8 @@ interface FamilyMemberWithMemberData extends FamilyMember {
 
 const MemberDetail: React.FC = () => {
   const { memberId } = useParams<{ memberId: string }>();
+  usePageTitle('Member Details');
+  
   const [member, setMember] = useState<Member | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
