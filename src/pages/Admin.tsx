@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Form, Alert, Nav, Table, Badge, InputGroup, Spinner, Modal } from 'react-bootstrap';
-import { FaUsers, FaChartBar, FaGear, FaRightFromBracket, FaPlus, FaPenToSquare, FaTrash, FaMagnifyingGlass, FaClock, FaUserCheck, FaUserXmark, FaEye, FaCalendar, FaEnvelope, FaUser, FaBriefcase, FaGraduationCap, FaHeart, FaLocationDot, FaPhone, FaTrophy, FaStar, FaXmark, FaLinkedin, FaFacebook, FaTwitter, FaCamera, FaFloppyDisk, FaTag, FaImages, FaCalendarDay, FaImage } from 'react-icons/fa6';
+import { FaUsers, FaChartBar, FaGear, FaRightFromBracket, FaPlus, FaPenToSquare, FaTrash, FaMagnifyingGlass, FaClock, FaUserCheck, FaUserXmark, FaEye, FaCalendar, FaEnvelope, FaUser, FaBriefcase, FaGraduationCap, FaHeart, FaLocationDot, FaPhone, FaTrophy, FaStar, FaXmark, FaLinkedin, FaFacebook, FaTwitter, FaCamera, FaFloppyDisk, FaTag, FaImages, FaCalendarDay, FaImage, FaKey } from 'react-icons/fa6';
 import MemberSearchModal from '../components/MemberSearchModal';
 import { usePageTitle } from '../hooks/usePageTitle';
 
@@ -3882,6 +3882,24 @@ const MembersTab: React.FC<{
           </Button>
         </div>
       </div>
+
+      {/* Account Setup Info */}
+      <Alert variant="info" className="mb-4 border-0 shadow-sm" style={{ borderRadius: '12px' }}>
+        <div className="d-flex align-items-start">
+          <IconWrapper icon={FaKey} className="me-3 mt-1" style={{ color: '#0066CC' }} />
+          <div>
+            <h6 className="fw-bold mb-2">New Feature: Account Setup for Members</h6>
+            <p className="mb-2">
+              Members added through the admin dashboard can now set up their own passwords and complete their account setup. 
+              They can do this by visiting the member login page and using the "Account Setup" tab.
+            </p>
+            <p className="mb-0 small">
+              <strong>How it works:</strong> Members use their email address (the one you added them with) and an access key to set up their password. 
+              Once set up, they can login normally through the member portal.
+            </p>
+          </div>
+        </div>
+      </Alert>
 
       {/* Quick Stats */}
       {memberStats && (

@@ -720,4 +720,89 @@ router.post('/upload-profile-picture', [
   }
 });
 
+// @route   POST /api/auth/member-setup
+// @desc    Allow members added by admin to set up their password
+// @access  Public
+router.post('/member-setup', [
+  body('email').isEmail().normalizeEmail(),
+  body('password').isLength({ min: 6 }),
+  body('accessKey').notEmpty()
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { email, password, accessKey } = req.body;
+    const db = req.app.locals.db;
+
+    // Validate access key
+    const validAccessKeys = process.env.ACCESS_KEYS ? process.env.ACCESS_KEYS.split(',') : ['ROTARY2024'];
+    if (!validAccessKeys.includes(accessKey)) {
+      return res.status(400).json({ 
+        message: 'Invalid access key. Please contact the administrator.' 
+      });
+    }
+
+    // Find member in Firestore
+    const membersRef = db.collection('members');
+    const memberSnapshot = await membersRef.where('email', '==', email).limit(1).get();
+
+    if (memberSnapshot.empty) {
+      return res.status(404).json({ 
+        message: 'Member not found. Please sign up using the signup form.' 
+      });
+    }
+
+    const memberDoc = memberSnapshot.docs[0];
+    const member = { id: memberDoc.id, ...memberDoc.data() };
+
+    // Check if member already has a password
+    if (member.password) {
+      return res.status(400).json({ 
+        message: 'Account already set up. Please use the login form instead.' 
+      });
+    }
+
+    // Check if member is active
+    if (!member.isActive) {
+      return res.status(401).json({ 
+        message: 'Account is deactivated. Please contact the administrator.' 
+      });
+    }
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Update member with password
+    await memberDoc.ref.update({
+      password: hashedPassword,
+      updatedAt: new Date()
+    });
+
+    // Get updated member
+    const updatedMemberDoc = await memberDoc.ref.get();
+    const updatedMember = { id: updatedMemberDoc.id, ...updatedMemberDoc.data() };
+
+    // Remove password from response
+    delete updatedMember.password;
+
+    // Check if member has admin role
+    const isAdmin = updatedMember.role === 'admin' || updatedMember.isAdmin === true;
+
+    res.json({
+      message: 'Account setup completed successfully. You can now login.',
+      member: {
+        ...updatedMember,
+        isAdmin: isAdmin
+      }
+    });
+  } catch (error) {
+    console.error('Member setup error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 module.exports = router; 

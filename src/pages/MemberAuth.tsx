@@ -9,7 +9,7 @@ const IconWrapper: React.FC<{ icon: any; className?: string; style?: React.CSSPr
 const MemberAuth: React.FC = () => {
   usePageTitle('Member Login');
   
-  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [authMode, setAuthMode] = useState<'login' | 'signup' | 'setup'>('login');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
@@ -145,6 +145,54 @@ const MemberAuth: React.FC = () => {
     }
   };
 
+  const handleSetup = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setSuccess('');
+    
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+    const confirmPassword = formData.get('confirmPassword') as string;
+    const accessKey = formData.get('accessKey') as string;
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/member-setup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ 
+          email, 
+          password,
+          accessKey
+        })
+      });
+
+      if (response.ok) {
+        setSuccess('Account setup completed successfully! You can now login.');
+        setAuthMode('login');
+        // Clear form
+        e.currentTarget.reset();
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || 'Account setup failed');
+      }
+    } catch (error) {
+      console.error('Account setup error:', error);
+      setError('Account setup failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div style={{ 
       minHeight: '100vh', 
@@ -215,7 +263,7 @@ const MemberAuth: React.FC = () => {
                   ) : (
                     <>
                       <Nav variant="pills" className="mb-5 nav-fill" activeKey={authMode} onSelect={(k) => {
-                        setAuthMode(k as 'login' | 'signup');
+                        setAuthMode(k as 'login' | 'signup' | 'setup');
                         setError('');
                         setSuccess('');
                       }}>
@@ -229,6 +277,12 @@ const MemberAuth: React.FC = () => {
                           <Nav.Link eventKey="signup" className="rounded-pill fw-semibold fs-6" style={{ padding: '12px 20px' }}>
                             <IconWrapper icon={FaUserPlus} className="me-2" />
                             Sign Up
+                          </Nav.Link>
+                        </Nav.Item>
+                        <Nav.Item>
+                          <Nav.Link eventKey="setup" className="rounded-pill fw-semibold fs-6" style={{ padding: '12px 20px' }}>
+                            <IconWrapper icon={FaKey} className="me-2" />
+                            Account Setup
                           </Nav.Link>
                         </Nav.Item>
                       </Nav>
@@ -298,7 +352,7 @@ const MemberAuth: React.FC = () => {
                             )}
                           </Button>
                         </Form>
-                      ) : (
+                      ) : authMode === 'signup' ? (
                         <Form onSubmit={handleSignup} className="needs-validation">
                           <Form.Group className="mb-4">
                             <Form.Label className="fw-semibold text-dark mb-3 fs-6">
@@ -427,22 +481,142 @@ const MemberAuth: React.FC = () => {
                             )}
                           </Button>
                         </Form>
+                      ) : (
+                        <Form onSubmit={handleSetup} className="needs-validation">
+                          <Form.Group className="mb-4">
+                            <Form.Label className="fw-semibold text-dark mb-3 fs-6">
+                              <IconWrapper icon={FaEnvelope} className="me-2" style={{ color: '#0066CC' }} />
+                              Email Address
+                            </Form.Label>
+                            <Form.Control
+                              type="email"
+                              name="email"
+                              required
+                              placeholder="Enter your email"
+                              className="form-control-lg border-0 bg-light"
+                              style={{
+                                borderRadius: '12px', 
+                                padding: '15px 20px',
+                                fontSize: '16px'
+                              }}
+                            />
+                            <Form.Text className="text-muted small mt-3">
+                              <IconWrapper icon={FaEnvelope} className="me-1" />
+                              Use the email address that was used when you were added by admin
+                            </Form.Text>
+                          </Form.Group>
+                          <Row>
+                            <Col md={6}>
+                              <Form.Group className="mb-4">
+                                <Form.Label className="fw-semibold text-dark mb-3 fs-6">
+                                  <IconWrapper icon={FaLock} className="me-2" style={{ color: '#0066CC' }} />
+                                  Password
+                                </Form.Label>
+                                <Form.Control
+                                  type="password"
+                                  name="password"
+                                  required
+                                  placeholder="Enter password"
+                                  className="form-control-lg border-0 bg-light"
+                                  style={{
+                                    borderRadius: '12px', 
+                                    padding: '15px 20px',
+                                    fontSize: '16px'
+                                  }}
+                                />
+                              </Form.Group>
+                            </Col>
+                            <Col md={6}>
+                              <Form.Group className="mb-4">
+                                <Form.Label className="fw-semibold text-dark mb-3 fs-6">
+                                  <IconWrapper icon={FaLock} className="me-2" style={{ color: '#0066CC' }} />
+                                  Confirm Password
+                                </Form.Label>
+                                <Form.Control
+                                  type="password"
+                                  name="confirmPassword"
+                                  required
+                                  placeholder="Confirm password"
+                                  className="form-control-lg border-0 bg-light"
+                                  style={{
+                                    borderRadius: '12px', 
+                                    padding: '15px 20px',
+                                    fontSize: '16px'
+                                  }}
+                                />
+                              </Form.Group>
+                            </Col>
+                          </Row>
+                          <Form.Group className="mb-5">
+                            <Form.Label className="fw-semibold text-dark mb-3 fs-6">
+                              <IconWrapper icon={FaKey} className="me-2" style={{ color: '#0066CC' }} />
+                              Access Key
+                            </Form.Label>
+                            <Form.Control
+                              type="text"
+                              name="accessKey"
+                              required
+                              placeholder="Enter access key provided by admin"
+                              className="form-control-lg border-0 bg-light"
+                              style={{
+                                borderRadius: '12px', 
+                                padding: '15px 20px',
+                                fontSize: '16px'
+                              }}
+                            />
+                            <Form.Text className="text-muted small mt-3">
+                              <IconWrapper icon={FaKey} className="me-1" />
+                              Contact the administrator to get your access key
+                            </Form.Text>
+                          </Form.Group>
+                          <Button 
+                            type="submit" 
+                            variant="warning" 
+                            size="lg"
+                            className="w-100 mb-4 shadow-sm fw-semibold"
+                            disabled={loading}
+                            style={{
+                              borderRadius: '12px', 
+                              padding: '15px',
+                              background: 'linear-gradient(135deg, #FFC107 0%, #E0A800 100%)',
+                              border: 'none',
+                              fontSize: '16px'
+                            }}
+                          >
+                            {loading ? (
+                              <>
+                                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                Setting up Account...
+                              </>
+                            ) : (
+                              <>
+                                <IconWrapper icon={FaKey} className="me-2" />
+                                Complete Account Setup
+                              </>
+                            )}
+                          </Button>
+                        </Form>
                       )}
                       
                       <div className="text-center mt-5 pt-4 border-top">
                         <p className="text-muted mb-0 fs-6">
-                          {authMode === 'login' ? "Don't have an account? " : "Already have an account? "}
+                          {authMode === 'login' ? "Don't have an account? " : 
+                           authMode === 'signup' ? "Already have an account? " : 
+                           "Need to login or sign up? "}
                           <Button 
                             variant="link" 
                             className="p-0 fw-semibold text-decoration-none"
                             style={{ color: '#0066CC' }}
                             onClick={() => {
-                              setAuthMode(authMode === 'login' ? 'signup' : 'login');
+                              setAuthMode(authMode === 'login' ? 'signup' : 
+                                         authMode === 'signup' ? 'setup' : 'login');
                               setError('');
                               setSuccess('');
                             }}
                           >
-                            {authMode === 'login' ? 'Sign up here' : 'Login here'}
+                            {authMode === 'login' ? 'Sign up here' : 
+                             authMode === 'signup' ? 'Account setup here' : 
+                             'Login here'}
                           </Button>
                         </p>
                       </div>
