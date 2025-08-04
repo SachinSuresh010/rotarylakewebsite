@@ -192,16 +192,23 @@ const Home: React.FC = () => {
           className="carousel slide carousel-fade" 
           interval={5000}
           fade
-          style={{ width: '100%' }}
+          style={{ width: '100%', margin: 0, padding: 0 }}
         >
           {heroImages.map((image, index) => (
             <Carousel.Item key={index} className="slider-image item">
-              <div className="item-wrapper" style={{ width: '100%' }}>
+              <div className="item-wrapper" style={{ width: '100%', height: '100%', margin: 0, padding: 0 }}>
                 <img
                   className="d-block w-100"
                   src={image}
                   alt={`Hero slide ${index + 1}`}
-                  style={{ width: '100%', height: '100vh', objectFit: 'cover' }}
+                  style={{ 
+                    width: '100%', 
+                    height: '100%', 
+                    objectFit: 'cover',
+                    objectPosition: 'center',
+                    margin: 0,
+                    padding: 0
+                  }}
                 />
               </div>
             </Carousel.Item>
@@ -210,7 +217,7 @@ const Home: React.FC = () => {
       </section>
 
       {/* Services Section */}
-      <section className="features4 cid-tnETaZ4gAu" id="features4-n">
+      <section className="features4 cid-tnETaZ4gAu services-section" id="features4-n" style={{ marginTop: 0 }}>
         <div className="mbr-overlay"></div>
         <Container>
           <motion.div

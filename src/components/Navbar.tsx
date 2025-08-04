@@ -93,15 +93,31 @@ const Navbar: React.FC = () => {
       className="shadow-sm"
       expanded={expanded}
       onToggle={() => setExpanded(!expanded)}
+      style={{ padding: '0.5rem 0' }}
     >
-      <Container>
+      <Container fluid className="px-3">
         <BootstrapNavbar.Brand as={Link} to="/" className="d-flex align-items-center">
           <img 
             src="/assets/images/logo2-2-121x121.png" 
             alt="Rotary Club Logo" 
             className="me-2"
+            style={{
+              width: 'auto',
+              height: '2.5rem',
+              maxWidth: '2.5rem',
+              objectFit: 'contain',
+              flexShrink: 0
+            }}
           />
-          <span className="navbar-caption text-black text-primary display-7">
+          <span className="navbar-caption text-black text-primary display-7" style={{
+            fontSize: '0.9rem',
+            fontWeight: '500',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            maxWidth: 'calc(100vw - 8rem)',
+            flexShrink: 1
+          }}>
             Rotary Club of Cochin Lakeside
           </span>
         </BootstrapNavbar.Brand>
