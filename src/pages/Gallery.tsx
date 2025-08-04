@@ -32,7 +32,8 @@ const Gallery: React.FC = () => {
     const fetchGalleryYears = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/gallery');
+        const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+        const response = await fetch(`${API_BASE_URL}/gallery`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch gallery data');

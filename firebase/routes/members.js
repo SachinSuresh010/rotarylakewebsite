@@ -40,26 +40,29 @@ router.get('/', async (req, res) => {
     // Process all members in memory (for small datasets this is fine)
     let members = [];
     allMembersSnapshot.forEach(doc => {
-      const member = { id: doc.id, ...doc.data() };
+      const memberData = doc.data();
+      // Filter out sensitive data
+      const { password, ...member } = memberData;
+      const memberWithId = { id: doc.id, ...member };
       
       // Apply additional filters in memory
-      if (classification && member.classification !== classification) {
+      if (classification && memberWithId.classification !== classification) {
         return; // Skip this member
       }
       
       // Convert Firestore timestamps to ISO strings for consistent sorting
-      if (member.createdAt) {
-        member.createdAt = typeof member.createdAt.toDate === 'function' ? 
-                          member.createdAt.toDate().toISOString() : 
-                          new Date(member.createdAt).toISOString();
+      if (memberWithId.createdAt) {
+        memberWithId.createdAt = typeof memberWithId.createdAt.toDate === 'function' ? 
+                          memberWithId.createdAt.toDate().toISOString() : 
+                          new Date(memberWithId.createdAt).toISOString();
       }
-      if (member.joinDate) {
-        member.joinDate = typeof member.joinDate.toDate === 'function' ? 
-                         member.joinDate.toDate().toISOString() : 
-                         new Date(member.joinDate).toISOString();
+      if (memberWithId.joinDate) {
+        memberWithId.joinDate = typeof memberWithId.joinDate.toDate === 'function' ? 
+                         memberWithId.joinDate.toDate().toISOString() : 
+                         new Date(memberWithId.joinDate).toISOString();
       }
       
-      members.push(member);
+      members.push(memberWithId);
     });
 
     // Apply search filter if provided
@@ -134,8 +137,11 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ message: 'Member not found' });
     }
 
-    const member = { id: memberDoc.id, ...memberDoc.data() };
-    res.json({ member });
+    const memberData = memberDoc.data();
+    // Filter out sensitive data
+    const { password, ...member } = memberData;
+    const memberWithId = { id: memberDoc.id, ...member };
+    res.json({ member: memberWithId });
   } catch (error) {
     console.error('Get member error:', error);
     res.status(500).json({ message: 'Server error' });
@@ -154,7 +160,9 @@ router.get('/directors/current', async (req, res) => {
     allMembersSnapshot.forEach(doc => {
       const member = doc.data();
       if (member.isActive && member.currentDesignation && member.currentDesignation.trim() !== '') {
-        directors.push({ id: doc.id, ...member });
+        // Filter out sensitive data
+        const { password, ...safeMember } = member;
+        directors.push({ id: doc.id, ...safeMember });
       }
     });
     res.json({ directors });
@@ -176,10 +184,12 @@ router.get('/presidents/past', async (req, res) => {
     allMembersSnapshot.forEach(doc => {
       const member = doc.data();
       if (member.isPastPresident) {
+        // Filter out sensitive data
+        const { password, ...safeMember } = member;
         // Add flag to indicate if member is clickable (active members are clickable)
         const presidentData = { 
           id: doc.id, 
-          ...member,
+          ...safeMember,
           isClickable: member.isActive // Only active members can be clicked
         };
         presidents.push(presidentData);

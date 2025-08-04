@@ -40,7 +40,10 @@ const Directors: React.FC = () => {
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
         const data = await response.json();
+        console.log('Parsed data:', data);
         setDirectorsData(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load directors data');

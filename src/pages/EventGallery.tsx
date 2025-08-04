@@ -184,7 +184,8 @@ const EventGallery: React.FC = () => {
         setLoading(true);
         
         // Try to fetch from API first
-        const response = await fetch(`/api/gallery/${year}`);
+        const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+        const response = await fetch(`${API_BASE_URL}/gallery/${year}`);
         
         if (response.ok) {
           const data: GalleryYearResponse = await response.json();

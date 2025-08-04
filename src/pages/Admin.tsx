@@ -2607,8 +2607,10 @@ const Admin: React.FC = () => {
       const adminToken = localStorage.getItem('adminToken');
       const token = memberToken || adminToken;
       
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+      
       // Fetch years
-      const yearsResponse = await fetch('/api/gallery/admin/years', {
+      const yearsResponse = await fetch(`${API_BASE_URL}/gallery/admin/years`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -2620,7 +2622,7 @@ const Admin: React.FC = () => {
       }
       
       // Fetch events
-      const eventsResponse = await fetch('/api/gallery/admin/events', {
+      const eventsResponse = await fetch(`${API_BASE_URL}/gallery/admin/events`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -2667,8 +2669,8 @@ const Admin: React.FC = () => {
       const token = memberToken || adminToken;
       
       const url = editingYear 
-        ? `/api/gallery/years/${editingYear.id}`
-        : '/api/gallery/years';
+        ? `${API_BASE_URL}/gallery/years/${editingYear.id}`
+        : `${API_BASE_URL}/gallery/years`;
       const method = editingYear ? 'PUT' : 'POST';
       
       const response = await fetch(url, {
@@ -2736,12 +2738,13 @@ const Admin: React.FC = () => {
       const adminToken = localStorage.getItem('adminToken');
       const token = memberToken || adminToken;
       
-      let url = '/api/gallery/events';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+      let url = `${API_BASE_URL}/gallery/events`;
       let method = 'POST';
       
       // If editing an existing event, use PUT method
       if (editingEvent) {
-        url = `/api/gallery/events/${editingEvent.id}`;
+        url = `${API_BASE_URL}/gallery/events/${editingEvent.id}`;
         method = 'PUT';
       }
       
@@ -2830,7 +2833,8 @@ const Admin: React.FC = () => {
       console.log('Deleting year:', yearId);
       console.log('Using token:', token ? 'Token exists' : 'No token');
       
-      const response = await fetch(`/api/gallery/years/${yearId}`, {
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+      const response = await fetch(`${API_BASE_URL}/gallery/years/${yearId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -2883,7 +2887,8 @@ const Admin: React.FC = () => {
       console.log('Deleting event:', eventId);
       console.log('Using token:', token ? 'Token exists' : 'No token');
       
-      const response = await fetch(`/api/gallery/events/${eventId}`, {
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+      const response = await fetch(`${API_BASE_URL}/gallery/events/${eventId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
