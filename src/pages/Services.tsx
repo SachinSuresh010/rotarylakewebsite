@@ -36,7 +36,8 @@ const Services: React.FC = () => {
     const loadServicesData = async () => {
       try {
         // Try to fetch from backend API first
-        const response = await fetch('/api/services');
+        const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+        const response = await fetch(`${API_BASE_URL}/services`);
         
         if (!response.ok) {
           throw new Error(`API error! status: ${response.status}`);
