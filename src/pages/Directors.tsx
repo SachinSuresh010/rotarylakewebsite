@@ -3,6 +3,7 @@ import { Container, Row, Col } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { usePageTitle } from '../hooks/usePageTitle';
+import MemberImage from '../components/MemberImage';
 
 interface Member {
   id: string;
@@ -99,10 +100,7 @@ const Directors: React.FC = () => {
     );
   }
 
-  // Helper function to get member image
-  const getMemberImage = (member: Member) => {
-    return member.profileImage || member.image || '/assets/images/placeholder.jpg';
-  };
+
 
   // Helper function to get member position
   const getMemberPosition = (member: Member) => {
@@ -177,28 +175,52 @@ const Directors: React.FC = () => {
                         alignItems: 'center',
                         justifyContent: 'center'
                       }}>
-                        <img 
-                          src={getMemberImage(member)} 
-                          alt={member.alt || member.name}
+                        {member.profileImage || member.image ? (
+                          <img 
+                            src={member.profileImage || member.image} 
+                            alt={member.alt || member.name}
+                            style={{
+                              cursor: 'pointer',
+                              transition: 'transform 0.2s ease-in-out',
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'contain',
+                              objectPosition: 'center'
+                            }}
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              const parent = target.parentElement;
+                              if (parent) {
+                                const placeholder = parent.querySelector('.director-placeholder') as HTMLElement;
+                                if (placeholder) {
+                                  placeholder.style.display = 'flex';
+                                }
+                              }
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.transform = 'scale(1.05)';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.transform = 'scale(1)';
+                            }}
+                          />
+                        ) : null}
+                        <div 
+                          className="director-placeholder"
                           style={{
-                            cursor: 'pointer',
-                            transition: 'transform 0.2s ease-in-out',
                             width: '100%',
                             height: '100%',
-                            objectFit: 'contain',
-                            objectPosition: 'center'
+                            display: (member.profileImage || member.image) ? 'none' : 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: '#f8f9fa',
+                            borderRadius: '8px',
+                            border: '2px dashed #dee2e6'
                           }}
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.src = '/assets/images/placeholder.jpg';
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'scale(1.05)';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'scale(1)';
-                          }}
-                        />
+                        >
+                          <span style={{ fontSize: '4rem', color: '#6c757d' }}>👤</span>
+                        </div>
                       </div>
                     </Link>
                   </div>
@@ -255,28 +277,52 @@ const Directors: React.FC = () => {
                           alignItems: 'center',
                           justifyContent: 'center'
                         }}>
-                          <img 
-                            src={getMemberImage(member)} 
-                            alt={member.alt || member.name}
+                          {member.profileImage || member.image ? (
+                            <img 
+                              src={member.profileImage || member.image} 
+                              alt={member.alt || member.name}
+                              style={{
+                                cursor: 'pointer',
+                                transition: 'transform 0.2s ease-in-out',
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'contain',
+                                objectPosition: 'center'
+                              }}
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                const parent = target.parentElement;
+                                if (parent) {
+                                  const placeholder = parent.querySelector('.director-placeholder') as HTMLElement;
+                                  if (placeholder) {
+                                    placeholder.style.display = 'flex';
+                                  }
+                                }
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'scale(1.05)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'scale(1)';
+                              }}
+                            />
+                          ) : null}
+                          <div 
+                            className="director-placeholder"
                             style={{
-                              cursor: 'pointer',
-                              transition: 'transform 0.2s ease-in-out',
                               width: '100%',
                               height: '100%',
-                              objectFit: 'contain',
-                              objectPosition: 'center'
+                              display: (member.profileImage || member.image) ? 'none' : 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              backgroundColor: '#f8f9fa',
+                              borderRadius: '8px',
+                              border: '2px dashed #dee2e6'
                             }}
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.src = '/assets/images/placeholder.jpg';
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.transform = 'scale(1.05)';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.transform = 'scale(1)';
-                            }}
-                          />
+                          >
+                            <span style={{ fontSize: '4rem', color: '#6c757d' }}>👤</span>
+                          </div>
                         </div>
                       </Link>
                     </div>

@@ -3,6 +3,7 @@ import { Container, Row, Col } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { usePageTitle } from '../hooks/usePageTitle';
+import MemberImage from '../components/MemberImage';
 
 interface Member {
   id: string;
@@ -97,10 +98,7 @@ const PastPresidents: React.FC = () => {
     );
   }
 
-  // Helper function to get member image
-  const getMemberImage = (member: Member) => {
-    return member.profileImage || member.image || '/assets/images/placeholder.jpg';
-  };
+
 
   // Helper function to get presidential years
   const getPresidentialYears = (member: Member) => {
@@ -185,32 +183,52 @@ const PastPresidents: React.FC = () => {
                           alignItems: 'center',
                           justifyContent: 'center'
                         }}>
-                          <img 
-                            src={getMemberImage(president)} 
-                            alt={president.alt || president.name}
+                          {president.profileImage || president.image ? (
+                            <img 
+                              src={president.profileImage || president.image} 
+                              alt={president.alt || president.name}
+                              style={{
+                                cursor: 'pointer',
+                                transition: 'transform 0.2s ease-in-out',
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'contain',
+                                objectPosition: 'center'
+                              }}
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                const parent = target.parentElement;
+                                if (parent) {
+                                  const placeholder = parent.querySelector('.president-placeholder') as HTMLElement;
+                                  if (placeholder) {
+                                    placeholder.style.display = 'flex';
+                                  }
+                                }
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'scale(1.05)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'scale(1)';
+                              }}
+                            />
+                          ) : null}
+                          <div 
+                            className="president-placeholder"
                             style={{
-                              cursor: 'pointer',
-                              transition: 'transform 0.2s ease-in-out',
                               width: '100%',
                               height: '100%',
-                              objectFit: 'contain',
-                              objectPosition: 'center'
+                              display: (president.profileImage || president.image) ? 'none' : 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              backgroundColor: '#f8f9fa',
+                              borderRadius: '8px',
+                              border: '2px dashed #dee2e6'
                             }}
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.style.display = 'none';
-                              const parent = target.parentElement;
-                              if (parent) {
-                                parent.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; font-size: 2rem;">👑</div>';
-                              }
-                            }}
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.transform = 'scale(1.05)';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.transform = 'scale(1)';
-                            }}
-                          />
+                          >
+                            <span style={{ fontSize: '4rem', color: '#6c757d' }}>👤</span>
+                          </div>
                         </div>
                       </Link>
                     ) : (
@@ -225,27 +243,48 @@ const PastPresidents: React.FC = () => {
                         justifyContent: 'center',
                         position: 'relative'
                       }}>
-                        <img 
-                          src={getMemberImage(president)} 
-                          alt={president.alt || president.name}
+                        {president.profileImage || president.image ? (
+                          <img 
+                            src={president.profileImage || president.image} 
+                            alt={president.alt || president.name}
+                            style={{
+                              cursor: 'default',
+                              transition: 'transform 0.2s ease-in-out',
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'contain',
+                              objectPosition: 'center',
+                              opacity: 0.7
+                            }}
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              const parent = target.parentElement;
+                              if (parent) {
+                                const placeholder = parent.querySelector('.president-placeholder') as HTMLElement;
+                                if (placeholder) {
+                                  placeholder.style.display = 'flex';
+                                }
+                              }
+                            }}
+                          />
+                        ) : null}
+                        <div 
+                          className="president-placeholder"
                           style={{
-                            cursor: 'default',
-                            transition: 'transform 0.2s ease-in-out',
                             width: '100%',
                             height: '100%',
-                            objectFit: 'contain',
-                            objectPosition: 'center',
+                            display: (president.profileImage || president.image) ? 'none' : 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            backgroundColor: '#f8f9fa',
+                            borderRadius: '8px',
+                            border: '2px dashed #dee2e6',
                             opacity: 0.7
                           }}
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.style.display = 'none';
-                            const parent = target.parentElement;
-                            if (parent) {
-                              parent.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; font-size: 2rem; opacity: 0.7;">👑</div>';
-                            }
-                          }}
-                        />
+                        >
+                          <span style={{ fontSize: '4rem', color: '#6c757d' }}>👤</span>
+                        </div>
 
                       </div>
                     )}

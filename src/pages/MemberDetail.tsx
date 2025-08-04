@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { Container, Row, Col } from 'react-bootstrap';
 import { motion } from 'framer-motion';
 import { usePageTitle } from '../hooks/usePageTitle';
+import MemberImage from '../components/MemberImage';
 
 interface Member {
   id: string;
@@ -233,16 +234,16 @@ const MemberDetail: React.FC = () => {
                 transition={{ duration: 0.8 }}
                 style={{ textAlign: 'center', position: 'relative', zIndex: 2 }}
               >
-                {member.profileImage ? (
-                  <div style={{
-                    position: 'relative',
-                    display: 'inline-block',
-                    borderRadius: '20px',
-                    padding: '8px',
-                    background: 'rgba(255,255,255,0.1)',
-                    backdropFilter: 'blur(10px)',
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
-                  }}>
+                <div style={{
+                  position: 'relative',
+                  display: 'inline-block',
+                  borderRadius: '20px',
+                  padding: '8px',
+                  background: 'rgba(255,255,255,0.1)',
+                  backdropFilter: 'blur(10px)',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
+                }}>
+                  {member.profileImage ? (
                     <img 
                       src={member.profileImage} 
                       alt={member.name}
@@ -260,29 +261,36 @@ const MemberDetail: React.FC = () => {
                       }}
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
-                        target.src = '/assets/images/placeholder.jpg';
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          const placeholder = parent.querySelector('.member-detail-placeholder') as HTMLElement;
+                          if (placeholder) {
+                            placeholder.style.display = 'flex';
+                          }
+                        }
                       }}
                     />
-                  </div>
-                ) : (
+                  ) : null}
                   <div 
+                    className="member-detail-placeholder"
                     style={{
                       width: '100%',
                       maxWidth: '400px',
                       height: '400px',
-                      borderRadius: '20px',
+                      borderRadius: '15px',
                       background: 'rgba(255,255,255,0.1)',
                       backdropFilter: 'blur(10px)',
-                      display: 'flex',
+                      display: member.profileImage ? 'none' : 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       margin: '0 auto',
-                      boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.2)'
                     }}
                   >
                     <span style={{ fontSize: '6rem', color: 'rgba(255,255,255,0.8)' }}>👤</span>
                   </div>
-                )}
+                </div>
               </motion.div>
             </Col>
             <Col xs={12} lg={7}>
@@ -634,11 +642,11 @@ const MemberDetail: React.FC = () => {
                     <Row className="align-items-center">
                       {/* Family Member Photo */}
                       <Col xs={12} md={4} className="text-center mb-3 mb-md-0">
-                        {familyMember.photo ? (
-                          <div style={{
-                            position: 'relative',
-                            display: 'inline-block'
-                          }}>
+                        <div style={{
+                          position: 'relative',
+                          display: 'inline-block'
+                        }}>
+                          {familyMember.photo ? (
                             <img 
                               src={familyMember.photo} 
                               alt={familyMember.name}
@@ -656,32 +664,26 @@ const MemberDetail: React.FC = () => {
                               }}
                               onError={(e) => {
                                 const target = e.target as HTMLImageElement;
-                                target.src = '/assets/images/placeholder.jpg';
+                                target.style.display = 'none';
+                                const parent = target.parentElement;
+                                if (parent) {
+                                  const placeholder = parent.querySelector('.family-member-placeholder') as HTMLElement;
+                                  if (placeholder) {
+                                    placeholder.style.display = 'flex';
+                                  }
+                                }
                               }}
                             />
-                            {/* Glow effect */}
-                            <div style={{
-                              position: 'absolute',
-                              top: '-10px',
-                              left: '-10px',
-                              right: '-10px',
-                              bottom: '-10px',
-                              borderRadius: '50%',
-                              background: 'linear-gradient(135deg, #0066CC 0%, #003366 100%)',
-                              opacity: 0.2,
-                              zIndex: -1,
-                              filter: 'blur(15px)'
-                            }}></div>
-                          </div>
-                        ) : (
+                          ) : null}
                           <div 
+                            className="family-member-placeholder"
                             style={{
                               width: '140px',
                               height: '140px',
                               borderRadius: '50%',
                               background: 'linear-gradient(135deg, #0066CC 0%, #003366 100%)',
                               border: '5px solid white',
-                              display: 'flex',
+                              display: familyMember.photo ? 'none' : 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
                               margin: '0 auto',
@@ -690,21 +692,21 @@ const MemberDetail: React.FC = () => {
                             }}
                           >
                             <span style={{ fontSize: '3.5rem', color: 'white' }}>👤</span>
-                            {/* Glow effect */}
-                            <div style={{
-                              position: 'absolute',
-                              top: '-10px',
-                              left: '-10px',
-                              right: '-10px',
-                              bottom: '-10px',
-                              borderRadius: '50%',
-                              background: 'linear-gradient(135deg, #0066CC 0%, #003366 100%)',
-                              opacity: 0.3,
-                              zIndex: -1,
-                              filter: 'blur(15px)'
-                            }}></div>
                           </div>
-                        )}
+                          {/* Glow effect */}
+                          <div style={{
+                            position: 'absolute',
+                            top: '-10px',
+                            left: '-10px',
+                            right: '-10px',
+                            bottom: '-10px',
+                            borderRadius: '50%',
+                            background: 'linear-gradient(135deg, #0066CC 0%, #003366 100%)',
+                            opacity: 0.2,
+                            zIndex: -1,
+                            filter: 'blur(15px)'
+                          }}></div>
+                        </div>
                       </Col>
                       
                       {/* Family Member Details */}

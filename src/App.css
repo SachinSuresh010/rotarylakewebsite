@@ -631,6 +631,64 @@ body {
   margin-bottom: 15px;
 }
 
+/* Override Mobirise CSS to ensure circular images stay circular */
+.cid-tnEVo7HlkB .user_image {
+  width: 200px !important;
+  height: 200px !important;
+  border-radius: 50% !important;
+  overflow: visible !important;
+  margin: 0 auto 2rem auto;
+  position: relative;
+}
+
+.cid-tnEVo7HlkB .user_image .item-wrapper {
+  width: 200px !important;
+  height: 200px !important;
+  overflow: visible !important;
+  position: relative;
+}
+
+/* Ensure the container stays square on all screen sizes */
+@media (max-width: 230px) {
+  .cid-tnEVo7HlkB .user_image {
+    width: 150px !important;
+    height: 150px !important;
+  }
+  
+  .cid-tnEVo7HlkB .user_image .item-wrapper {
+    width: 150px !important;
+    height: 150px !important;
+  }
+}
+
+/* Ensure member image containers are not clipped */
+.member-image-container {
+  overflow: visible !important;
+  position: relative;
+}
+
+.member-placeholder {
+  overflow: visible !important;
+}
+
+/* Ensure carousel containers don't clip circular images */
+.cid-tnEVo7HlkB .embla__viewport {
+  overflow: visible !important;
+}
+
+.cid-tnEVo7HlkB .embla__container {
+  overflow: visible !important;
+}
+
+.cid-tnEVo7HlkB .embla__slide {
+  overflow: visible !important;
+}
+
+/* Ensure the user container doesn't clip */
+.cid-tnEVo7HlkB .user {
+  overflow: visible !important;
+}
+
 .user_name {
   font-weight: bold;
   margin-bottom: 5px;

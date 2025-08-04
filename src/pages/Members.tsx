@@ -3,6 +3,7 @@ import { Container, Row, Col } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { usePageTitle } from '../hooks/usePageTitle';
+import MemberImage from '../components/MemberImage';
 
 interface Member {
   id: string;
@@ -159,57 +160,11 @@ const Members: React.FC = () => {
                 >
                   <div className="item-img d-flex justify-content-center" style={{ marginBottom: '15px' }}>
                     <Link to={`/members/${member.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                      {member.profileImage ? (
-                        <img 
-                          src={member.profileImage} 
-                          alt={member.name}
-                          style={{
-                            width: '150px',
-                            height: '150px',
-                            objectFit: 'cover',
-                            borderRadius: '50%',
-                            cursor: 'pointer',
-                            transition: 'transform 0.2s ease-in-out',
-                            boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-                            imageRendering: 'auto',
-                            backfaceVisibility: 'hidden',
-                            transform: 'translateZ(0)'
-                          }}
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.src = '/assets/images/placeholder.jpg';
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'scale(1.05)';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'scale(1)';
-                          }}
-                        />
-                      ) : (
-                        <div 
-                          style={{
-                            width: '150px',
-                            height: '150px',
-                            backgroundColor: '#f8f9fa',
-                            borderRadius: '50%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            cursor: 'pointer',
-                            transition: 'transform 0.2s ease-in-out',
-                            border: '2px dashed #dee2e6'
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'scale(1.05)';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'scale(1)';
-                          }}
-                        >
-                          <span style={{ fontSize: '2.5rem', color: '#6c757d' }}>👤</span>
-                        </div>
-                      )}
+                      <MemberImage 
+                        member={member}
+                        size="medium"
+                        onClick={() => {}}
+                      />
                     </Link>
                   </div>
                   <div className="item-content flex-grow-1 d-flex flex-column justify-content-center">

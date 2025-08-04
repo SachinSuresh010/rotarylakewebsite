@@ -3,6 +3,7 @@ import { Container, Row, Col, Carousel, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { usePageTitle } from '../hooks/usePageTitle';
+import MemberImage from '../components/MemberImage';
 
 interface Director {
   id: string;
@@ -341,29 +342,10 @@ const Home: React.FC = () => {
                         <div className="user_image">
                           <Link to={`/members/${director.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                             <div className="item-wrapper position-relative">
-                              <img 
-                                src={director.profileImage || director.image || '/assets/images/placeholder.jpg'} 
-                                alt={director.alt || director.name}
-                                data-slide-to={index}
-                                data-bs-slide-to={index}
-                                style={{
-                                  width: '150px',
-                                  height: '150px',
-                                  borderRadius: '50%',
-                                  objectFit: 'cover',
-                                  cursor: 'pointer',
-                                  transition: 'transform 0.2s ease-in-out'
-                                }}
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  target.src = '/assets/images/placeholder.jpg';
-                                }}
-                                onMouseEnter={(e) => {
-                                  e.currentTarget.style.transform = 'scale(1.05)';
-                                }}
-                                onMouseLeave={(e) => {
-                                  e.currentTarget.style.transform = 'scale(1)';
-                                }}
+                              <MemberImage 
+                                member={director}
+                                size="medium"
+                                onClick={() => {}}
                               />
                             </div>
                           </Link>
