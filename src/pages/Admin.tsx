@@ -65,6 +65,21 @@ const modernStyles = `
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
   }
   
+  .admin-stats-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    border: none;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    overflow: hidden;
+  }
+  
+  .admin-stats-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+  }
+  
   .admin-nav {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
@@ -98,48 +113,185 @@ const modernStyles = `
   .admin-btn {
     border: none;
     border-radius: 12px;
-    padding: 12px 24px;
     font-weight: 600;
+    padding: 12px 24px;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+    cursor: pointer;
   }
   
   .admin-btn-primary {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
   }
   
   .admin-btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+    color: white;
   }
   
   .admin-btn-outline {
     background: rgba(255, 255, 255, 0.9);
     color: #667eea;
-    border: 2px solid #667eea;
+    border: 2px solid rgba(102, 126, 234, 0.2);
   }
   
   .admin-btn-outline:hover {
-    background: #667eea;
-    color: white;
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
     transform: translateY(-2px);
   }
   
-  .admin-form-control {
-    border: none;
+  .admin-btn-secondary {
     background: rgba(255, 255, 255, 0.9);
+    color: #64748b;
+    border: 2px solid rgba(100, 116, 139, 0.2);
+  }
+  
+  .admin-btn-secondary:hover {
+    background: rgba(100, 116, 139, 0.1);
+    color: #64748b;
+    transform: translateY(-2px);
+  }
+  
+  .admin-btn-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+  }
+  
+  .admin-btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4);
+    color: white;
+  }
+  
+  .admin-btn-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+  }
+  
+  .admin-btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+    color: white;
+  }
+  
+  .admin-form-control {
+    border: 2px solid rgba(100, 116, 139, 0.2);
     border-radius: 12px;
-    padding: 16px 20px;
-    font-size: 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 12px 16px;
+    font-size: 14px;
     transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.9);
   }
   
   .admin-form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     background: white;
-    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
-    transform: translateY(-1px);
+  }
+  
+  .admin-text-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .admin-stats-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: white;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  }
+  
+  .admin-stats-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+  
+  .admin-stats-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  }
+  
+  .admin-stats-warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  }
+  
+  .admin-stats-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  }
+  
+  .admin-stats-info {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  }
+  
+  .admin-spinner {
+    color: #667eea;
+  }
+  
+  .admin-login-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    border: none;
+  }
+  
+  .admin-login-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 24px 24px 0 0;
+    border: none;
+    padding: 32px;
+    text-align: center;
+  }
+  
+  .admin-login-body {
+    padding: 32px;
+  }
+  
+  .admin-modal {
+    border-radius: 24px;
+    border: none;
+  }
+  
+  .admin-modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 24px 24px 0 0;
+    border: none;
+    padding: 24px;
+  }
+  
+  .admin-modal-body {
+    padding: 24px;
+    background: rgba(255, 255, 255, 0.95);
+  }
+  
+  .admin-modal-footer {
+    background: rgba(248, 250, 252, 0.95);
+    border-radius: 0 0 24px 24px;
+    border: none;
+    padding: 24px;
+  }
+  
+  .admin-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
   }
   
   .admin-table {
@@ -153,356 +305,423 @@ const modernStyles = `
   .admin-table th {
     background: rgba(102, 126, 234, 0.1);
     border: none;
-    padding: 20px;
-    font-weight: 700;
-    color: #374151;
+    font-weight: 600;
+    color: #667eea;
+    padding: 16px;
   }
   
   .admin-table td {
     border: none;
-    padding: 20px;
+    padding: 16px;
     vertical-align: middle;
-  }
-  
-  .admin-table tbody tr {
-    transition: all 0.3s ease;
   }
   
   .admin-table tbody tr:hover {
     background: rgba(102, 126, 234, 0.05);
-    transform: scale(1.01);
   }
   
   .admin-badge {
+    padding: 6px 12px;
     border-radius: 20px;
-    padding: 8px 16px;
-    font-weight: 600;
     font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
   
-  .admin-modal {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    border-radius: 24px;
-    border: none;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  .admin-badge-success {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
   }
   
-  .admin-modal-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-radius: 24px 24px 0 0;
-    border: none;
-    padding: 24px 32px;
+  .admin-badge-warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: #d97706;
   }
   
-  .admin-modal-body {
-    padding: 32px;
-    background: rgba(255, 255, 255, 0.95);
-    max-height: 70vh;
-    overflow-y: auto;
+  .admin-badge-danger {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
   }
   
-  .admin-modal-footer {
-    border: none;
-    padding: 24px 32px;
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 0 0 24px 24px;
-  }
-  
-  .admin-stats-card {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    border-radius: 20px;
-    border: none;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-    overflow: hidden;
-  }
-  
-  .admin-stats-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
-  }
-  
-  .admin-stats-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 16px;
-    font-size: 24px;
-  }
-  
-  .admin-stats-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-  }
-  
-  .admin-stats-success {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: white;
-  }
-  
-  .admin-stats-info {
-    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-    color: white;
-  }
-  
-  .admin-stats-warning {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-    color: white;
-  }
-  
-  .admin-stats-danger {
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    color: white;
-  }
-  
-  .admin-login-container {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    border-radius: 24px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-  }
-  
-  .admin-login-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 24px 24px 0 0;
-    padding: 40px;
-    text-align: center;
-    color: white;
-  }
-  
-  .admin-login-body {
-    padding: 40px;
-  }
-  
-  .admin-spinner {
+  .admin-badge-info {
+    background: rgba(102, 126, 234, 0.1);
     color: #667eea;
   }
   
-  .admin-text-gradient {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  
-  .admin-glass {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-  }
-  
-  /* Modal size fixes */
-  .modal-xxl {
-    max-width: 90vw !important;
-    width: 90vw !important;
-  }
-  
-  .modal-xxl .modal-dialog {
-    max-width: 90vw !important;
-    width: 90vw !important;
-    margin: 2rem auto;
-    max-height: 90vh;
-  }
-  
-  .modal-xxl .modal-content {
-    max-height: 90vh;
-    overflow-y: auto;
-    border-radius: 20px;
-    border: none;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-    max-width: 90vw !important;
-    width: 90vw !important;
-    height: 90vh !important;
-  }
-  
-  .modal-xxl .modal-body {
-    max-height: 70vh;
-    overflow-y: auto;
-    padding: 2rem;
-  }
-  
-  /* Fix modal backdrop to cover full viewport */
-  .modal-backdrop {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    background-color: rgba(0, 0, 0, 0.5) !important;
-    z-index: 1040 !important;
-  }
-  
-  /* Ensure modal covers full viewport */
-  .modal {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    z-index: 1050 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-  }
-  
-  /* Override App.css modal restrictions for admin modals */
-  .admin-modal {
-    max-width: 90vw !important;
-    width: 90vw !important;
-  }
-  
-  .admin-modal .modal-dialog {
-    max-width: 90vw !important;
-    width: 90vw !important;
-    margin: 2rem auto !important;
-    height: 90vh !important;
-    max-height: 90vh !important;
-  }
-  
-  .admin-modal .modal-content {
-    max-width: 90vw !important;
-    width: 90vw !important;
-    max-height: 90vh !important;
-    height: 90vh !important;
-    border-radius: 20px !important;
-    border: none !important;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
-  }
-  
-  .admin-modal .modal-body {
-    max-height: 70vh !important;
-    overflow-y: auto !important;
-    padding: 2rem !important;
-  }
-  
-  .admin-modal .modal-header {
-    padding: 1.5rem 2rem !important;
-    border-bottom: none !important;
-  }
-  
-  .admin-modal .modal-footer {
-    padding: 1.5rem 2rem !important;
-    border-top: none !important;
-  }
-  
-  /* Ensure form content is properly displayed in admin modals */
-  .admin-modal .form-control,
-  .admin-modal .form-select {
-    border: none !important;
-    background-color: rgba(255, 255, 255, 0.9) !important;
-    border-radius: 12px !important;
-    padding: 16px 20px !important;
-    font-size: 16px !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
-    transition: all 0.3s ease !important;
-  }
-  
-  .admin-modal .form-control:focus,
-  .admin-modal .form-select:focus {
-    background-color: white !important;
-    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2) !important;
-    transform: translateY(-1px) !important;
-  }
-  
-  .admin-modal .btn {
-    border-radius: 12px !important;
-    padding: 12px 24px !important;
-    font-weight: 600 !important;
-    transition: all 0.3s ease !important;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
-  }
-  
-  .admin-modal .nav-tabs {
-    border-bottom: 2px solid rgba(102, 126, 234, 0.1) !important;
-  }
-  
-  .admin-modal .nav-tabs .nav-link {
-    border: none !important;
-    color: #64748b !important;
-    font-weight: 600 !important;
-    padding: 16px 24px !important;
-    border-radius: 12px 12px 0 0 !important;
-    margin-right: 4px !important;
-    transition: all 0.3s ease !important;
-  }
-  
-  .admin-modal .nav-tabs .nav-link:hover {
-    background: rgba(102, 126, 234, 0.1) !important;
-    color: #667eea !important;
-  }
-  
-  .admin-modal .nav-tabs .nav-link.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-    color: white !important;
-    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3) !important;
-  }
-  
-  @media (max-width: 768px) {
+  /* Responsive Design */
+  @media (max-width: 1200px) {
+    .admin-modern {
+      padding: 4rem 0 2rem 0 !important;
+    }
+    
     .admin-main {
       margin: 10px;
-      border-radius: 16px;
     }
     
     .admin-header {
       margin: 10px;
+      padding: 20px;
+    }
+    
+    .admin-nav {
+      margin: 0 10px;
+    }
+  }
+  
+  @media (max-width: 992px) {
+    .admin-modern {
+      padding: 3rem 0 2rem 0 !important;
+    }
+    
+    .admin-header {
       padding: 16px;
     }
     
-    .modal-xxl {
-      max-width: 95vw !important;
-      width: 95vw !important;
+    .admin-header .d-flex {
+      flex-direction: column;
+      gap: 16px;
+      align-items: flex-start !important;
     }
     
-    .modal-xxl .modal-dialog {
-      max-width: 95vw !important;
-      width: 95vw !important;
-      margin: 1rem auto;
-      height: 85vh !important;
-      max-height: 85vh !important;
+    .admin-nav .nav-link {
+      padding: 12px 16px;
+      margin: 2px 4px;
+      font-size: 14px;
     }
     
-    .modal-xxl .modal-content {
-      max-width: 95vw !important;
-      width: 95vw !important;
-      max-height: 85vh !important;
-      height: 85vh !important;
+    .admin-nav .nav-link span {
+      display: none;
     }
     
-    .modal-xxl .modal-body {
-      max-height: 60vh;
-      padding: 1rem;
+    .admin-nav .nav-link {
+      justify-content: center;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .admin-modern {
+      padding: 2rem 0 1rem 0 !important;
+      margin-top: 1rem;
+    }
+    
+    .admin-main {
+      margin: 5px;
+      border-radius: 16px;
+    }
+    
+    .admin-header {
+      margin: 5px;
+      border-radius: 16px;
+      padding: 16px;
+    }
+    
+    .admin-nav {
+      margin: 0 5px;
+      border-radius: 12px;
+    }
+    
+    .admin-nav .nav-link {
+      padding: 10px 12px;
+      margin: 1px 2px;
+      font-size: 12px;
+      border-radius: 8px;
+    }
+    
+    .admin-btn {
+      padding: 10px 16px;
+      font-size: 14px;
+    }
+    
+    .admin-stats-icon {
+      width: 50px;
+      height: 50px;
+      font-size: 20px;
+    }
+    
+    .admin-login-container {
+      margin: 0 10px;
+    }
+    
+    .admin-login-header {
+      padding: 24px 16px;
+    }
+    
+    .admin-login-body {
+      padding: 24px 16px;
     }
     
     .admin-modal {
-      max-width: 95vw !important;
-      width: 95vw !important;
+      margin: 10px;
     }
     
-    .admin-modal .modal-dialog {
-      max-width: 95vw !important;
-      width: 95vw !important;
-      margin: 1rem auto !important;
-      height: 85vh !important;
-      max-height: 85vh !important;
+    .admin-modal-header {
+      padding: 16px;
     }
     
-    .admin-modal .modal-content {
-      max-width: 95vw !important;
-      width: 95vw !important;
-      max-height: 85vh !important;
-      height: 85vh !important;
+    .admin-modal-body {
+      padding: 16px;
     }
     
-    .admin-modal .modal-body {
-      max-height: 60vh !important;
-      padding: 1rem !important;
+    .admin-modal-footer {
+      padding: 16px;
+    }
+    
+    .admin-table {
+      font-size: 14px;
+    }
+    
+    .admin-table th,
+    .admin-table td {
+      padding: 12px 8px;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .admin-modern {
+      padding: 1rem 0 0.5rem 0 !important;
+    }
+    
+    .admin-main {
+      margin: 2px;
+      border-radius: 12px;
+    }
+    
+    .admin-header {
+      margin: 2px;
+      border-radius: 12px;
+      padding: 12px;
+    }
+    
+    .admin-nav {
+      margin: 0 2px;
+      border-radius: 8px;
+    }
+    
+    .admin-nav .nav-link {
+      padding: 8px 10px;
+      margin: 1px;
+      font-size: 11px;
+      border-radius: 6px;
+    }
+    
+    .admin-btn {
+      padding: 8px 12px;
+      font-size: 12px;
+    }
+    
+    .admin-stats-icon {
+      width: 40px;
+      height: 40px;
+      font-size: 16px;
+    }
+    
+    .admin-login-container {
+      margin: 0 5px;
+    }
+    
+    .admin-login-header {
+      padding: 20px 12px;
+    }
+    
+    .admin-login-body {
+      padding: 20px 12px;
+    }
+    
+    .admin-modal {
+      margin: 5px;
+    }
+    
+    .admin-modal-header {
+      padding: 12px;
+    }
+    
+    .admin-modal-body {
+      padding: 12px;
+    }
+    
+    .admin-modal-footer {
+      padding: 12px;
+    }
+    
+    .admin-table {
+      font-size: 12px;
+    }
+    
+    .admin-table th,
+    .admin-table td {
+      padding: 8px 6px;
+    }
+    
+    .admin-form-control {
+      padding: 10px 12px;
+      font-size: 12px;
+    }
+  }
+  
+  /* Mobile Navigation Improvements */
+  @media (max-width: 768px) {
+    .admin-nav .nav {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .admin-nav .nav-item {
+      flex: 1;
+      min-width: 80px;
+    }
+    
+    .admin-nav .nav-link {
+      text-align: center;
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    .admin-nav .nav-link svg {
+      font-size: 16px;
+    }
+  }
+  
+  /* Dashboard Responsive Cards */
+  @media (max-width: 768px) {
+    .admin-dashboard-stats .row > div {
+      margin-bottom: 16px;
+    }
+    
+    .admin-dashboard-stats .card {
+      margin-bottom: 0;
+    }
+  }
+  
+  /* Table Responsive */
+  @media (max-width: 768px) {
+    .admin-table-responsive {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    .admin-table-responsive .table {
+      min-width: 600px;
+    }
+    
+    .admin-card {
+      margin-bottom: 0.5rem;
+    }
+    
+    .admin-card .card-body {
+      padding: 0.75rem;
+    }
+    
+    .admin-card h6 {
+      font-size: 0.9rem;
+      margin-bottom: 0.25rem;
+    }
+    
+    .admin-card p {
+      font-size: 0.75rem;
+      margin-bottom: 0.25rem;
+    }
+    
+    .admin-card .btn {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+    }
+  }
+  
+  /* Form Responsive */
+  @media (max-width: 768px) {
+    .admin-form-row {
+      flex-direction: column;
+    }
+    
+    .admin-form-row > div {
+      margin-bottom: 16px;
+    }
+    
+    .admin-form-row > div:last-child {
+      margin-bottom: 0;
+    }
+  }
+  
+  /* Modal Responsive */
+  @media (max-width: 576px) {
+    .admin-modal {
+      margin: 0;
+      border-radius: 0;
+      height: 100vh;
+      max-height: 100vh;
+    }
+    
+    .admin-modal-header {
+      border-radius: 0;
+    }
+    
+    .admin-modal-footer {
+      border-radius: 0;
+    }
+  }
+  
+  /* Search and Filter Responsive */
+  @media (max-width: 768px) {
+    .admin-search-filters {
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .admin-search-filters > div {
+      width: 100%;
+    }
+    
+    .admin-search-filters .btn {
+      width: 100%;
+      margin-top: 8px;
+    }
+  }
+  
+  /* Pagination Responsive */
+  @media (max-width: 576px) {
+    .admin-pagination {
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+    }
+    
+    .admin-pagination .pagination {
+      margin: 0;
+    }
+  }
+  
+  /* Gallery Responsive */
+  @media (max-width: 768px) {
+    .admin-gallery-grid {
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .admin-gallery-grid {
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 8px;
+    }
+  }
+  
+  /* Services Responsive */
+  @media (max-width: 768px) {
+    .admin-services-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+  }
+  
+  /* Settings Responsive */
+  @media (max-width: 768px) {
+    .admin-settings-section {
+      padding: 16px;
+    }
+    
+    .admin-settings-card {
+      margin-bottom: 16px;
     }
   }
 `;
@@ -2934,7 +3153,7 @@ const Admin: React.FC = () => {
       <div className="admin-modern d-flex align-items-center justify-content-center" style={{ minHeight: 'calc(100vh - 200px)', paddingTop: '6rem' }}>
         <Container>
           <Row className="justify-content-center">
-            <Col md={6} lg={5}>
+            <Col xs={12} sm={10} md={8} lg={6} xl={5}>
               <Card className="admin-login-container border-0">
                 <Card.Header className="admin-login-header">
                   <div className="mb-4">
@@ -3008,58 +3227,63 @@ const Admin: React.FC = () => {
           <Col>
             {/* Header */}
             <div className="admin-header">
-              <div className="d-flex justify-content-between align-items-center">
-                <div>
+              <div className="d-flex justify-content-between align-items-center flex-wrap">
+                <div className="flex-grow-1">
                   <h2 className="fw-bold admin-text-gradient mb-2">
                     <IconWrapper icon={FaGear} className="me-3" />
-                    Admin Dashboard
+                    <span className="d-none d-sm-inline">Admin Dashboard</span>
+                    <span className="d-inline d-sm-none">Admin</span>
                   </h2>
                   <p className="text-white mb-0 opacity-90">
                     Welcome back, {member?.name || user?.profile?.firstName || user?.username}!
                   </p>
                 </div>
-                <Button 
-                  className="admin-btn admin-btn-outline"
-                  onClick={handleLogout}
-                >
-                  <IconWrapper icon={FaRightFromBracket} className="me-2" />
-                  Logout
-                </Button>
+                <div className="mt-3 mt-sm-0">
+                  <Button 
+                    className="admin-btn admin-btn-outline"
+                    onClick={handleLogout}
+                    size="sm"
+                  >
+                    <IconWrapper icon={FaRightFromBracket} className="me-2" />
+                    <span className="d-none d-sm-inline">Logout</span>
+                    <span className="d-inline d-sm-none">Logout</span>
+                  </Button>
+                </div>
               </div>
             </div>
 
             {/* Navigation Tabs */}
             <Card className="admin-nav mb-4">
               <Card.Body className="p-0">
-                <Nav variant="tabs" activeKey={activeTab} onSelect={(k) => setActiveTab(k || 'dashboard')} className="border-0">
-                  <Nav.Item>
+                <Nav variant="tabs" activeKey={activeTab} onSelect={(k) => setActiveTab(k || 'dashboard')} className="border-0 flex-wrap">
+                  <Nav.Item className="flex-fill">
                     <Nav.Link eventKey="dashboard" className="admin-nav-link">
                       <IconWrapper icon={FaChartBar} className="me-2" />
-                      Dashboard
+                      <span className="d-none d-md-inline">Dashboard</span>
                     </Nav.Link>
                   </Nav.Item>
-                  <Nav.Item>
+                  <Nav.Item className="flex-fill">
                     <Nav.Link eventKey="members" className="admin-nav-link">
                       <IconWrapper icon={FaUsers} className="me-2" />
-                      Members
+                      <span className="d-none d-md-inline">Members</span>
                     </Nav.Link>
                   </Nav.Item>
-                  <Nav.Item>
+                  <Nav.Item className="flex-fill">
                     <Nav.Link eventKey="services" className="admin-nav-link">
                       <IconWrapper icon={FaBriefcase} className="me-2" />
-                      Services
+                      <span className="d-none d-md-inline">Services</span>
                     </Nav.Link>
                   </Nav.Item>
-                  <Nav.Item>
+                  <Nav.Item className="flex-fill">
                     <Nav.Link eventKey="gallery" className="admin-nav-link">
                       <IconWrapper icon={FaCamera} className="me-2" />
-                      Gallery
+                      <span className="d-none d-md-inline">Gallery</span>
                     </Nav.Link>
                   </Nav.Item>
-                  <Nav.Item>
+                  <Nav.Item className="flex-fill">
                     <Nav.Link eventKey="settings" className="admin-nav-link">
                       <IconWrapper icon={FaGear} className="me-2" />
-                      Settings
+                      <span className="d-none d-md-inline">Settings</span>
                     </Nav.Link>
                   </Nav.Item>
                 </Nav>
@@ -3068,7 +3292,7 @@ const Admin: React.FC = () => {
 
             {/* Content */}
             <div className="admin-main">
-              <div className="p-4">
+              <div className="p-3 p-md-4">
                 {activeTab === 'dashboard' && (
                   <DashboardTab 
                     stats={stats} 
@@ -3713,10 +3937,10 @@ const DashboardTab: React.FC<{
   return (
     <div className="admin-content">
       {/* Main Stats */}
-      <Row className="mb-4">
-        <Col md={3}>
-          <Card className="admin-stats-card text-center">
-            <Card.Body className="p-4">
+      <Row className="mb-4 admin-dashboard-stats">
+        <Col xs={12} sm={6} lg={3} className="mb-3">
+          <Card className="admin-stats-card text-center h-100">
+            <Card.Body className="p-3 p-md-4">
               <div className="admin-stats-icon admin-stats-primary mx-auto mb-3">
                 <IconWrapper icon={FaUsers} />
               </div>
@@ -3725,9 +3949,9 @@ const DashboardTab: React.FC<{
             </Card.Body>
           </Card>
         </Col>
-        <Col md={3}>
-          <Card className="admin-stats-card text-center">
-            <Card.Body className="p-4">
+        <Col xs={12} sm={6} lg={3} className="mb-3">
+          <Card className="admin-stats-card text-center h-100">
+            <Card.Body className="p-3 p-md-4">
               <div className="admin-stats-icon admin-stats-success mx-auto mb-3">
                 <IconWrapper icon={FaUserCheck} />
               </div>
@@ -3736,9 +3960,9 @@ const DashboardTab: React.FC<{
             </Card.Body>
           </Card>
         </Col>
-        <Col md={3}>
-          <Card className="admin-stats-card text-center">
-            <Card.Body className="p-4">
+        <Col xs={12} sm={6} lg={3} className="mb-3">
+          <Card className="admin-stats-card text-center h-100">
+            <Card.Body className="p-3 p-md-4">
               <div className="admin-stats-icon admin-stats-info mx-auto mb-3">
                 <IconWrapper icon={FaEye} />
               </div>
@@ -3747,9 +3971,9 @@ const DashboardTab: React.FC<{
             </Card.Body>
           </Card>
         </Col>
-        <Col md={3}>
-          <Card className="admin-stats-card text-center">
-            <Card.Body className="p-4">
+        <Col xs={12} sm={6} lg={3} className="mb-3">
+          <Card className="admin-stats-card text-center h-100">
+            <Card.Body className="p-3 p-md-4">
               <div className="admin-stats-icon admin-stats-warning mx-auto mb-3">
                 <IconWrapper icon={FaCalendar} />
               </div>
@@ -3761,10 +3985,10 @@ const DashboardTab: React.FC<{
       </Row>
 
       {/* Login Activity Stats */}
-      <Row>
-        <Col md={3}>
-          <Card className="admin-stats-card text-center">
-            <Card.Body className="p-4">
+      <Row className="admin-dashboard-stats">
+        <Col xs={12} sm={6} lg={3} className="mb-3">
+          <Card className="admin-stats-card text-center h-100">
+            <Card.Body className="p-3 p-md-4">
               <div className="admin-stats-icon admin-stats-primary mx-auto mb-3">
                 <IconWrapper icon={FaUserCheck} />
               </div>
@@ -3773,9 +3997,9 @@ const DashboardTab: React.FC<{
             </Card.Body>
           </Card>
         </Col>
-        <Col md={3}>
-          <Card className="admin-stats-card text-center">
-            <Card.Body className="p-4">
+        <Col xs={12} sm={6} lg={3} className="mb-3">
+          <Card className="admin-stats-card text-center h-100">
+            <Card.Body className="p-3 p-md-4">
               <div className="admin-stats-icon admin-stats-success mx-auto mb-3">
                 <IconWrapper icon={FaClock} />
               </div>
@@ -3784,9 +4008,9 @@ const DashboardTab: React.FC<{
             </Card.Body>
           </Card>
         </Col>
-        <Col md={3}>
-          <Card className="admin-stats-card text-center">
-            <Card.Body className="p-4">
+        <Col xs={12} sm={6} lg={3} className="mb-3">
+          <Card className="admin-stats-card text-center h-100">
+            <Card.Body className="p-3 p-md-4">
               <div className="admin-stats-icon admin-stats-info mx-auto mb-3">
                 <IconWrapper icon={FaChartBar} />
               </div>
@@ -3795,9 +4019,9 @@ const DashboardTab: React.FC<{
             </Card.Body>
           </Card>
         </Col>
-        <Col md={3}>
-          <Card className="admin-stats-card text-center">
-            <Card.Body className="p-4">
+        <Col xs={12} sm={6} lg={3} className="mb-3">
+          <Card className="admin-stats-card text-center h-100">
+            <Card.Body className="p-3 p-md-4">
               <div className="admin-stats-icon admin-stats-danger mx-auto mb-3">
                 <IconWrapper icon={FaUserXmark} />
               </div>
@@ -3864,9 +4088,9 @@ const MembersTab: React.FC<{
           <h3 className="fw-bold admin-text-gradient mb-2">Members Management</h3>
           <p className="text-white opacity-90 mb-0">Manage and monitor member accounts</p>
         </div>
-        <div className="d-flex gap-2">
+        <div className="d-flex gap-2 flex-wrap">
           <Button 
-            variant={useClientSideFiltering ? "success" : "outline-success"}
+            className={`admin-btn ${useClientSideFiltering ? 'admin-btn-success' : 'admin-btn-outline'}`}
             size="sm"
             onClick={() => setUseClientSideFiltering(!useClientSideFiltering)}
             title={useClientSideFiltering ? "Switch to Server-side Filtering" : "Switch to Client-side Filtering"}
@@ -3875,6 +4099,7 @@ const MembersTab: React.FC<{
           </Button>
           <Button 
             className="admin-btn admin-btn-primary"
+            size="sm"
             onClick={onAdd}
           >
             <IconWrapper icon={FaPlus} className="me-2" />
@@ -3943,8 +4168,8 @@ const MembersTab: React.FC<{
       <Card className="admin-card">
         <Card.Body className="p-4">
           {/* Search and Filter Bar */}
-          <Row className="mb-4">
-            <Col md={8}>
+          <Row className="mb-4 admin-search-filters">
+            <Col xs={12} md={8} className="mb-3 mb-md-0">
               <Form onSubmit={onSearch}>
                 <InputGroup>
                   <Form.Control
@@ -3965,7 +4190,7 @@ const MembersTab: React.FC<{
                 </InputGroup>
               </Form>
             </Col>
-            <Col md={4}>
+            <Col xs={12} md={4}>
               <Form.Select
                 value={statusFilter}
                 onChange={(e) => onStatusFilterChange(e.target.value)}
@@ -3978,12 +4203,64 @@ const MembersTab: React.FC<{
             </Col>
           </Row>
 
-          {/* Members Table */}
-          <div className="table-responsive">
+          {/* Mobile Card Layout */}
+          <div className="d-block d-md-none">
+            {members.length === 0 ? (
+              <div className="text-center py-5">
+                <div className="text-muted">
+                  <IconWrapper icon={FaUsers} className="fs-1 mb-3" />
+                  <p className="mb-0">No members found</p>
+                </div>
+              </div>
+            ) : (
+              <div className="row">
+                {members.map((member) => (
+                  <div key={member._id} className="col-12 mb-3">
+                    <Card className="admin-card">
+                      <Card.Body className="p-3">
+                        <div className="mb-2">
+                          <h6 className="fw-bold text-dark mb-1">{member.name}</h6>
+                          <p className="text-muted small mb-1">{member.email}</p>
+                          <p className="text-muted small mb-1">{member.currentDesignation || 'Member'}</p>
+                          <div className="d-flex gap-1 mb-2">
+                            {getStatusBadge(member.status)}
+                            {getLoginStatusBadge(member)}
+                          </div>
+                          <div className="d-flex gap-2 justify-content-start">
+                            <Button 
+                              size="sm" 
+                              className={`admin-btn ${member.status === 'active' ? 'admin-btn-outline' : 'admin-btn-primary'}`}
+                              onClick={() => onStatusToggle(member)}
+                              title={member.status === 'active' ? 'Deactivate Member' : 'Activate Member'}
+                            >
+                              {member.status === 'active' ? (
+                                <IconWrapper icon={FaUserXmark} />
+                              ) : (
+                                <IconWrapper icon={FaUserCheck} />
+                              )}
+                            </Button>
+                            <Button size="sm" className="admin-btn admin-btn-outline" onClick={() => onEdit(member)}>
+                              <IconWrapper icon={FaPenToSquare} />
+                            </Button>
+                            <Button size="sm" className="admin-btn admin-btn-outline" onClick={() => onDelete(member)}>
+                              <IconWrapper icon={FaTrash} />
+                            </Button>
+                          </div>
+                        </div>
+                      </Card.Body>
+                    </Card>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Desktop Table Layout */}
+          <div className="d-none d-md-block table-responsive admin-table-responsive">
             <Table className="admin-table mb-0">
               <thead>
                 <tr>
-                  <th>
+                  <th className="d-none d-md-table-cell">
                     <Button 
                       variant="link" 
                       className="p-0 text-decoration-none fw-semibold text-dark"
@@ -3992,13 +4269,13 @@ const MembersTab: React.FC<{
                       Name {sortBy === 'name' && (sortOrder === 'asc' ? '↑' : '↓')}
                     </Button>
                   </th>
-                  <th>
+                  <th className="d-none d-lg-table-cell">
                     <span className="fw-semibold text-dark">Email</span>
                   </th>
-                  <th>
+                  <th className="d-none d-md-table-cell">
                     <span className="fw-semibold text-dark">Current Designation</span>
                   </th>
-                  <th>
+                  <th className="d-none d-lg-table-cell">
                     <Button 
                       variant="link" 
                       className="p-0 text-decoration-none fw-semibold text-dark"
@@ -4007,7 +4284,7 @@ const MembersTab: React.FC<{
                       Signup Date {sortBy === 'createdAt' && (sortOrder === 'asc' ? '↑' : '↓')}
                     </Button>
                   </th>
-                  <th>
+                  <th className="d-none d-lg-table-cell">
                     <Button 
                       variant="link" 
                       className="p-0 text-decoration-none fw-semibold text-dark"
@@ -4016,7 +4293,7 @@ const MembersTab: React.FC<{
                       Last Login {sortBy === 'lastLogin' && (sortOrder === 'asc' ? '↑' : '↓')}
                     </Button>
                   </th>
-                  <th>
+                  <th className="d-none d-md-table-cell">
                     <span className="fw-semibold text-dark">Status</span>
                   </th>
                   <th>
@@ -4037,15 +4314,15 @@ const MembersTab: React.FC<{
                 ) : (
                   members.map((member) => (
                     <tr key={member._id}>
-                      <td>
+                      <td className="d-none d-md-table-cell">
                         <div>
                           <div className="fw-semibold text-dark">{member.name}</div>
                         </div>
                       </td>
-                      <td>
+                      <td className="d-none d-lg-table-cell">
                         <span className="text-muted">{member.email}</span>
                       </td>
-                      <td>
+                      <td className="d-none d-md-table-cell">
                         <div>
                           <span className="text-muted">{member.currentDesignation || 'Member'}</span>
                           {member.currentDesignation && (
@@ -4060,13 +4337,13 @@ const MembersTab: React.FC<{
                           )}
                         </div>
                       </td>
-                      <td>
+                      <td className="d-none d-lg-table-cell">
                         <span className="text-muted">{member.signupText || 'N/A'}</span>
                       </td>
-                      <td>
+                      <td className="d-none d-lg-table-cell">
                         {getLoginStatusBadge(member)}
                       </td>
-                      <td>
+                      <td className="d-none d-md-table-cell">
                         {getStatusBadge(member.status)}
                       </td>
                       <td>
@@ -4100,7 +4377,7 @@ const MembersTab: React.FC<{
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="d-flex justify-content-center mt-4">
+            <div className="d-flex justify-content-center mt-4 admin-pagination">
               <nav>
                 <ul className="pagination mb-0">
                   <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
@@ -4110,7 +4387,8 @@ const MembersTab: React.FC<{
                       onClick={() => setCurrentPage(currentPage - 1)}
                       disabled={currentPage === 1}
                     >
-                      Previous
+                      <span className="d-none d-sm-inline">Previous</span>
+                      <span className="d-inline d-sm-none">←</span>
                     </Button>
                   </li>
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
@@ -4131,7 +4409,8 @@ const MembersTab: React.FC<{
                       onClick={() => setCurrentPage(currentPage + 1)}
                       disabled={currentPage === totalPages}
                     >
-                      Next
+                      <span className="d-none d-sm-inline">Next</span>
+                      <span className="d-inline d-sm-none">→</span>
                     </Button>
                   </li>
                 </ul>
