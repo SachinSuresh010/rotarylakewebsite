@@ -12,7 +12,15 @@ const PORT = process.env.PORT || 5001;
 app.set('trust proxy', 1);
 
 // Initialize Firebase Admin
-const serviceAccount = require('./serviceAccountKey.json');
+let serviceAccount;
+if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+  // Use environment variable for production
+  serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+} else {
+  // Use local file for development
+  serviceAccount = require('./serviceAccountKey.json');
+}
+
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   storageBucket: process.env.FIREBASE_STORAGE_BUCKET
