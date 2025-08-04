@@ -32,7 +32,8 @@ const PastPresidents: React.FC = () => {
   useEffect(() => {
     const loadPresidentsData = async () => {
       try {
-        const response = await fetch('http://localhost:5001/api/members/presidents/past');
+        const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+        const response = await fetch(`${API_BASE_URL}/members/presidents/past`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
