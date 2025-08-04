@@ -184,19 +184,219 @@ const modernStyles = `
     color: white;
   }
   
-  .admin-form-control {
-    border: 2px solid rgba(100, 116, 139, 0.2);
-    border-radius: 12px;
-    padding: 12px 16px;
-    font-size: 14px;
-    transition: all 0.3s ease;
-    background: rgba(255, 255, 255, 0.9);
+  /* Enhanced form controls for admin modals */
+  .admin-modal .form-control,
+  .admin-modal .form-select {
+    border: 2px solid #e9ecef !important;
+    border-radius: 8px !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 1rem !important;
+    transition: all 0.2s ease !important;
+    background: #ffffff !important;
+    min-height: 48px !important;
   }
   
-  .admin-form-control:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    background: white;
+  .admin-modal .form-control:focus,
+  .admin-modal .form-select:focus {
+    border-color: #667eea !important;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
+    background: #ffffff !important;
+  }
+  
+  .admin-modal .form-label {
+    font-weight: 600 !important;
+    color: #495057 !important;
+    margin-bottom: 0.5rem !important;
+    font-size: 0.95rem !important;
+  }
+  
+  .admin-modal .form-text {
+    color: #6c757d !important;
+    font-size: 0.875rem !important;
+  }
+  
+  /* Enhanced buttons for admin modals */
+  .admin-modal .btn {
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    padding: 0.75rem 1.5rem !important;
+    font-size: 0.95rem !important;
+    transition: all 0.2s ease !important;
+    min-height: 48px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+  }
+  
+  .admin-modal .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border: none !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+  }
+  
+  .admin-modal .btn-primary:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4) !important;
+  }
+  
+  .admin-modal .btn-outline-secondary {
+    border: 2px solid #6c757d !important;
+    color: #6c757d !important;
+    background: transparent !important;
+  }
+  
+  .admin-modal .btn-outline-secondary:hover {
+    background: #6c757d !important;
+    color: white !important;
+    transform: translateY(-1px) !important;
+  }
+  
+  .admin-modal .btn-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+    border: none !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3) !important;
+  }
+  
+  .admin-modal .btn-danger:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 16px rgba(220, 53, 69, 0.4) !important;
+  }
+  
+  /* Enhanced layout for admin modals */
+  .admin-modal .row {
+    margin-left: -0.75rem !important;
+    margin-right: -0.75rem !important;
+  }
+  
+  .admin-modal .col,
+  .admin-modal .col-md-6,
+  .admin-modal .col-lg-6,
+  .admin-modal .col-lg-8,
+  .admin-modal .col-lg-4 {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+  
+  .admin-modal .mb-3 {
+    margin-bottom: 1.5rem !important;
+  }
+  
+  .admin-modal .mb-4 {
+    margin-bottom: 2rem !important;
+  }
+  
+  .admin-modal .d-flex.gap-3 {
+    gap: 1rem !important;
+  }
+  
+  /* Enhanced alerts in admin modals */
+  .admin-modal .alert {
+    border-radius: 8px !important;
+    border: none !important;
+    padding: 1rem 1.25rem !important;
+    margin-bottom: 1.5rem !important;
+    font-weight: 500 !important;
+  }
+  
+  .admin-modal .alert-danger {
+    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%) !important;
+    color: #721c24 !important;
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.1) !important;
+  }
+  
+  .admin-modal .alert-success {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%) !important;
+    color: #155724 !important;
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.1) !important;
+  }
+  
+  /* Enhanced image previews in admin modals */
+  .admin-modal .img-fluid {
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  .admin-modal .position-relative {
+    border-radius: 8px !important;
+    overflow: hidden !important;
+  }
+  
+  /* Ensure form content uses full modal space */
+  .admin-modal-body form {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+  }
+  
+  .admin-modal-body .form-content {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+  }
+  
+  .admin-modal-body .form-fields {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1.5rem !important;
+    min-height: 0 !important;
+  }
+  
+  .admin-modal-body .form-group {
+    margin-bottom: 0 !important;
+  }
+  
+  .admin-modal-body .form-group:last-child {
+    margin-bottom: 0 !important;
+  }
+  
+  /* Ensure textarea expands to fill available space */
+  .admin-modal-body textarea.form-control {
+    min-height: 150px !important;
+    resize: vertical !important;
+    flex: 1 !important;
+  }
+  
+  /* Ensure form groups use full width */
+  .admin-modal-body .row {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+  
+  .admin-modal-body .col,
+  .admin-modal-body .col-md-6,
+  .admin-modal-body .col-lg-6,
+  .admin-modal-body .col-lg-8,
+  .admin-modal-body .col-lg-4 {
+    padding: 0.75rem !important;
+  }
+  
+  /* Remove any bottom margins that might cause spacing issues */
+  .admin-modal-body .mb-3:last-child,
+  .admin-modal-body .mb-4:last-child {
+    margin-bottom: 0 !important;
+  }
+  
+  /* Ensure image upload areas are properly sized */
+  .admin-modal-body .image-upload-area {
+    min-height: 200px !important;
+    border: 2px dashed #dee2e6 !important;
+    border-radius: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #f8f9fa !important;
+    transition: all 0.2s ease !important;
+  }
+  
+  .admin-modal-body .image-upload-area:hover {
+    border-color: #667eea !important;
+    background: #f0f2ff !important;
   }
   
   .admin-text-gradient {
@@ -263,28 +463,144 @@ const modernStyles = `
     padding: 32px;
   }
   
+  /* New Admin Modal Design - Bigger and More Spacious */
   .admin-modal {
-    border-radius: 24px;
-    border: none;
+    max-width: 95vw !important;
+    width: 1400px !important;
+    max-height: 90vh !important;
+    height: 90vh !important;
+    margin: 1rem auto !important;
+    border-radius: 16px !important;
+    border: none !important;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25) !important;
+    overflow: hidden !important;
+  }
+  
+  .admin-modal .modal-dialog {
+    max-width: none !important;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: stretch !important;
+  }
+  
+  .admin-modal .modal-content {
+    height: 100% !important;
+    width: 100% !important;
+    border-radius: 16px !important;
+    border: none !important;
+    background: #ffffff !important;
+    display: flex !important;
+    flex-direction: column !important;
   }
   
   .admin-modal-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 24px 24px 0 0;
-    border: none;
-    padding: 24px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border-radius: 16px 16px 0 0 !important;
+    border: none !important;
+    padding: 2rem !important;
+    min-height: 80px !important;
+    flex-shrink: 0 !important;
+  }
+  
+  .admin-modal-header .modal-title {
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    color: white !important;
+  }
+  
+  .admin-modal-header .btn-close {
+    filter: invert(1) !important;
+    opacity: 0.8 !important;
+    font-size: 1.2rem !important;
   }
   
   .admin-modal-body {
-    padding: 24px;
-    background: rgba(255, 255, 255, 0.95);
+    padding: 2rem !important;
+    background: #ffffff !important;
+    overflow-y: auto !important;
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
   }
   
   .admin-modal-footer {
-    background: rgba(248, 250, 252, 0.95);
-    border-radius: 0 0 24px 24px;
-    border: none;
-    padding: 24px;
+    background: #f8f9fa !important;
+    border-radius: 0 0 16px 16px !important;
+    border: none !important;
+    padding: 1.5rem 2rem !important;
+    border-top: 1px solid #e9ecef !important;
+    flex-shrink: 0 !important;
+  }
+  
+  /* Responsive adjustments for admin modals */
+  @media (max-width: 1600px) {
+    .admin-modal {
+      max-width: 95vw !important;
+      width: 1200px !important;
+      height: 90vh !important;
+    }
+  }
+  
+  @media (max-width: 1400px) {
+    .admin-modal {
+      max-width: 95vw !important;
+      width: 1100px !important;
+      height: 90vh !important;
+    }
+  }
+  
+  @media (max-width: 1200px) {
+    .admin-modal {
+      max-width: 98vw !important;
+      width: 1000px !important;
+      height: 90vh !important;
+    }
+  }
+  
+  @media (max-width: 992px) {
+    .admin-modal {
+      max-width: 98vw !important;
+      width: 900px !important;
+      max-height: 95vh !important;
+      height: 95vh !important;
+    }
+    
+    .admin-modal-header {
+      padding: 1.5rem !important;
+    }
+    
+    .admin-modal-body {
+      padding: 1.5rem !important;
+    }
+    
+    .admin-modal-footer {
+      padding: 1rem 1.5rem !important;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .admin-modal {
+      max-width: 98vw !important;
+      width: 95vw !important;
+      max-height: 95vh !important;
+      height: 95vh !important;
+      margin: 1rem auto !important;
+    }
+    
+    .admin-modal-header {
+      padding: 1rem !important;
+    }
+    
+    .admin-modal-body {
+      padding: 1rem !important;
+    }
+    
+    .admin-modal-footer {
+      padding: 0.75rem 1rem !important;
+    }
   }
   
   .admin-nav-link {
@@ -3429,7 +3745,7 @@ const Admin: React.FC = () => {
       </Modal>
 
       {/* Delete Member Modal */}
-      <Modal show={showDeleteModal} onHide={handleDeleteCancel} centered dialogClassName="admin-modal">
+              <Modal show={showDeleteModal} onHide={handleDeleteCancel} centered size="xl" dialogClassName="admin-modal">
         <Modal.Header closeButton className="admin-modal-header">
           <Modal.Title className="fw-bold text-white">Delete Member</Modal.Title>
         </Modal.Header>
@@ -4440,7 +4756,7 @@ const ServicesTab: React.FC = () => {
     description: '',
     image: '',
     alt: '',
-    serviceId: ''
+    serviceIds: [] as string[]
   });
   const [imagePreview, setImagePreview] = useState<string>('');
   
@@ -4489,7 +4805,7 @@ const ServicesTab: React.FC = () => {
       description: '',
       image: '',
       alt: '',
-      serviceId: selectedService || ''
+      serviceIds: selectedService ? [selectedService] : []
     });
     setImagePreview('');
     setShowAddProjectModal(true);
@@ -4503,7 +4819,7 @@ const ServicesTab: React.FC = () => {
       description: project.description,
       image: project.image,
       alt: project.alt,
-      serviceId: serviceId
+      serviceIds: project.serviceIds || [serviceId]
     });
     setImagePreview(project.image || '');
     setShowEditProjectModal(true);
@@ -4586,7 +4902,7 @@ const ServicesTab: React.FC = () => {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            serviceId: projectFormData.serviceId,
+            serviceIds: projectFormData.serviceIds,
             project: {
               title: projectFormData.title,
               date: projectFormData.date,
@@ -4613,7 +4929,7 @@ const ServicesTab: React.FC = () => {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            serviceId: projectFormData.serviceId,
+            serviceIds: projectFormData.serviceIds,
             project: {
               title: projectFormData.title,
               date: projectFormData.date,
@@ -4797,7 +5113,7 @@ const ServicesTab: React.FC = () => {
       )}
 
       {/* Add Project Modal */}
-      <Modal show={showAddProjectModal} onHide={() => setShowAddProjectModal(false)} centered size="lg" dialogClassName="admin-modal">
+      <Modal show={showAddProjectModal} onHide={() => setShowAddProjectModal(false)} centered size="xl" dialogClassName="admin-modal">
         <Modal.Header closeButton className="admin-modal-header">
           <Modal.Title className="fw-bold text-white">Add New Project</Modal.Title>
         </Modal.Header>
@@ -4884,6 +5200,37 @@ const ServicesTab: React.FC = () => {
             </Form.Group>
             
             <Form.Group className="mb-3">
+              <Form.Label className="fw-semibold">Service Categories *</Form.Label>
+              <div className="mb-2">
+                <small className="text-muted">Select one or more categories for this project:</small>
+              </div>
+              {servicesData?.services?.map((service: any) => (
+                <Form.Check
+                  key={service.id}
+                  type="checkbox"
+                  id={`service-add-${service.id}`}
+                  label={
+                    <div className="d-flex align-items-center">
+                      <span style={{ fontSize: '1.2rem', marginRight: '0.5rem' }}>{service.icon}</span>
+                      <span>{service.title}</span>
+                    </div>
+                  }
+                  checked={projectFormData.serviceIds.includes(service.id)}
+                  onChange={(e) => {
+                    const newServiceIds = e.target.checked
+                      ? [...projectFormData.serviceIds, service.id]
+                      : projectFormData.serviceIds.filter(id => id !== service.id);
+                    setProjectFormData({...projectFormData, serviceIds: newServiceIds});
+                  }}
+                  className="mb-2"
+                />
+              ))}
+              {projectFormData.serviceIds.length === 0 && (
+                <div className="text-danger small">Please select at least one service category</div>
+              )}
+            </Form.Group>
+            
+            <Form.Group className="mb-3">
               <Form.Label className="fw-semibold">Alt Text</Form.Label>
               <Form.Control
                 type="text"
@@ -4913,7 +5260,7 @@ const ServicesTab: React.FC = () => {
       </Modal>
 
       {/* Edit Project Modal */}
-      <Modal show={showEditProjectModal} onHide={() => setShowEditProjectModal(false)} centered size="lg" dialogClassName="admin-modal">
+      <Modal show={showEditProjectModal} onHide={() => setShowEditProjectModal(false)} centered size="xl" dialogClassName="admin-modal">
         <Modal.Header closeButton className="admin-modal-header">
           <Modal.Title className="fw-bold text-white">Edit Project</Modal.Title>
         </Modal.Header>
@@ -5000,6 +5347,37 @@ const ServicesTab: React.FC = () => {
             </Form.Group>
             
             <Form.Group className="mb-3">
+              <Form.Label className="fw-semibold">Service Categories *</Form.Label>
+              <div className="mb-2">
+                <small className="text-muted">Select one or more categories for this project:</small>
+              </div>
+              {servicesData?.services?.map((service: any) => (
+                <Form.Check
+                  key={service.id}
+                  type="checkbox"
+                  id={`service-edit-${service.id}`}
+                  label={
+                    <div className="d-flex align-items-center">
+                      <span style={{ fontSize: '1.2rem', marginRight: '0.5rem' }}>{service.icon}</span>
+                      <span>{service.title}</span>
+                    </div>
+                  }
+                  checked={projectFormData.serviceIds.includes(service.id)}
+                  onChange={(e) => {
+                    const newServiceIds = e.target.checked
+                      ? [...projectFormData.serviceIds, service.id]
+                      : projectFormData.serviceIds.filter(id => id !== service.id);
+                    setProjectFormData({...projectFormData, serviceIds: newServiceIds});
+                  }}
+                  className="mb-2"
+                />
+              ))}
+              {projectFormData.serviceIds.length === 0 && (
+                <div className="text-danger small">Please select at least one service category</div>
+              )}
+            </Form.Group>
+            
+            <Form.Group className="mb-3">
               <Form.Label className="fw-semibold">Alt Text</Form.Label>
               <Form.Control
                 type="text"
@@ -5029,7 +5407,7 @@ const ServicesTab: React.FC = () => {
       </Modal>
 
       {/* Delete Confirmation Modal */}
-      <Modal show={showDeleteConfirmModal} onHide={() => setShowDeleteConfirmModal(false)} centered dialogClassName="admin-modal">
+              <Modal show={showDeleteConfirmModal} onHide={() => setShowDeleteConfirmModal(false)} centered size="xl" dialogClassName="admin-modal">
         <Modal.Header closeButton className="admin-modal-header">
           <Modal.Title className="fw-bold text-white">Delete Project</Modal.Title>
         </Modal.Header>

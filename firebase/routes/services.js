@@ -173,67 +173,14 @@ router.put('/', authenticateToken, async (req, res) => {
 // Add a new project to a service
 router.post('/projects', authenticateToken, async (req, res) => {
   try {
-    const { serviceId, project } = req.body;
+    const { serviceIds, project } = req.body;
     
-    if (!serviceId || !project) {
-      return res.status(400).json({ message: 'Service ID and project data are required' });
+    if (!serviceIds || !Array.isArray(serviceIds) || serviceIds.length === 0 || !project) {
+      return res.status(400).json({ message: 'Service IDs array and project data are required' });
     }
     
     const db = admin.firestore();
     const servicesRef = db.collection('services');
-    
-    // Check if the service document exists
-    const serviceDoc = servicesRef.doc(serviceId);
-    const serviceSnapshot = await serviceDoc.get();
-    
-    let serviceData;
-    if (!serviceSnapshot.exists) {
-      // Create new service document with default structure
-      const defaultServices = {
-        community_service: {
-          id: "community-service",
-          title: "Community Service",
-          description: "Serving our local community through various initiatives and projects that address local needs.",
-          icon: "🏘️"
-        },
-        vocational_service: {
-          id: "vocational-service",
-          title: "Vocational Service",
-          description: "Promoting vocational excellence and professional development through mentorship and training programs.",
-          icon: "💼"
-        },
-        international_service: {
-          id: "international-service",
-          title: "International Service",
-          description: "Building international understanding and cooperation through global projects and partnerships.",
-          icon: "🌍"
-        },
-        youth_service: {
-          id: "youth-service",
-          title: "Youth Service",
-          description: "Empowering young people through leadership development, scholarships, and service opportunities.",
-          icon: "👨‍🎓"
-        },
-        club_service: {
-          id: "club-service",
-          title: "Club Service",
-          description: "Strengthening our club through effective administration, fellowship, and member development.",
-          icon: "🤝"
-        }
-      };
-      
-      serviceData = defaultServices[serviceId.replace('-', '_')] || {
-        id: serviceId,
-        title: serviceId.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()),
-        description: "Service description",
-        icon: "📋"
-      };
-      
-      // Create the service document
-      await serviceDoc.set(serviceData);
-    } else {
-      serviceData = serviceSnapshot.data();
-    }
     
     // Generate unique ID for the project
     const projectId = `project-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -243,8 +190,62 @@ router.post('/projects', authenticateToken, async (req, res) => {
       createdAt: admin.firestore.FieldValue.serverTimestamp()
     };
     
-    // Store project in subcollection to avoid document size limits
-    await serviceDoc.collection('projects').doc(projectId).set(newProject);
+    // Add project to all specified services
+    for (const serviceId of serviceIds) {
+      // Check if the service document exists
+      const serviceDoc = servicesRef.doc(serviceId);
+      const serviceSnapshot = await serviceDoc.get();
+      
+      let serviceData;
+      if (!serviceSnapshot.exists) {
+        // Create new service document with default structure
+        const defaultServices = {
+          community_service: {
+            id: "community-service",
+            title: "Community Service",
+            description: "Serving our local community through various initiatives and projects that address local needs.",
+            icon: "🏘️"
+          },
+          vocational_service: {
+            id: "vocational-service",
+            title: "Vocational Service",
+            description: "Promoting vocational excellence and professional development through mentorship and training programs.",
+            icon: "💼"
+          },
+          international_service: {
+            id: "international-service",
+            title: "International Service",
+            description: "Building international understanding and cooperation through global projects and partnerships.",
+            icon: "🌍"
+          },
+          youth_service: {
+            id: "youth-service",
+            title: "Youth Service",
+            description: "Empowering young people through leadership development, scholarships, and service opportunities.",
+            icon: "👨‍🎓"
+          },
+          club_service: {
+            id: "club-service",
+            title: "Club Service",
+            description: "Strengthening our club through effective administration, fellowship, and member development.",
+            icon: "🤝"
+          }
+        };
+        
+        serviceData = defaultServices[serviceId.replace('-', '_')] || {
+          id: serviceId,
+          title: serviceId.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()),
+          description: "Service description",
+          icon: "📋"
+        };
+        
+        // Create the service document
+        await serviceDoc.set(serviceData);
+      }
+      
+      // Store project in subcollection to avoid document size limits
+      await serviceDoc.collection('projects').doc(projectId).set(newProject);
+    }
     
     res.json({ message: 'Project added successfully', project: newProject });
   } catch (error) {
@@ -257,27 +258,36 @@ router.post('/projects', authenticateToken, async (req, res) => {
 router.put('/projects/:projectId', authenticateToken, async (req, res) => {
   try {
     const { projectId } = req.params;
-    const { serviceId, project } = req.body;
+    const { serviceIds, project } = req.body;
     
-    if (!serviceId || !project) {
-      return res.status(400).json({ message: 'Service ID and project data are required' });
+    if (!serviceIds || !Array.isArray(serviceIds) || serviceIds.length === 0 || !project) {
+      return res.status(400).json({ message: 'Service IDs array and project data are required' });
     }
     
     const db = admin.firestore();
     const servicesRef = db.collection('services');
-    const serviceDoc = servicesRef.doc(serviceId);
-    const serviceSnapshot = await serviceDoc.get();
     
-    if (!serviceSnapshot.exists) {
-      return res.status(404).json({ message: 'Service not found' });
+    // First, check if the project exists in any of the services
+    let projectExists = false;
+    for (const serviceId of serviceIds) {
+      const serviceDoc = servicesRef.doc(serviceId);
+      const serviceSnapshot = await serviceDoc.get();
+      
+      if (!serviceSnapshot.exists) {
+        return res.status(404).json({ message: `Service ${serviceId} not found` });
+      }
+      
+      const projectRef = serviceDoc.collection('projects').doc(projectId);
+      const projectSnapshot = await projectRef.get();
+      
+      if (projectSnapshot.exists) {
+        projectExists = true;
+        break;
+      }
     }
     
-    // Update project in subcollection
-    const projectRef = serviceDoc.collection('projects').doc(projectId);
-    const projectSnapshot = await projectRef.get();
-    
-    if (!projectSnapshot.exists) {
-      return res.status(404).json({ message: 'Project not found' });
+    if (!projectExists) {
+      return res.status(404).json({ message: 'Project not found in any of the specified services' });
     }
     
     const updatedProject = {
@@ -286,7 +296,12 @@ router.put('/projects/:projectId', authenticateToken, async (req, res) => {
       updatedAt: admin.firestore.FieldValue.serverTimestamp()
     };
     
-    await projectRef.set(updatedProject);
+    // Update project in all specified services
+    for (const serviceId of serviceIds) {
+      const serviceDoc = servicesRef.doc(serviceId);
+      const projectRef = serviceDoc.collection('projects').doc(projectId);
+      await projectRef.set(updatedProject);
+    }
     
     res.json({ message: 'Project updated successfully', project: updatedProject });
   } catch (error) {

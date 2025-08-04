@@ -195,161 +195,173 @@ const Services: React.FC = () => {
           </div>
         </motion.div>
 
-        {/* Services Overview Cards */}
-        <Row className="mb-5">
+        {/* Accordion Services */}
+        <div className="accordion" id="servicesAccordion">
           {servicesData.services.map((service, index) => (
-            <Col key={service.id} xs={12} md={6} lg={4} className="mb-4">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
+            <motion.div
+              key={service.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
+              className="accordion-item mb-3"
+              style={{
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                overflow: 'hidden',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+              }}
+            >
+              {/* Service Header */}
+              <div
+                className="accordion-header"
+                style={{
+                  backgroundColor: expandedServices.has(service.id) ? '#2d5a5f' : 'white',
+                  color: expandedServices.has(service.id) ? 'white' : '#1a365d',
+                  cursor: 'pointer',
+                  padding: '1.5rem',
+                  transition: 'all 0.3s ease-in-out',
+                  borderBottom: expandedServices.has(service.id) ? 'none' : '1px solid #e2e8f0'
+                }}
+                onClick={() => toggleService(service.id)}
+                onMouseEnter={(e) => {
+                  if (!expandedServices.has(service.id)) {
+                    e.currentTarget.style.backgroundColor = '#f7fafc';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!expandedServices.has(service.id)) {
+                    e.currentTarget.style.backgroundColor = 'white';
+                  }
+                }}
               >
-                <Card 
-                  className="h-100 service-overview-card"
-                  style={{
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease-in-out',
-                    border: expandedServices.has(service.id) ? '2px solid #2d5a5f' : '1px solid #e2e8f0',
-                    backgroundColor: expandedServices.has(service.id) ? '#f7fafc' : 'white'
-                  }}
-                  onClick={() => toggleService(service.id)}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-3px)';
-                    e.currentTarget.style.boxShadow = '0 6px 20px rgba(45, 90, 95, 0.15)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
-                  }}
-                >
-                  <Card.Body className="text-center p-4">
-                    <div className="mb-3" style={{ fontSize: '3rem' }}>
-                      {service.icon}
+                <div className="d-flex justify-content-between align-items-center">
+                  <div className="d-flex align-items-center">
+                    <span 
+                      style={{ 
+                        fontSize: '2rem', 
+                        marginRight: '1rem',
+                        transition: 'transform 0.3s ease-in-out',
+                        transform: expandedServices.has(service.id) ? 'rotate(90deg)' : 'rotate(0deg)'
+                      }}
+                    >
+                      {expandedServices.has(service.id) ? '▶' : '▶'}
+                    </span>
+                    <div>
+                      <h4 className="mb-1" style={{ fontWeight: 'bold' }}>
+                        {service.title}
+                      </h4>
+                      <p className="mb-0" style={{ 
+                        fontSize: '0.9rem',
+                        opacity: expandedServices.has(service.id) ? 0.9 : 0.7
+                      }}>
+                        {service.description}
+                      </p>
                     </div>
-                    <Card.Title className="mbr-fonts-style display-5" style={{ color: '#1a365d' }}>
-                      <strong>{service.title}</strong>
-                    </Card.Title>
-                    <Card.Text className="mbr-text mbr-fonts-style display-7 mb-3" style={{ color: '#4a5568' }}>
-                      {service.description}
-                    </Card.Text>
-                    <div className="d-flex justify-content-between align-items-center">
-                      <Badge 
-                        style={{ 
-                          backgroundColor: '#2d5a5f', 
-                          color: 'white',
-                          border: 'none'
-                        }}
-                      >
-                        {service.projects.length} {service.projects.length === 1 ? 'Project' : 'Projects'}
-                      </Badge>
-                      <Badge 
-                        style={{ 
-                          backgroundColor: expandedServices.has(service.id) ? '#38a169' : '#718096',
-                          color: 'white',
-                          border: 'none'
-                        }}
-                      >
-                        {expandedServices.has(service.id) ? 'Expanded' : 'Click to Expand'}
-                      </Badge>
-                    </div>
-                  </Card.Body>
-                </Card>
-              </motion.div>
-            </Col>
-          ))}
-        </Row>
+                  </div>
+                  <div className="d-flex align-items-center">
+                    <Badge 
+                      style={{ 
+                        backgroundColor: expandedServices.has(service.id) ? 'rgba(255,255,255,0.2)' : '#2d5a5f',
+                        color: expandedServices.has(service.id) ? 'white' : 'white',
+                        border: 'none',
+                        marginRight: '1rem'
+                      }}
+                    >
+                      {service.projects.length} {service.projects.length === 1 ? 'Project' : 'Projects'}
+                    </Badge>
+                    <span style={{ fontSize: '1.2rem' }}>
+                      {expandedServices.has(service.id) ? '−' : '+'}
+                    </span>
+                  </div>
+                </div>
+              </div>
 
-        {/* Projects by Service Category */}
-        <AnimatePresence>
-          {servicesData.services.map((service) => (
-            expandedServices.has(service.id) && (
-              <motion.div
-                key={service.id}
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.5 }}
-                className="mb-5"
-              >
-                <Card style={{ borderColor: '#2d5a5f' }}>
-                  <Card.Header 
-                    style={{ 
-                      backgroundColor: '#2d5a5f',
-                      color: 'white',
-                      cursor: 'pointer'
+              {/* Projects Content */}
+              <AnimatePresence>
+                {expandedServices.has(service.id) && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    style={{
+                      backgroundColor: '#f8f9fa',
+                      borderTop: '1px solid #e2e8f0'
                     }}
-                    onClick={() => toggleService(service.id)}
                   >
-                    <div className="d-flex justify-content-between align-items-center">
-                      <div>
-                        <span style={{ fontSize: '1.5rem', marginRight: '10px' }}>{service.icon}</span>
-                        <h4 className="mb-0">{service.title} Projects</h4>
-                      </div>
-                      <Button 
-                        variant="outline-light" 
-                        size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleService(service.id);
-                        }}
-                        style={{
-                          borderColor: 'rgba(255,255,255,0.5)',
-                          color: 'white'
-                        }}
-                      >
-                        Collapse
-                      </Button>
+                    <div className="p-4">
+                      <Row>
+                        {service.projects
+                          .sort((a, b) => {
+                            // Parse dates and sort in descending order (latest first)
+                            const dateA = new Date(a.date + 'T00:00:00');
+                            const dateB = new Date(b.date + 'T00:00:00');
+                            return dateB.getTime() - dateA.getTime();
+                          })
+                          .map((project, projectIndex) => (
+                          <Col key={project.id} xs={12} md={6} lg={4} className="mb-4">
+                            <motion.div
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.4, delay: projectIndex * 0.1 }}
+                            >
+                              <Card className="h-100 project-card" style={{ 
+                                borderColor: '#e2e8f0',
+                                transition: 'all 0.3s ease-in-out'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(45, 90, 95, 0.15)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                              }}
+                              >
+                                <div className="item-img">
+                                  <img 
+                                    src={project.image} 
+                                    alt={project.alt}
+                                    style={{
+                                      width: '100%',
+                                      height: '200px',
+                                      objectFit: 'cover',
+                                      borderTopLeftRadius: 'calc(0.375rem - 1px)',
+                                      borderTopRightRadius: 'calc(0.375rem - 1px)'
+                                    }}
+                                    onError={(e) => {
+                                      const target = e.target as HTMLImageElement;
+                                      target.src = '/assets/images/placeholder.jpg';
+                                    }}
+                                  />
+                                </div>
+                                <Card.Body className="p-3">
+                                  <h6 className="item-title mbr-fonts-style display-7 mb-2" style={{ color: '#1a365d' }}>
+                                    <strong>{project.title}</strong>
+                                  </h6>
+                                  <p className="item-subtitle mbr-fonts-style mb-2" style={{ color: '#718096', fontSize: '0.85rem' }}>
+                                    <em>{new Date(project.date + 'T00:00:00').toLocaleDateString('en-US', {
+                                      year: 'numeric',
+                                      month: 'long',
+                                      day: 'numeric'
+                                    })}</em>
+                                  </p>
+                                  <p className="mbr-text mbr-fonts-style mb-0 display-7" style={{ fontSize: '0.9rem', color: '#4a5568' }}>
+                                    {project.description}
+                                  </p>
+                                </Card.Body>
+                              </Card>
+                            </motion.div>
+                          </Col>
+                        ))}
+                      </Row>
                     </div>
-                  </Card.Header>
-                  <Card.Body className="p-4">
-                    <Row>
-                      {service.projects.map((project, index) => (
-                        <Col key={project.id} xs={12} md={6} lg={4} className="mb-4">
-                          <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6, delay: index * 0.1 }}
-                          >
-                            <Card className="h-100 project-card" style={{ borderColor: '#e2e8f0' }}>
-                              <div className="item-img">
-                                <img 
-                                  src={project.image} 
-                                  alt={project.alt}
-                                  style={{
-                                    width: '100%',
-                                    height: '200px',
-                                    objectFit: 'cover',
-                                    borderTopLeftRadius: 'calc(0.375rem - 1px)',
-                                    borderTopRightRadius: 'calc(0.375rem - 1px)'
-                                  }}
-                                  onError={(e) => {
-                                    const target = e.target as HTMLImageElement;
-                                    target.src = '/assets/images/placeholder.jpg';
-                                  }}
-                                />
-                              </div>
-                              <Card.Body className="p-3">
-                                <h6 className="item-title mbr-fonts-style display-7 mb-2" style={{ color: '#1a365d' }}>
-                                  <strong>{project.title}</strong>
-                                </h6>
-                                <p className="item-subtitle mbr-fonts-style mb-2" style={{ color: '#718096', fontSize: '0.85rem' }}>
-                                  <em>{project.date}</em>
-                                </p>
-                                <p className="mbr-text mbr-fonts-style mb-0 display-7" style={{ fontSize: '0.9rem', color: '#4a5568' }}>
-                                  {project.description}
-                                </p>
-                              </Card.Body>
-                            </Card>
-                          </motion.div>
-                        </Col>
-                      ))}
-                    </Row>
-                  </Card.Body>
-                </Card>
-              </motion.div>
-            )
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
           ))}
-        </AnimatePresence>
+        </div>
 
         {/* Summary Section */}
         {expandedServices.size === 0 && (

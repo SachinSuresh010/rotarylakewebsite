@@ -816,34 +816,254 @@ html {
   padding: 0 !important;
 }
 
-/* Modal styling fixes */
-.modal-content {
+/* Admin Modal Styles - Clean and Large - Highest Specificity */
+body .admin-modal .modal-dialog,
+html body .admin-modal .modal-dialog,
+body .cid-tnJhw8D8ZS .admin-modal .modal-dialog,
+html body .cid-tnJhw8D8ZS .admin-modal .modal-dialog {
+  max-width: 75vw !important;
+  width: 75vw !important;
+  margin: 1rem 0.5rem !important;
+}
+
+body .admin-modal .modal-content,
+html body .admin-modal .modal-content,
+body .cid-tnJhw8D8ZS .admin-modal .modal-content,
+html body .cid-tnJhw8D8ZS .admin-modal .modal-content {
+  border-radius: 20px !important;
+  border: none !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
+  max-width: 75vw !important;
+  width: 75vw !important;
+  min-height: 80vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+body .admin-modal .modal-header,
+html body .admin-modal .modal-header,
+body .cid-tnJhw8D8ZS .admin-modal .modal-header,
+html body .cid-tnJhw8D8ZS .admin-modal .modal-header {
+  border-bottom: none !important;
+  padding: 1.5rem 2rem 0 2rem !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border-radius: 20px 20px 0 0 !important;
+  flex-shrink: 0 !important;
+}
+
+body .admin-modal .modal-body,
+html body .admin-modal .modal-body,
+body .cid-tnJhw8D8ZS .admin-modal .modal-body,
+html body .cid-tnJhw8D8ZS .admin-modal .modal-body {
+  padding: 2rem !important;
+  max-height: 70vh !important;
+  overflow-y: auto !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+body .admin-modal .modal-footer,
+html body .admin-modal .modal-footer,
+body .cid-tnJhw8D8ZS .admin-modal .modal-footer,
+html body .cid-tnJhw8D8ZS .admin-modal .modal-footer {
+  border-top: none !important;
+  padding: 0 2rem 1.5rem 2rem !important;
+  background: rgba(248, 250, 252, 0.95) !important;
+  border-radius: 0 0 20px 20px !important;
+  flex-shrink: 0 !important;
+}
+
+/* Make form take up all available space in modal-body */
+body .admin-modal .modal-body form,
+html body .admin-modal .modal-body form,
+body .cid-tnJhw8D8ZS .admin-modal .modal-body form,
+html body .cid-tnJhw8D8ZS .admin-modal .modal-body form {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  width: 100% !important;
+}
+
+/* Make form content fill available space */
+body .admin-modal .modal-body form > *,
+html body .admin-modal .modal-body form > *,
+body .cid-tnJhw8D8ZS .admin-modal .modal-body form > *,
+html body .cid-tnJhw8D8ZS .admin-modal .modal-body form > * {
+  flex: 1 !important;
+}
+
+/* Ensure textarea and other form elements can expand */
+body .admin-modal .modal-body form textarea,
+html body .admin-modal .modal-body form textarea,
+body .cid-tnJhw8D8ZS .admin-modal .modal-body form textarea,
+html body .cid-tnJhw8D8ZS .admin-modal .modal-body form textarea {
+  flex: 1 !important;
+  min-height: 200px !important;
+  resize: vertical !important;
+}
+
+/* Override external CSS that might interfere with admin modals */
+.cid-tnJhw8D8ZS .admin-modal .modal-dialog {
+  max-width: 75vw !important;
+  width: 75vw !important;
+  margin: 1rem 0.5rem !important;
+}
+
+.cid-tnJhw8D8ZS .admin-modal .modal-content {
+  border-radius: 20px !important;
+  border: none !important;
+  background: #fff !important;
+  max-width: 75vw !important;
+  width: 75vw !important;
+  min-height: 80vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.cid-tnJhw8D8ZS .admin-modal .modal-body {
+  padding: 2rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  max-height: 70vh !important;
+  overflow-y: auto !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  flex: 1 !important;
+}
+
+.cid-tnJhw8D8ZS .admin-modal .modal-body form {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  width: 100% !important;
+}
+
+.cid-tnJhw8D8ZS .admin-modal .modal-body form textarea {
+  flex: 1 !important;
+  min-height: 200px !important;
+  resize: vertical !important;
+}
+
+/* Override theme CSS modal styles for admin modals */
+.modal-dialog.admin-modal .modal-dialog,
+.admin-modal .modal-dialog {
+  max-width: 75vw !important;
+  width: 75vw !important;
+  margin: 1rem 0.5rem !important;
+  height: auto !important;
+}
+
+.admin-modal .modal-content {
+  height: auto !important;
+  max-width: 75vw !important;
+  width: 75vw !important;
+  min-height: 80vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* Override Bootstrap modal styles for admin modals */
+@media (min-width: 576px) {
+  .admin-modal .modal-dialog {
+    max-width: 75vw !important;
+    width: 75vw !important;
+    margin: 1rem 0.5rem !important;
+  }
+}
+
+@media (min-width: 992px) {
+  .admin-modal .modal-dialog {
+    max-width: 75vw !important;
+    width: 75vw !important;
+  }
+}
+
+@media (min-width: 1200px) {
+  .admin-modal .modal-dialog {
+    max-width: 75vw !important;
+    width: 75vw !important;
+  }
+}
+
+/* Responsive adjustments for admin modals */
+@media (max-width: 1200px) {
+  body .admin-modal .modal-dialog,
+  html body .admin-modal .modal-dialog,
+  body .cid-tnJhw8D8ZS .admin-modal .modal-dialog,
+  html body .cid-tnJhw8D8ZS .admin-modal .modal-dialog {
+    max-width: 85vw !important;
+    width: 85vw !important;
+    margin: 1rem 0.25rem !important;
+  }
+  
+  body .admin-modal .modal-content,
+  html body .admin-modal .modal-content,
+  body .cid-tnJhw8D8ZS .admin-modal .modal-content,
+  html body .cid-tnJhw8D8ZS .admin-modal .modal-content {
+    max-width: 85vw !important;
+    width: 85vw !important;
+  }
+}
+
+@media (max-width: 768px) {
+  body .admin-modal .modal-dialog,
+  html body .admin-modal .modal-dialog,
+  body .cid-tnJhw8D8ZS .admin-modal .modal-dialog,
+  html body .cid-tnJhw8D8ZS .admin-modal .modal-dialog {
+    max-width: 95vw !important;
+    width: 95vw !important;
+    margin: 0.5rem 0.125rem !important;
+  }
+  
+  body .admin-modal .modal-content,
+  html body .admin-modal .modal-content,
+  body .cid-tnJhw8D8ZS .admin-modal .modal-content,
+  html body .cid-tnJhw8D8ZS .admin-modal .modal-content {
+    max-width: 95vw !important;
+    width: 95vw !important;
+    min-height: 90vh !important;
+  }
+  
+  body .admin-modal .modal-body,
+  html body .admin-modal .modal-body,
+  body .cid-tnJhw8D8ZS .admin-modal .modal-body,
+  html body .cid-tnJhw8D8ZS .admin-modal .modal-body {
+    padding: 1rem !important;
+    max-height: 80vh !important;
+  }
+}
+
+/* Regular modal styles for non-admin modals */
+.modal:not(.admin-modal) .modal-content {
   border-radius: 15px !important;
   border: none !important;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
-  max-width: 350px !important;
   margin: 0 auto !important;
 }
 
-.modal-header {
+.modal:not(.admin-modal) .modal-header {
   border-bottom: none !important;
   padding: 1rem 1rem 0 1rem !important;
 }
 
-.modal-body {
+.modal:not(.admin-modal) .modal-body {
   padding: 1rem !important;
-  max-height: 300px !important;
   overflow-y: auto !important;
 }
 
-.modal-footer {
+.modal:not(.admin-modal) .modal-footer {
   border-top: none !important;
-  padding: 0 1rem 1rem 1rem !important;
+  padding: 1rem !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 1rem !important;
 }
 
-.modal-dialog {
+.modal:not(.admin-modal) .modal-dialog {
   margin: 1rem auto !important;
-  max-width: 350px !important;
+  max-width: 75vw !important;
 }
 
 /* Ensure modals are properly positioned and don't get cut off */
@@ -914,29 +1134,18 @@ html {
   font-size: 0.85rem !important;
 }
 
-/* Ensure modal content doesn't overflow */
-.modal-content {
-  max-height: 400px !important;
-  overflow: hidden !important;
-}
-
-.modal-body {
-  overflow-y: auto !important;
-  max-height: 200px !important;
-}
-
-/* Responsive modal adjustments */
+/* Responsive modal adjustments for non-admin modals */
 @media (max-width: 768px) {
-  .modal-dialog {
+  .modal:not(.admin-modal) .modal-dialog {
     margin: 0.5rem auto !important;
     max-width: 90vw !important;
   }
   
-  .modal-body {
+  .modal:not(.admin-modal) .modal-body {
     max-height: 250px !important;
   }
   
-  .modal-content {
+  .modal:not(.admin-modal) .modal-content {
     max-width: 90vw !important;
   }
 }
