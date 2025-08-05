@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Carousel, Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -50,12 +50,10 @@ interface HomeContent {
 const Home: React.FC = () => {
   usePageTitle('Home');
   
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-  const [slidesToShow, setSlidesToShow] = useState(3);
   const [directorsData, setDirectorsData] = useState<DirectorsResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
+  const [screenSize, setScreenSize] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   // Load directors data from backend API
   useEffect(() => {
@@ -120,6 +118,15 @@ const Home: React.FC = () => {
     
     // If same priority, sort alphabetically by name
     return a.name.localeCompare(b.name);
+  });
+
+  // Debug logging
+  console.log('Directors data:', {
+    total: directors.length,
+    sorted: sortedDirectors.length,
+    firstDirector: sortedDirectors[0],
+    validDirectors: sortedDirectors.filter(d => d && d.name && d.name.trim() !== ''),
+    emptyDirectors: sortedDirectors.filter(d => !d || !d.name || d.name.trim() === '')
   });
 
   // Static fallback content
@@ -194,15 +201,15 @@ const Home: React.FC = () => {
   const services = homeContent?.services?.items || staticServices;
   const heroImages = homeContent?.hero?.images || staticHeroImages;
 
-  // Responsive slides calculation
+  // Responsive screen size detection
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 576) {
-        setSlidesToShow(1);
+        setScreenSize('mobile');
       } else if (window.innerWidth < 992) {
-        setSlidesToShow(2);
+        setScreenSize('tablet');
       } else {
-        setSlidesToShow(3);
+        setScreenSize('desktop');
       }
     };
 
@@ -211,31 +218,14 @@ const Home: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Auto-play functionality
-  useEffect(() => {
-    if (isAutoPlaying) {
-      autoPlayRef.current = setInterval(() => {
-        setCurrentSlide((prev) => (prev + 1) % Math.max(1, sortedDirectors.length - slidesToShow + 1));
-      }, 7000);
+  // Calculate directors per slide based on screen size
+  const getDirectorsPerSlide = () => {
+    switch (screenSize) {
+      case 'mobile': return 1;
+      case 'tablet': return 2;
+      case 'desktop': return 3;
+      default: return 3;
     }
-
-    return () => {
-      if (autoPlayRef.current) {
-        clearInterval(autoPlayRef.current);
-      }
-    };
-  }, [isAutoPlaying, sortedDirectors.length, slidesToShow]);
-
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % Math.max(1, sortedDirectors.length - slidesToShow + 1));
-  };
-
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + Math.max(1, sortedDirectors.length - slidesToShow + 1)) % Math.max(1, sortedDirectors.length - slidesToShow + 1));
-  };
-
-  const goToSlide = (index: number) => {
-    setCurrentSlide(Math.min(index, sortedDirectors.length - slidesToShow));
   };
 
   return (
@@ -353,213 +343,315 @@ const Home: React.FC = () => {
         </Container>
       </section>
 
-      {/* Directors Section - Custom Carousel */}
+      {/* Directors Section - Bootstrap Carousel */}
       <section className="people5 mbr-embla cid-tnEVo7HlkB" id="people5-p">
-        <div className="position-relative text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="mb-4"
-          >
-            <h3 className="mbr-fonts-style display-2">
-              <strong>Our Directors</strong>
-            </h3>
-          </motion.div>
+        <Container>
+          <div className="position-relative text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="mb-4"
+            >
+              <h3 className="mbr-fonts-style display-2">
+                <strong>Our Directors</strong>
+              </h3>
+            </motion.div>
 
-          {loading ? (
-            <div className="text-center py-5">
-              <div className="spinner-border" role="status">
-                <span className="visually-hidden">Loading...</span>
+            {loading ? (
+              <div className="text-center py-5">
+                <div className="spinner-border" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+                <p className="mt-3">Loading directors...</p>
               </div>
-              <p className="mt-3">Loading directors...</p>
-            </div>
-          ) : sortedDirectors.length === 0 ? (
-            <div className="text-center py-5">
-              <div className="alert alert-warning" role="alert">
-                <h4>No Directors Data</h4>
-                <p>No directors data found.</p>
-              </div>
-            </div>
-          ) : (
-            <div className="embla" style={{ position: 'relative', maxWidth: '100%', margin: '0 auto' }}>
-              <div className="embla__viewport" style={{ overflow: 'hidden' }}>
-                <div 
-                  className="embla__container" 
-                  style={{ 
-                    display: 'flex', 
-                    transition: 'transform 0.5s ease-in-out',
-                    transform: `translateX(-${currentSlide * (100 / slidesToShow)}%)`
-                  }}
-                >
-                  {sortedDirectors.map((director, index) => (
-                    <div 
-                      key={director.id || index} 
-                      className="embla__slide slider-image item" 
-                      style={{ 
-                        minWidth: `${100 / slidesToShow}%`, 
-                        padding: '0 15px',
-                        marginLeft: '0rem', 
-                        marginRight: '0rem',
-                        display: 'flex',
-                        justifyContent: 'center'
-                      }}
-                    >
-                      <div className="user">
-                        <div className="user_image">
-                          <Link to={`/members/${director.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                            <div className="item-wrapper position-relative">
-                              <MemberImage 
-                                member={director}
-                                size="medium"
-                                onClick={() => {}}
-                              />
-                            </div>
-                          </Link>
-                        </div>
-                        <div className="user_text mb-4">
-                          <p className="mbr-fonts-style display-7"></p>
-                        </div>
-                        <Link to={`/members/${director.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                          <div className="user_name mbr-fonts-style mb-2 display-7" style={{ cursor: 'pointer' }}>
-                            <strong>{director.name}</strong>
-                            {director.isPastPresident && (
-                              <span 
-                                style={{
-                                  backgroundColor: '#ffc107',
-                                  color: '#000',
-                                  fontSize: '0.7rem',
-                                  padding: '2px 6px',
-                                  borderRadius: '10px',
-                                  marginLeft: '5px'
-                                }}
-                              >
-                                Past President
-                              </span>
-                            )}
-                          </div>
-                        </Link>
-                        <div className="user_desk mbr-fonts-style display-7">
-                          {director.currentDesignation}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+            ) : sortedDirectors.length === 0 ? (
+              <div className="text-center py-5">
+                <div className="alert alert-warning" role="alert">
+                  <h4>No Directors Data</h4>
+                  <p>No directors data found.</p>
                 </div>
               </div>
-            
-            {/* Navigation Buttons */}
-            <button 
-              className="embla__button embla__button--prev"
-              onClick={prevSlide}
-              style={{
-                position: 'absolute',
-                top: '50%',
-                left: '10px',
-                transform: 'translateY(-50%)',
-                background: 'rgba(0, 0, 0, 0.7)',
-                border: '2px solid rgba(255, 255, 255, 0.8)',
-                borderRadius: '50%',
-                width: '50px',
-                height: '50px',
-                display: slidesToShow === 1 ? 'none' : 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                zIndex: 10,
-                transition: 'all 0.3s ease',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
-              }}
-              onMouseEnter={(e) => {
-                setIsAutoPlaying(false);
-                e.currentTarget.style.background = 'rgba(0, 0, 0, 0.9)';
-                e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)';
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 1)';
-              }}
-              onMouseLeave={(e) => {
-                setIsAutoPlaying(true);
-                e.currentTarget.style.background = 'rgba(0, 0, 0, 0.7)';
-                e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.8)';
-              }}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="15,18 9,12 15,6"></polyline>
-              </svg>
-              <span className="sr-only visually-hidden visually-hidden">Previous</span>
-            </button>
-            
-            <button 
-              className="embla__button embla__button--next"
-              onClick={nextSlide}
-              style={{
-                position: 'absolute',
-                top: '50%',
-                right: '10px',
-                transform: 'translateY(-50%)',
-                background: 'rgba(0, 0, 0, 0.7)',
-                border: '2px solid rgba(255, 255, 255, 0.8)',
-                borderRadius: '50%',
-                width: '50px',
-                height: '50px',
-                display: slidesToShow === 1 ? 'none' : 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                zIndex: 10,
-                transition: 'all 0.3s ease',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
-              }}
-              onMouseEnter={(e) => {
-                setIsAutoPlaying(false);
-                e.currentTarget.style.background = 'rgba(0, 0, 0, 0.9)';
-                e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)';
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 1)';
-              }}
-              onMouseLeave={(e) => {
-                setIsAutoPlaying(true);
-                e.currentTarget.style.background = 'rgba(0, 0, 0, 0.7)';
-                e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
-                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.8)';
-              }}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="9,18 15,12 9,6"></polyline>
-              </svg>
-              <span className="sr-only visually-hidden visually-hidden">Next</span>
-            </button>
-
-            {/* Dots Indicator */}
-            <div style={{ 
-              position: 'absolute', 
-              bottom: '-30px', 
-              left: '50%', 
-              transform: 'translateX(-50%)',
-              display: 'flex',
-              gap: '8px'
-            }}>
-              {Array.from({ length: Math.max(1, sortedDirectors.length - slidesToShow + 1) }, (_, index) => (
-                <button
-                  key={index}
-                  onClick={() => goToSlide(index)}
-                  style={{
-                    width: '10px',
-                    height: '10px',
-                    borderRadius: '50%',
-                    border: 'none',
-                    background: index === currentSlide ? '#007bff' : '#ccc',
-                    cursor: 'pointer',
-                    transition: 'background-color 0.3s ease'
-                  }}
-                  onMouseEnter={() => setIsAutoPlaying(false)}
-                  onMouseLeave={() => setIsAutoPlaying(true)}
-                />
-              ))}
-            </div>
+            ) : !directorsData ? (
+              <div className="text-center py-5">
+                <div className="spinner-border" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+                <p className="mt-3">Loading directors data...</p>
+              </div>
+            ) : (
+              <div className="directors-carousel-container">
+                {(() => {
+                  // Filter out empty directors
+                  const validDirectors = sortedDirectors.filter(director => 
+                    director && director.name && director.name.trim() !== ''
+                  );
+                  
+                  const directorsPerSlide = getDirectorsPerSlide();
+                  const slides = [];
+                  
+                  console.log('Creating slides:', {
+                    totalDirectors: sortedDirectors.length,
+                    validDirectors: validDirectors.length,
+                    directorsPerSlide,
+                    screenSize
+                  });
+                  
+                  for (let i = 0; i < validDirectors.length; i += directorsPerSlide) {
+                    const slideDirectors = validDirectors.slice(i, i + directorsPerSlide);
+                    console.log(`Slide ${slides.length}:`, slideDirectors.map(d => d.name));
+                    slides.push(slideDirectors);
+                  }
+                  
+                  console.log('Total slides created:', slides.length);
+                  
+                  // Only render carousel if we have valid slides
+                  if (slides.length === 0) {
+                    return (
+                      <div className="text-center py-5">
+                        <div className="alert alert-info" role="alert">
+                          <h4>No Directors Available</h4>
+                          <p>No valid directors data found.</p>
+                        </div>
+                      </div>
+                    );
+                  }
+                  
+                  const nextSlide = () => {
+                    setCurrentSlide((prev) => (prev + 1) % slides.length);
+                  };
+                  
+                  const prevSlide = () => {
+                    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+                  };
+                  
+                  const goToSlide = (index: number) => {
+                    setCurrentSlide(index);
+                  };
+                  
+                  return (
+                    <div className="custom-carousel" style={{ position: 'relative', maxWidth: '100%', margin: '0 auto', padding: '0 20px' }}>
+                      <style>
+                        {`
+                          .custom-carousel {
+                            position: relative;
+                            overflow: visible;
+                          }
+                          
+                          .custom-carousel .carousel-control-prev,
+                          .custom-carousel .carousel-control-next {
+                            width: 50px;
+                            height: 50px;
+                            background: rgba(0, 0, 0, 0.7);
+                            border-radius: 50%;
+                            border: 2px solid rgba(255, 255, 255, 0.8);
+                            top: 50%;
+                            transform: translateY(-50%);
+                            transition: all 0.3s ease;
+                            position: absolute;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            cursor: pointer;
+                            z-index: 10;
+                            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                          }
+                          
+                          .custom-carousel .carousel-control-prev:hover,
+                          .custom-carousel .carousel-control-next:hover {
+                            background: rgba(0, 0, 0, 0.9);
+                            transform: translateY(-50%) scale(1.1);
+                            border-color: rgba(255, 255, 255, 1);
+                          }
+                          
+                          .custom-carousel .carousel-indicators {
+                            position: absolute;
+                            bottom: -40px;
+                            left: 0;
+                            right: 0;
+                            display: flex;
+                            gap: 8px;
+                            justify-content: center;
+                            align-items: center;
+                            margin: 0 auto;
+                          }
+                          
+                          .custom-carousel .carousel-indicators button {
+                            width: 12px;
+                            height: 12px;
+                            border-radius: 50%;
+                            background-color: #ccc;
+                            border: none;
+                            margin: 0 4px;
+                            transition: background-color 0.3s ease;
+                            cursor: pointer;
+                            flex-shrink: 0;
+                          }
+                          
+                          .custom-carousel .carousel-indicators button.active {
+                            background-color: #007bff;
+                          }
+                          
+                          .custom-carousel .carousel-slide {
+                            display: none;
+                            transition: opacity 0.5s ease-in-out;
+                          }
+                          
+                          .custom-carousel .carousel-slide.active {
+                            display: block;
+                          }
+                          
+                          @media (max-width: 576px) {
+                            .custom-carousel .carousel-control-prev,
+                            .custom-carousel .carousel-control-next {
+                              width: 40px;
+                              height: 40px;
+                            }
+                            
+                            .custom-carousel .carousel-indicators {
+                              bottom: -30px;
+                              gap: 6px;
+                            }
+                            
+                            .custom-carousel .carousel-indicators button {
+                              width: 10px;
+                              height: 10px;
+                              margin: 0 2px;
+                            }
+                          }
+                        `}
+                      </style>
+                      
+                      {/* Navigation Buttons */}
+                      {slides.length > 1 && (
+                        <>
+                          <button 
+                            className="carousel-control-prev"
+                            onClick={prevSlide}
+                            style={{ left: '10px' }}
+                          >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="15,18 9,12 15,6"></polyline>
+                            </svg>
+                          </button>
+                          
+                          <button 
+                            className="carousel-control-next"
+                            onClick={nextSlide}
+                            style={{ right: '10px' }}
+                          >
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="9,18 15,12 9,6"></polyline>
+                            </svg>
+                          </button>
+                        </>
+                      )}
+                      
+                      {/* Slides */}
+                      {slides.map((slideDirectors, slideIndex) => (
+                        <div 
+                          key={`slide-${slideIndex}`}
+                          className={`carousel-slide ${slideIndex === currentSlide ? 'active' : ''}`}
+                        >
+                          <Row className="justify-content-center">
+                            {slideDirectors.map((director, directorIndex) => (
+                              <Col 
+                                key={`director-${director.id || slideIndex}-${directorIndex}`} 
+                                xs={12} 
+                                sm={6} 
+                                lg={4}
+                                className="mb-4"
+                              >
+                                <motion.div
+                                  initial={{ opacity: 0, y: 20 }}
+                                  whileInView={{ opacity: 1, y: 0 }}
+                                  transition={{ duration: 0.6, delay: directorIndex * 0.1 }}
+                                  viewport={{ once: true }}
+                                  className="director-item text-center"
+                                  style={{
+                                    padding: '15px'
+                                  }}
+                                >
+                                  <div className="director-image-container mb-3">
+                                    <Link to={`/members/${director.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                      <div className="position-relative d-flex justify-content-center align-items-center" style={{ width: '100%' }}>
+                                        <MemberImage 
+                                          member={director}
+                                          size="medium"
+                                          onClick={() => {}}
+                                          style={{ margin: '0 auto' }}
+                                        />
+                                      </div>
+                                    </Link>
+                                  </div>
+                                  
+                                  <div className="director-info">
+                                    <Link to={`/members/${director.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                      <h5 
+                                        className="director-name mb-2" 
+                                        style={{ 
+                                          cursor: 'pointer',
+                                          fontSize: '1.1rem',
+                                          fontWeight: 'bold',
+                                          color: '#333'
+                                        }}
+                                      >
+                                        {director.name}
+                                        {director.isPastPresident && (
+                                          <span 
+                                            className="badge ms-2"
+                                            style={{
+                                              backgroundColor: '#ffc107',
+                                              color: '#000',
+                                              fontSize: '0.7rem',
+                                              padding: '4px 8px',
+                                              borderRadius: '12px'
+                                            }}
+                                          >
+                                            Past President
+                                          </span>
+                                        )}
+                                      </h5>
+                                    </Link>
+                                    
+                                    <p 
+                                      className="director-designation mb-0"
+                                      style={{
+                                        fontSize: '0.9rem',
+                                        color: '#666',
+                                        fontWeight: '500'
+                                      }}
+                                    >
+                                      {director.currentDesignation}
+                                    </p>
+                                  </div>
+                                </motion.div>
+                              </Col>
+                            ))}
+                          </Row>
+                        </div>
+                      ))}
+                      
+                      {/* Indicators */}
+                      {slides.length > 1 && (
+                        <div className="carousel-indicators">
+                          {slides.map((_, index) => (
+                            <button
+                              key={index}
+                              onClick={() => goToSlide(index)}
+                              className={index === currentSlide ? 'active' : ''}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
           </div>
-        )}
-        </div>
+        </Container>
       </section>
     </div>
   );

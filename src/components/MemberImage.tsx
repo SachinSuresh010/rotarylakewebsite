@@ -79,7 +79,8 @@ const MemberImage: React.FC<MemberImageProps> = ({
             backfaceVisibility: 'hidden',
             transform: 'translateZ(0)',
             border: showBorder ? '3px solid #0066CC' : 'none',
-            display: 'block'
+            display: 'block',
+            margin: '0 auto'
           }}
           onError={handleImageError}
           onMouseEnter={(e) => {
