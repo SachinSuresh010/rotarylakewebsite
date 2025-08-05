@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Form, Alert, Nav, Table, Badge, InputGroup, Spinner, Modal } from 'react-bootstrap';
-import { FaUsers, FaChartBar, FaGear, FaRightFromBracket, FaPlus, FaPenToSquare, FaTrash, FaMagnifyingGlass, FaClock, FaUserCheck, FaUserXmark, FaEye, FaCalendar, FaEnvelope, FaUser, FaBriefcase, FaGraduationCap, FaHeart, FaLocationDot, FaPhone, FaTrophy, FaStar, FaXmark, FaLinkedin, FaFacebook, FaTwitter, FaCamera, FaFloppyDisk, FaTag, FaImages, FaCalendarDay, FaImage, FaKey } from 'react-icons/fa6';
+import { FaUsers, FaChartBar, FaGear, FaRightFromBracket, FaPlus, FaPenToSquare, FaTrash, FaMagnifyingGlass, FaClock, FaUserCheck, FaUserXmark, FaEye, FaCalendar, FaEnvelope, FaUser, FaBriefcase, FaGraduationCap, FaHeart, FaLocationDot, FaPhone, FaTrophy, FaStar, FaXmark, FaLinkedin, FaFacebook, FaTwitter, FaCamera, FaFloppyDisk, FaTag, FaImages, FaCalendarDay, FaImage, FaKey, FaRotateLeft } from 'react-icons/fa6';
 import MemberSearchModal from '../components/MemberSearchModal';
 import { usePageTitle } from '../hooks/usePageTitle';
 
@@ -1183,6 +1183,31 @@ interface GalleryEvent {
   createdAt?: string;
 }
 
+interface HomePageContent {
+  hero: {
+    title: string;
+    subtitle: string;
+    description: string;
+    images: string[];
+    isActive: boolean;
+  };
+  services: {
+    title: string;
+    subtitle: string;
+    description: string;
+    items: {
+      title: string;
+      image: string;
+      description: string;
+      link: string;
+      isActive: boolean;
+    }[];
+    isActive: boolean;
+  };
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 const GalleryTab: React.FC<{
   galleryYears: GalleryYear[];
   galleryEvents: GalleryEvent[];
@@ -1921,6 +1946,810 @@ const GalleryTab: React.FC<{
   );
 };
 
+const HomePageTab: React.FC<{
+  homeContent: HomePageContent | null;
+  homeLoading: boolean;
+  homeError: string | null;
+  homeSuccess: string | null;
+  showHeroModal: boolean;
+  setShowHeroModal: (show: boolean) => void;
+  showServicesModal: boolean;
+  setShowServicesModal: (show: boolean) => void;
+  editingHero: any;
+  editingServices: any;
+  setEditingHero: (hero: any) => void;
+  setEditingServices: (services: any) => void;
+  fetchHomeContent: () => Promise<void>;
+  updateHeroContent: (heroData: any) => Promise<void>;
+  updateServicesContent: (servicesData: any) => Promise<void>;
+}> = ({ 
+  homeContent, 
+  homeLoading, 
+  homeError, 
+  homeSuccess,
+  showHeroModal,
+  setShowHeroModal,
+  showServicesModal,
+  setShowServicesModal,
+  editingHero,
+  editingServices,
+  setEditingHero,
+  setEditingServices,
+  fetchHomeContent,
+  updateHeroContent,
+  updateServicesContent
+}) => {
+  // Fetch home content when component mounts
+  useEffect(() => {
+    fetchHomeContent();
+  }, [fetchHomeContent]);
+
+  return (
+    <div className="admin-home-page">
+      <div className="row">
+        <div className="col-12">
+          <Card className="admin-card mb-4">
+            <Card.Header className="admin-card-header">
+              <div className="d-flex align-items-center">
+                <div className="admin-stats-icon admin-stats-primary me-3">
+                  <IconWrapper icon={FaUser} />
+                </div>
+                <div>
+                  <h5 className="mb-1 text-white fw-bold">Home Page Management</h5>
+                  <p className="mb-0 opacity-90 text-white">Customize hero section and services content</p>
+                </div>
+              </div>
+            </Card.Header>
+            <Card.Body className="admin-card-body">
+              {homeError && <Alert variant="danger" className="mb-4 border-0 shadow-sm">{homeError}</Alert>}
+              {homeSuccess && <Alert variant="success" className="mb-4 border-0 shadow-sm">{homeSuccess}</Alert>}
+              
+              {homeLoading ? (
+                <div className="text-center py-5">
+                  <Spinner animation="border" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                  </Spinner>
+                  <p className="mt-3">Loading home page content...</p>
+                </div>
+              ) : (
+                <div className="row">
+                  {/* Hero Section */}
+                  <div className="col-md-6 mb-4">
+                    <Card className="admin-card h-100">
+                      <Card.Header className="admin-card-header">
+                        <h6 className="mb-0 text-white">Hero Section</h6>
+                      </Card.Header>
+                      <Card.Body>
+                        {homeContent?.hero ? (
+                          <div>
+                            <h6>Title: {homeContent.hero.title}</h6>
+                            <h6>Subtitle: {homeContent.hero.subtitle}</h6>
+                            <p>Description: {homeContent.hero.description}</p>
+                            <p>Images: {homeContent.hero.images.length} images</p>
+                            <p>Status: {homeContent.hero.isActive ? 'Active' : 'Inactive'}</p>
+                            <Button 
+                              variant="outline-primary" 
+                              size="sm"
+                              onClick={() => {
+                                setEditingHero({
+                                  ...homeContent.hero,
+                                  newImageUrl: '',
+                                  newImageFile: null
+                                });
+                                setShowHeroModal(true);
+                              }}
+                            >
+                              <IconWrapper icon={FaPenToSquare} className="me-2" />
+                              Edit Hero
+                            </Button>
+                          </div>
+                        ) : (
+                          <div>
+                            <p className="text-muted">No hero content configured</p>
+                            <Button 
+                              variant="outline-primary" 
+                              size="sm"
+                              onClick={() => {
+                                setEditingHero({
+                                  title: "Welcome to Rotary Lake",
+                                  subtitle: "Service Above Self",
+                                  description: "Join us in making a difference in our community and around the world.",
+                                  images: [],
+                                  isActive: true,
+                                  newImageUrl: '',
+                                  newImageFile: null
+                                });
+                                setShowHeroModal(true);
+                              }}
+                            >
+                              <IconWrapper icon={FaPlus} className="me-2" />
+                              Add Hero
+                            </Button>
+                          </div>
+                        )}
+                      </Card.Body>
+                    </Card>
+                  </div>
+
+                  {/* Services Section */}
+                  <div className="col-md-6 mb-4">
+                    <Card className="admin-card h-100">
+                      <Card.Header className="admin-card-header">
+                        <h6 className="mb-0 text-white">Services Section</h6>
+                      </Card.Header>
+                      <Card.Body>
+                        {homeContent?.services ? (
+                          <div>
+                            <h6>Title: {homeContent.services.title}</h6>
+                            <h6>Subtitle: {homeContent.services.subtitle}</h6>
+                            <p>Description: {homeContent.services.description}</p>
+                            <p>Items: {homeContent.services.items.length} services</p>
+                            <p>Status: {homeContent.services.isActive ? 'Active' : 'Inactive'}</p>
+                            <Button 
+                              variant="outline-primary" 
+                              size="sm"
+                              className="me-2"
+                              onClick={() => {
+                                setEditingServices({
+                                  ...homeContent.services,
+                                  newItemTitle: '',
+                                  newItemImage: '',
+                                  newItemDescription: '',
+                                  newItemImageFile: null
+                                });
+                                setShowServicesModal(true);
+                              }}
+                            >
+                              <IconWrapper icon={FaPenToSquare} className="me-2" />
+                              Edit Services
+                            </Button>
+                          </div>
+                        ) : (
+                          <div>
+                            <p className="text-muted">No services content configured</p>
+                            <Button 
+                              variant="outline-primary" 
+                              size="sm"
+                              onClick={() => {
+                                setEditingServices({
+                                  title: "Services",
+                                  subtitle: "Rotary avenues of service",
+                                  description: "Discover our various service initiatives and projects.",
+                                  items: [],
+                                  isActive: true,
+                                  newItemTitle: '',
+                                  newItemImage: '',
+                                  newItemDescription: '',
+                                  newItemImageFile: null
+                                });
+                                setShowServicesModal(true);
+                              }}
+                            >
+                              <IconWrapper icon={FaPlus} className="me-2" />
+                              Add Services
+                            </Button>
+                          </div>
+                        )}
+                      </Card.Body>
+                    </Card>
+                  </div>
+                  
+                  {/* Reset Section */}
+                  <div className="col-12 mb-4">
+                    <Card className="admin-card">
+                      <Card.Header className="admin-card-header">
+                        <h6 className="mb-0 text-white">Reset Content</h6>
+                      </Card.Header>
+                      <Card.Body>
+                        <p className="text-muted mb-3">Reset all home page content to default values</p>
+                        <Button 
+                          variant="outline-warning" 
+                          size="sm"
+                                                        onClick={async () => {
+                                try {
+                                  const memberToken = localStorage.getItem('memberToken');
+                                  const adminToken = localStorage.getItem('adminToken');
+                                  const token = memberToken || adminToken;
+                                  
+                                  if (!token) {
+                                    console.error('No authentication token found');
+                                    alert('Please log in to perform this action');
+                                    return;
+                                  }
+                                  
+
+                                  
+                                  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+                                  console.log('Making reset request to:', `${API_BASE_URL}/home/reset`);
+                                  console.log('Token:', token.substring(0, 20) + '...');
+                                  
+                                  // Test if API is reachable
+                                  try {
+                                    const healthCheck = await fetch(`${API_BASE_URL}/health`);
+                                    console.log('Health check status:', healthCheck.status);
+                                  } catch (error) {
+                                    console.error('API not reachable:', error);
+                                    alert('API server is not reachable. Please check if the backend is running.');
+                                    return;
+                                  }
+                                  
+                                  const response = await fetch(`${API_BASE_URL}/home/reset`, {
+                                    method: 'POST',
+                                    headers: {
+                                      'Authorization': `Bearer ${token}`,
+                                      'Content-Type': 'application/json'
+                                    }
+                                  });
+                                  
+                                  console.log('Response status:', response.status);
+                                  console.log('Response headers:', response.headers);
+                                  
+                                  if (response.ok) {
+                                    const result = await response.json();
+                                    console.log('Reset successful:', result);
+                                    fetchHomeContent();
+                                    alert('Content reset to default successfully!');
+                                  } else {
+                                    const errorData = await response.json().catch(() => ({ message: 'Reset failed' }));
+                                    console.error(`Failed to reset content: ${errorData.message}`);
+                                    alert(`Failed to reset content: ${errorData.message}`);
+                                  }
+                                } catch (error) {
+                                  console.error(`Failed to reset content: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                                  alert(`Failed to reset content: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                                }
+                              }}
+                        >
+                          <IconWrapper icon={FaRotateLeft} className="me-2" />
+                          Reset to Default
+                        </Button>
+                      </Card.Body>
+                    </Card>
+                  </div>
+                </div>
+              )}
+            </Card.Body>
+          </Card>
+        </div>
+      </div>
+
+      {/* Hero Edit Modal */}
+      <Modal show={showHeroModal} onHide={() => setShowHeroModal(false)} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Hero Section</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Label>Title</Form.Label>
+              <Form.Control
+                type="text"
+                value={editingHero?.title || ''}
+                onChange={(e) => setEditingHero({ ...editingHero, title: e.target.value })}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Subtitle</Form.Label>
+              <Form.Control
+                type="text"
+                value={editingHero?.subtitle || ''}
+                onChange={(e) => setEditingHero({ ...editingHero, subtitle: e.target.value })}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Description</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                value={editingHero?.description || ''}
+                onChange={(e) => setEditingHero({ ...editingHero, description: e.target.value })}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Check
+                type="checkbox"
+                label="Active"
+                checked={editingHero?.isActive || false}
+                onChange={(e) => setEditingHero({ ...editingHero, isActive: e.target.checked })}
+              />
+            </Form.Group>
+            
+            <Form.Group className="mb-3">
+              <Form.Label>Images</Form.Label>
+              {editingHero?.images && editingHero.images.length > 0 && (
+                <div className="mb-3">
+                  <h6>Current Images:</h6>
+                  <div className="row">
+                    {editingHero.images.map((image: string, index: number) => (
+                      <div key={index} className="col-md-4 mb-2">
+                        <div className="position-relative">
+                          <img 
+                            src={image} 
+                            alt={`Hero ${index + 1}`}
+                            className="img-fluid rounded"
+                            style={{ height: '100px', objectFit: 'cover', width: '100%' }}
+                          />
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            className="position-absolute top-0 end-0"
+                            style={{ margin: '2px' }}
+                            onClick={() => {
+                              const newImages = editingHero.images.filter((image: string, i: number) => i !== index);
+                              setEditingHero({ ...editingHero, images: newImages });
+                            }}
+                          >
+                            <IconWrapper icon={FaXmark} />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <div className="mb-3">
+                <h6>Add Image via URL:</h6>
+                <Form.Control
+                  type="text"
+                  placeholder="e.g., https://example.com/image.jpg or /assets/images/hero-image.jpg"
+                  value={editingHero?.newImageUrl || ''}
+                  onChange={(e) => {
+                    setEditingHero({ ...editingHero, newImageUrl: e.target.value });
+                  }}
+                />
+                <Form.Text className="text-muted">
+                  Enter a full URL or relative path to an image file
+                </Form.Text>
+              </div>
+              
+              <div className="mb-3">
+                <h6>Upload Image File:</h6>
+                <Form.Control
+                  type="file"
+                  accept="image/*"
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      // Create a temporary URL for preview
+                      const imageUrl = URL.createObjectURL(file);
+                      setEditingHero({ 
+                        ...editingHero, 
+                        newImageFile: file,
+                        newImageUrl: imageUrl
+                      });
+                    }
+                  }}
+                />
+                <Form.Text className="text-muted">
+                  Select an image file to upload (JPG, PNG, GIF supported)
+                </Form.Text>
+                
+                {/* Preview for uploaded file */}
+                {editingHero?.newImageFile && editingHero?.newImageUrl && (
+                  <div className="mt-2">
+                    <h6>Preview:</h6>
+                    <div className="position-relative d-inline-block">
+                      <img 
+                        src={editingHero.newImageUrl} 
+                        alt="Preview" 
+                        style={{ 
+                          maxWidth: '200px', 
+                          maxHeight: '150px', 
+                          objectFit: 'cover',
+                          border: '1px solid #ddd',
+                          borderRadius: '4px'
+                        }} 
+                      />
+                      <Button
+                        variant="outline-danger"
+                        size="sm"
+                        className="position-absolute top-0 end-0"
+                        style={{ transform: 'translate(50%, -50%)' }}
+                        onClick={() => {
+                          URL.revokeObjectURL(editingHero.newImageUrl);
+                          setEditingHero({ 
+                            ...editingHero, 
+                            newImageFile: null,
+                            newImageUrl: ''
+                          });
+                        }}
+                      >
+                        ×
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              <Button
+                variant="outline-primary"
+                size="sm"
+                onClick={async () => {
+                  if (editingHero?.newImageFile) {
+                    try {
+                      // Upload the file first
+                      const formData = new FormData();
+                      formData.append('image', editingHero.newImageFile);
+                      
+                      const memberToken = localStorage.getItem('memberToken');
+                      const adminToken = localStorage.getItem('adminToken');
+                      const token = memberToken || adminToken;
+                      
+                      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+                      const response = await fetch(`${API_BASE_URL}/home/upload-image`, {
+                        method: 'POST',
+                        headers: {
+                          'Authorization': `Bearer ${token}`
+                        },
+                        body: formData
+                      });
+                      
+                      if (response.ok) {
+                        const data = await response.json();
+                        const newImages = [...(editingHero.images || []), data.imageUrl];
+                        setEditingHero({ 
+                          ...editingHero, 
+                          images: newImages,
+                          newImageUrl: '',
+                          newImageFile: null
+                        });
+                      } else {
+                        const errorData = await response.json().catch(() => ({ message: 'Upload failed' }));
+                        alert(`Failed to upload image: ${errorData.message}`);
+                      }
+                    } catch (error) {
+                      alert(`Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                    }
+                  } else if (editingHero?.newImageUrl && !editingHero.newImageUrl.startsWith('blob:')) {
+                    // Only add URL if it's not a blob URL (blob URLs are temporary)
+                    const newImages = [...(editingHero.images || []), editingHero.newImageUrl];
+                    setEditingHero({ 
+                      ...editingHero, 
+                      images: newImages,
+                      newImageUrl: '',
+                      newImageFile: null
+                    });
+                  } else if (editingHero?.newImageUrl && editingHero.newImageUrl.startsWith('blob:')) {
+                    alert('Please select a file to upload or enter a valid image URL');
+                  }
+                }}
+              >
+                <IconWrapper icon={FaPlus} className="me-2" />
+                Add Image
+              </Button>
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowHeroModal(false)}>
+            Cancel
+          </Button>
+          <Button 
+            variant="primary" 
+            onClick={() => {
+              if (editingHero) {
+                updateHeroContent(editingHero);
+              }
+            }}
+          >
+            Save Changes
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Services Edit Modal */}
+      <Modal show={showServicesModal} onHide={() => setShowServicesModal(false)} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Services Section</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Label>Title</Form.Label>
+              <Form.Control
+                type="text"
+                value={editingServices?.title || ''}
+                onChange={(e) => setEditingServices({ ...editingServices, title: e.target.value })}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Subtitle</Form.Label>
+              <Form.Control
+                type="text"
+                value={editingServices?.subtitle || ''}
+                onChange={(e) => setEditingServices({ ...editingServices, subtitle: e.target.value })}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Description</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                value={editingServices?.description || ''}
+                onChange={(e) => setEditingServices({ ...editingServices, description: e.target.value })}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Check
+                type="checkbox"
+                label="Active"
+                checked={editingServices?.isActive || false}
+                onChange={(e) => setEditingServices({ ...editingServices, isActive: e.target.checked })}
+              />
+            </Form.Group>
+            
+            <Form.Group className="mb-3">
+              <Form.Label>Service Items</Form.Label>
+              {editingServices?.items && editingServices.items.length > 0 && (
+                <div className="mb-3">
+                  <h6>Current Service Items:</h6>
+                  {editingServices.items.map((item: any, index: number) => (
+                    <div key={index} className="card mb-3">
+                      <div className="card-body">
+                        <div className="row">
+                          <div className="col-md-3">
+                            <img 
+                              src={item.image} 
+                              alt={item.title}
+                              className="img-fluid rounded"
+                              style={{ height: '80px', objectFit: 'cover', width: '100%' }}
+                            />
+                          </div>
+                          <div className="col-md-9">
+                            <h6>{item.title}</h6>
+                            <p className="text-muted small">{item.description}</p>
+                            <div className="d-flex gap-2">
+                              <Button
+                                variant="outline-primary"
+                                size="sm"
+                                onClick={() => {
+                                  // Edit this service item
+                                  setEditingServices({
+                                    ...editingServices,
+                                    editingItem: { ...item, index },
+                                    newItemTitle: item.title,
+                                    newItemImage: item.image,
+                                    newItemDescription: item.description,
+                                    newItemImageFile: null
+                                  });
+                                }}
+                              >
+                                <IconWrapper icon={FaPenToSquare} className="me-1" />
+                                Edit
+                              </Button>
+                              <Button
+                                variant="outline-danger"
+                                size="sm"
+                                onClick={() => {
+                                  const newItems = editingServices.items.filter((_: any, i: number) => i !== index);
+                                  setEditingServices({ ...editingServices, items: newItems });
+                                }}
+                              >
+                                <IconWrapper icon={FaTrash} className="me-1" />
+                                Remove
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              <div className="mb-3">
+                <h6>{editingServices?.editingItem ? `Edit Service Item: ${editingServices.editingItem.title}` : 'Add New Service Item:'}</h6>
+                                 <div className="row">
+                   <div className="col-md-6">
+                     <Form.Control
+                       type="text"
+                       placeholder="Service title"
+                       value={editingServices?.newItemTitle || ''}
+                       onChange={(e) => setEditingServices({ ...editingServices, newItemTitle: e.target.value })}
+                     />
+                   </div>
+                   <div className="col-md-6">
+                     <Form.Control
+                       type="text"
+                       placeholder="e.g., https://example.com/image.jpg or /assets/images/service.jpg"
+                       value={editingServices?.newItemImage || ''}
+                       onChange={(e) => setEditingServices({ ...editingServices, newItemImage: e.target.value })}
+                     />
+                   </div>
+                 </div>
+                 <div className="row mt-2">
+                   <div className="col-md-6">
+                     <Form.Control
+                       type="file"
+                       accept="image/*"
+                       placeholder="Upload image file"
+                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                         const file = e.target.files?.[0];
+                         if (file) {
+                           const imageUrl = URL.createObjectURL(file);
+                           setEditingServices({ 
+                             ...editingServices, 
+                             newItemImageFile: file,
+                             newItemImage: imageUrl
+                           });
+                         }
+                       }}
+                     />
+                   </div>
+                   <div className="col-md-6">
+                     {/* Preview for uploaded service item image */}
+                     {editingServices?.newItemImageFile && editingServices?.newItemImage && (
+                       <div className="position-relative d-inline-block">
+                         <img 
+                           src={editingServices.newItemImage} 
+                           alt="Preview" 
+                           style={{ 
+                             maxWidth: '150px', 
+                             maxHeight: '100px', 
+                             objectFit: 'cover',
+                             border: '1px solid #ddd',
+                             borderRadius: '4px'
+                           }} 
+                         />
+                         <Button
+                           variant="outline-danger"
+                           size="sm"
+                           className="position-absolute top-0 end-0"
+                           style={{ transform: 'translate(50%, -50%)' }}
+                           onClick={() => {
+                             URL.revokeObjectURL(editingServices.newItemImage);
+                             setEditingServices({ 
+                               ...editingServices, 
+                               newItemImageFile: null,
+                               newItemImage: ''
+                             });
+                           }}
+                         >
+                           ×
+                         </Button>
+                       </div>
+                     )}
+                   </div>
+                 </div>
+                <Form.Control
+                  as="textarea"
+                  rows={2}
+                  placeholder="Service description"
+                  value={editingServices?.newItemDescription || ''}
+                  onChange={(e) => setEditingServices({ ...editingServices, newItemDescription: e.target.value })}
+                  className="mt-2"
+                />
+                {editingServices?.editingItem && (
+                  <Button
+                    variant="outline-secondary"
+                    size="sm"
+                    className="mt-2 me-2"
+                    onClick={() => {
+                      setEditingServices({
+                        ...editingServices,
+                        editingItem: null,
+                        newItemTitle: '',
+                        newItemImage: '',
+                        newItemDescription: '',
+                        newItemImageFile: null
+                      });
+                    }}
+                  >
+                    <IconWrapper icon={FaXmark} className="me-2" />
+                    Cancel Edit
+                  </Button>
+                )}
+                <Button
+                  variant="outline-primary"
+                  size="sm"
+                  className="mt-2"
+                  onClick={async () => {
+                    console.log('Update/Add Service Item clicked');
+                    console.log('Current editingServices:', editingServices);
+                    
+                    if (editingServices?.newItemTitle && editingServices?.newItemDescription) {
+                      let imageUrl = editingServices.newItemImage;
+                      
+                      // If there's a file to upload, upload it first
+                      if (editingServices?.newItemImageFile) {
+                        try {
+                          const formData = new FormData();
+                          formData.append('image', editingServices.newItemImageFile);
+                          
+                          const memberToken = localStorage.getItem('memberToken');
+                          const adminToken = localStorage.getItem('adminToken');
+                          const token = memberToken || adminToken;
+                          
+                          const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+                          const response = await fetch(`${API_BASE_URL}/home/upload-image`, {
+                            method: 'POST',
+                            headers: {
+                              'Authorization': `Bearer ${token}`
+                            },
+                            body: formData
+                          });
+                          
+                          if (response.ok) {
+                            const data = await response.json();
+                            imageUrl = data.imageUrl;
+                          } else {
+                            const errorData = await response.json().catch(() => ({ message: 'Upload failed' }));
+                            alert(`Failed to upload image: ${errorData.message}`);
+                            return;
+                          }
+                        } catch (error) {
+                          alert(`Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}`);
+                          return;
+                        }
+                      } else if (!editingServices.newItemImage || editingServices.newItemImage.startsWith('blob:')) {
+                        alert('Please provide an image URL or select a file to upload');
+                        return;
+                      }
+                      
+                      const newItem = {
+                        title: editingServices.newItemTitle,
+                        image: imageUrl,
+                        description: editingServices.newItemDescription,
+                        link: '/services',
+                        isActive: true
+                      };
+                      
+                      let newItems;
+                      if (editingServices.editingItem) {
+                        // Update existing item
+                        console.log('Updating existing item at index:', editingServices.editingItem.index);
+                        newItems = [...(editingServices.items || [])];
+                        newItems[editingServices.editingItem.index] = newItem;
+                        console.log('Updated items array:', newItems);
+                      } else {
+                        // Add new item
+                        console.log('Adding new item');
+                        newItems = [...(editingServices.items || []), newItem];
+                      }
+                      
+                      setEditingServices({
+                        ...editingServices,
+                        items: newItems,
+                        editingItem: null,
+                        newItemTitle: '',
+                        newItemImage: '',
+                        newItemDescription: '',
+                        newItemImageFile: null
+                      });
+                      
+                      console.log('Updated editingServices state');
+                    }
+                  }}
+                >
+                  <IconWrapper icon={editingServices?.editingItem ? FaFloppyDisk : FaPlus} className="me-2" />
+                  {editingServices?.editingItem ? 'Update Service Item' : 'Add Service Item'}
+                </Button>
+              </div>
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowServicesModal(false)}>
+            Cancel
+          </Button>
+          <Button 
+            variant="primary" 
+            onClick={() => {
+              console.log('Save Changes clicked');
+              console.log('Final editingServices to save:', editingServices);
+              if (editingServices) {
+                updateServicesContent(editingServices);
+              }
+            }}
+          >
+            Save Changes
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </div>
+  );
+};
+
 const Admin: React.FC = () => {
   usePageTitle('Admin');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -2090,6 +2919,16 @@ const Admin: React.FC = () => {
   const [yearImage, setYearImage] = useState<File | null>(null);
   const [eventThumbnail, setEventThumbnail] = useState<File | null>(null);
   const [eventImages, setEventImages] = useState<File[]>([]);
+
+  // Home page management states
+  const [homeContent, setHomeContent] = useState<HomePageContent | null>(null);
+  const [homeLoading, setHomeLoading] = useState(false);
+  const [homeError, setHomeError] = useState<string | null>(null);
+  const [homeSuccess, setHomeSuccess] = useState<string | null>(null);
+  const [showHeroModal, setShowHeroModal] = useState(false);
+  const [showServicesModal, setShowServicesModal] = useState(false);
+  const [editingHero, setEditingHero] = useState<any>(null);
+  const [editingServices, setEditingServices] = useState<any>(null);
 
   // Helper functions for family members
   const addFamilyMember = () => {
@@ -3450,6 +4289,112 @@ const Admin: React.FC = () => {
     }
   };
 
+  // Home page content management functions
+  const fetchHomeContent = useCallback(async () => {
+    try {
+      setHomeLoading(true);
+      setHomeError(null);
+      const memberToken = localStorage.getItem('memberToken');
+      const adminToken = localStorage.getItem('adminToken');
+      const token = memberToken || adminToken;
+      
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+      
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const response = await fetch(`${API_BASE_URL}/home/content`, {
+        headers
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setHomeContent(data);
+      } else {
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        setHomeError(`Failed to fetch home content: ${errorData.message || `HTTP ${response.status}`}`);
+      }
+    } catch (err) {
+      setHomeError(`Failed to fetch home content: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      setHomeLoading(false);
+    }
+  }, [setHomeLoading, setHomeError, setHomeContent]);
+
+  const updateHeroContent = async (heroData: any) => {
+    try {
+      setHomeLoading(true);
+      setHomeError(null);
+      const memberToken = localStorage.getItem('memberToken');
+      const adminToken = localStorage.getItem('adminToken');
+      const token = memberToken || adminToken;
+      
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+      const response = await fetch(`${API_BASE_URL}/home/hero`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(heroData)
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setHomeContent(prev => prev ? { ...prev, hero: data.hero } : null);
+        setHomeSuccess('Hero content updated successfully!');
+        setShowHeroModal(false);
+        setEditingHero(null);
+      } else {
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        setHomeError(`Failed to update hero content: ${errorData.message || 'Unknown error'}`);
+      }
+    } catch (err) {
+      setHomeError(`Failed to update hero content: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      setHomeLoading(false);
+    }
+  };
+
+  const updateServicesContent = async (servicesData: any) => {
+    try {
+      setHomeLoading(true);
+      setHomeError(null);
+      const memberToken = localStorage.getItem('memberToken');
+      const adminToken = localStorage.getItem('adminToken');
+      const token = memberToken || adminToken;
+      
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+      const response = await fetch(`${API_BASE_URL}/home/services`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(servicesData)
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setHomeContent(prev => prev ? { ...prev, services: data.services } : null);
+        setHomeSuccess('Services content updated successfully!');
+        setShowServicesModal(false);
+        setEditingServices(null);
+      } else {
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        setHomeError(`Failed to update services content: ${errorData.message || 'Unknown error'}`);
+      }
+    } catch (err) {
+      setHomeError(`Failed to update services content: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      setHomeLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="admin-modern d-flex align-items-center justify-content-center" style={{ minHeight: 'calc(100vh - 200px)', paddingTop: '6rem' }}>
@@ -3597,6 +4542,12 @@ const Admin: React.FC = () => {
                     </Nav.Link>
                   </Nav.Item>
                   <Nav.Item className="flex-fill">
+                    <Nav.Link eventKey="home" className="admin-nav-link">
+                      <IconWrapper icon={FaUser} className="me-2" />
+                      <span className="d-none d-md-inline">Home Page</span>
+                    </Nav.Link>
+                  </Nav.Item>
+                  <Nav.Item className="flex-fill">
                     <Nav.Link eventKey="settings" className="admin-nav-link">
                       <IconWrapper icon={FaGear} className="me-2" />
                       <span className="d-none d-md-inline">Settings</span>
@@ -3677,6 +4628,25 @@ const Admin: React.FC = () => {
                     setEditingEvent={setEditingEvent}
                     existingEventImages={existingEventImages}
                     setExistingEventImages={setExistingEventImages}
+                  />
+                )}
+                {activeTab === 'home' && (
+                  <HomePageTab 
+                    homeContent={homeContent}
+                    homeLoading={homeLoading}
+                    homeError={homeError}
+                    homeSuccess={homeSuccess}
+                    showHeroModal={showHeroModal}
+                    setShowHeroModal={setShowHeroModal}
+                    showServicesModal={showServicesModal}
+                    setShowServicesModal={setShowServicesModal}
+                    editingHero={editingHero}
+                    editingServices={editingServices}
+                    setEditingHero={setEditingHero}
+                    setEditingServices={setEditingServices}
+                    fetchHomeContent={fetchHomeContent}
+                    updateHeroContent={updateHeroContent}
+                    updateServicesContent={updateServicesContent}
                   />
                 )}
                 {activeTab === 'settings' && (

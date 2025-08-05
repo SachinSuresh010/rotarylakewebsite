@@ -24,6 +24,29 @@ interface DirectorsResponse {
   directors: Director[];
 }
 
+interface HomeContent {
+  hero?: {
+    title?: string;
+    subtitle?: string;
+    description?: string;
+    images?: string[];
+    isActive?: boolean;
+  };
+  services?: {
+    title?: string;
+    subtitle?: string;
+    description?: string;
+    items?: Array<{
+      title: string;
+      image: string;
+      description: string;
+      link: string;
+      isActive?: boolean;
+    }>;
+    isActive?: boolean;
+  };
+}
+
 const Home: React.FC = () => {
   usePageTitle('Home');
   
@@ -99,7 +122,8 @@ const Home: React.FC = () => {
     return a.name.localeCompare(b.name);
   });
 
-  const services = [
+  // Static fallback content
+  const staticServices = [
     {
       title: "Community Service",
       image: "/assets/images/whatsapp-image-2022-07-02-at-11.34.51-am-2-1256x942.jpg",
@@ -132,11 +156,43 @@ const Home: React.FC = () => {
     }
   ];
 
-  const heroImages = [
+  const staticHeroImages = [
     "/assets/images/29cce85f-3867-4dff-b9d0-00549b5eef17-1280x853.jpg",
     "/assets/images/a7eac4de-03fe-4f44-893a-b80d7af1b098-1280x853.jpg",
     "/assets/images/817d1ab1-18a1-449b-84b3-4b353be3fbee-1280x853.jpg"
   ];
+
+  // State for dynamic content
+  const [homeContent, setHomeContent] = useState<HomeContent | null>(null);
+  const [contentError, setContentError] = useState<string | null>(null);
+
+  // Fetch home content from API
+  useEffect(() => {
+    const fetchHomeContent = async () => {
+      try {
+        const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+        const response = await fetch(`${API_BASE_URL}/home/content`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          setHomeContent(data);
+        } else {
+          console.warn('Failed to fetch home content, using static content');
+          setHomeContent(null);
+        }
+      } catch (error) {
+        console.error('Error fetching home content:', error);
+        setContentError('Failed to load dynamic content');
+        setHomeContent(null);
+      }
+    };
+
+    fetchHomeContent();
+  }, []);
+
+  // Use dynamic content if available, otherwise fall back to static content
+  const services = homeContent?.services?.items || staticServices;
+  const heroImages = homeContent?.hero?.images || staticHeroImages;
 
   // Responsive slides calculation
   useEffect(() => {
@@ -195,7 +251,7 @@ const Home: React.FC = () => {
           fade
           style={{ width: '100%', margin: 0, padding: 0 }}
         >
-          {heroImages.map((image, index) => (
+          {heroImages.map((image: string, index: number) => (
             <Carousel.Item key={index} className="slider-image item">
               <div className="item-wrapper" style={{ width: '100%', height: '100%', margin: 0, padding: 0 }}>
                 <img
@@ -221,6 +277,13 @@ const Home: React.FC = () => {
       <section className="features4 cid-tnETaZ4gAu services-section" id="features4-n" style={{ marginTop: 0 }}>
         <div className="mbr-overlay"></div>
         <Container>
+          {contentError && (
+            <div className="alert alert-warning text-center mb-4" role="alert">
+              <strong>Note:</strong> Using static content due to connection issues. 
+              {homeContent && <span className="ms-2">✅ Dynamic content loaded successfully!</span>}
+            </div>
+          )}
+          
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -231,17 +294,22 @@ const Home: React.FC = () => {
             <Row className="text-center">
               <Col>
                 <h4 className="mbr-section-title mbr-fonts-style align-center mb-0 display-2">
-                  <strong>Services</strong>
+                  <strong>{homeContent?.services?.title || 'Services'}</strong>
                 </h4>
                 <h5 className="mbr-section-subtitle mbr-fonts-style align-center mb-0 mt-2 display-5">
-                  Rotary avenues of service
+                  {homeContent?.services?.subtitle || 'Rotary avenues of service'}
                 </h5>
+                {homeContent?.services?.description && (
+                  <p className="mbr-section-description mbr-fonts-style align-center mb-0 mt-2 display-7">
+                    {homeContent.services.description}
+                  </p>
+                )}
               </Col>
             </Row>
           </motion.div>
 
           <Row className="mt-4">
-            {services.map((service, index) => (
+            {services.map((service: any, index: number) => (
               <Col key={index} xs={12} md={6} lg={6} className="mb-4">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}

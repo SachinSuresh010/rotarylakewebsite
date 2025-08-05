@@ -23,7 +23,7 @@ if (process.env.FIREBASE_SERVICE_ACCOUNT) {
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  storageBucket: process.env.FIREBASE_STORAGE_BUCKET
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET || `${serviceAccount.project_id}.appspot.com`
 });
 
 // Initialize Firestore
@@ -62,6 +62,7 @@ app.use('/api/events', require('./routes/events'));
 app.use('/api/gallery', require('./routes/gallery'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/services', require('./routes/services'));
+app.use('/api/home', require('./routes/home'));
 
 // Health check
 app.get('/api/health', (req, res) => {
