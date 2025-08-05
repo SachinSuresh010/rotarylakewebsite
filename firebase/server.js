@@ -36,7 +36,9 @@ app.use(cors({
     process.env.FRONTEND_URL || 'http://localhost:3000',
     'https://rotarylakewebsite-p44ihk6ii-sachinsuresh010s-projects.vercel.app',
     'https://rotarylakewebsite.vercel.app',
-    'https://rotarylakewebsite-git-main-sachinsuresh010s-projects.vercel.app'
+    'https://rotarylakewebsite-git-main-sachinsuresh010s-projects.vercel.app',
+    'https://www.rotarycochinlakeside.org',
+    'https://rotarycochinlakeside.org'
   ],
   credentials: true
 }));
