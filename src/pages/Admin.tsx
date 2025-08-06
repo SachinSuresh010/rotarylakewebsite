@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Form, Alert, Nav, Table, Badge, InputGroup, Spinner, Modal } from 'react-bootstrap';
 import { FaUsers, FaChartBar, FaGear, FaRightFromBracket, FaPlus, FaPenToSquare, FaTrash, FaMagnifyingGlass, FaClock, FaUserCheck, FaUserXmark, FaEye, FaCalendar, FaEnvelope, FaUser, FaBriefcase, FaGraduationCap, FaHeart, FaLocationDot, FaPhone, FaTrophy, FaStar, FaXmark, FaLinkedin, FaFacebook, FaTwitter, FaCamera, FaFloppyDisk, FaTag, FaImages, FaCalendarDay, FaImage, FaKey, FaRotateLeft, FaCompress } from 'react-icons/fa6';
@@ -1523,7 +1523,7 @@ const GalleryTab: React.FC<{
                                         variant="outline-danger" 
                                         size="sm"
                                         onClick={() => handleDeleteYear(year.id)}
-                                        title="Delete Year"
+                                        title="Permanently Delete Year"
                                       >
                                         <IconWrapper icon={FaTrash} />
                                       </Button>
@@ -1627,7 +1627,7 @@ const GalleryTab: React.FC<{
                                         variant="outline-danger" 
                                         size="sm"
                                         onClick={() => handleDeleteEvent(event.id)}
-                                        title="Delete Event"
+                                        title="Permanently Delete Event"
                                       >
                                         <IconWrapper icon={FaTrash} />
                                       </Button>
@@ -1752,7 +1752,7 @@ const GalleryTab: React.FC<{
                       type="file"
                       accept="image/*"
                       onChange={handleYearImageUpload}
-                      required={!editingYear}
+                      required={!editingYear && !(newYear as any).imageUrl}
                     />
                     <small className="text-muted">
                       Recommended: 800x600px or larger
@@ -1811,17 +1811,29 @@ const GalleryTab: React.FC<{
                             imageUrl: (newYear as any).newImageUrl,
                             newImageUrl: ''
                           }));
+                          // Clear the file upload when URL is set
+                          setYearImage(null);
                         }
                       }}
                       disabled={!(newYear as any).newImageUrl || (newYear as any).newImageUrl.startsWith('blob:')}
                     >
                       <IconWrapper icon={FaPlus} className="me-2" />
-                      Set Year Image URL
+                      Use This URL as Year Image
                     </Button>
                     
                     {(newYear as any).imageUrl && (
-                      <div className="mt-2 p-2 bg-light rounded">
-                        <small className="text-muted">Current URL: {(newYear as any).imageUrl}</small>
+                      <div className="mt-2 p-2 bg-success bg-opacity-10 rounded">
+                        <small className="text-success">
+                          <strong>✓ Image URL Set:</strong> {(newYear as any).imageUrl}
+                        </small>
+                      </div>
+                    )}
+                    
+                    {yearImage && !(newYear as any).imageUrl && (
+                      <div className="mt-2 p-2 bg-info bg-opacity-10 rounded">
+                        <small className="text-info">
+                          <strong>📁 File Selected:</strong> {yearImage.name}
+                        </small>
                       </div>
                     )}
                   </div>
@@ -1951,6 +1963,7 @@ const GalleryTab: React.FC<{
                        type="file"
                        accept="image/*"
                        onChange={handleEventThumbnailUpload}
+                       required={!editingEvent && !(newEvent as any).thumbnailUrl}
                      />
                     <small className="text-muted">
                       Recommended: 400x300px or larger
@@ -2009,6 +2022,8 @@ const GalleryTab: React.FC<{
                             thumbnailUrl: (newEvent as any).newThumbnailUrl,
                             newThumbnailUrl: ''
                           }));
+                          // Clear the file upload when URL is set
+                          setEventThumbnail(null);
                         }
                       }}
                       disabled={!(newEvent as any).newThumbnailUrl || (newEvent as any).newThumbnailUrl.startsWith('blob:')}
@@ -2018,8 +2033,18 @@ const GalleryTab: React.FC<{
                     </Button>
                     
                     {(newEvent as any).thumbnailUrl && (
-                      <div className="mt-2 p-2 bg-light rounded">
-                        <small className="text-muted">Current URL: {(newEvent as any).thumbnailUrl}</small>
+                      <div className="mt-2 p-2 bg-success bg-opacity-10 rounded">
+                        <small className="text-success">
+                          <strong>✓ Thumbnail URL Set:</strong> {(newEvent as any).thumbnailUrl}
+                        </small>
+                      </div>
+                    )}
+                    
+                    {eventThumbnail && !(newEvent as any).thumbnailUrl && (
+                      <div className="mt-2 p-2 bg-info bg-opacity-10 rounded">
+                        <small className="text-info">
+                          <strong>📁 Thumbnail File Selected:</strong> {eventThumbnail.name}
+                        </small>
                       </div>
                     )}
                   </div>
@@ -2100,7 +2125,7 @@ const GalleryTab: React.FC<{
                         accept="image/*"
                         multiple
                         onChange={handleEventImagesUpload}
-                        required={!editingEvent && existingEventImages.length === 0}
+                        required={!editingEvent && existingEventImages.length === 0 && (!(newEvent as any).imageUrls || (newEvent as any).imageUrls.length === 0)}
                       />
                       <small className="text-muted">
                         Select multiple images. Recommended: 1200x800px or larger
@@ -2163,12 +2188,14 @@ const GalleryTab: React.FC<{
                             imageUrls: newImageUrls,
                             newImageUrl: ''
                           }));
+                          // Clear the file uploads when URL is set
+                          setEventImages([]);
                         }
                       }}
                       disabled={!(newEvent as any).newImageUrl || (newEvent as any).newImageUrl.startsWith('blob:')}
                     >
                       <IconWrapper icon={FaPlus} className="me-2" />
-                      Add URL Image
+                      Use This URL as Event Image
                     </Button>
                     
                     {/* Display added URL images */}
@@ -2214,6 +2241,23 @@ const GalleryTab: React.FC<{
                             </div>
                           </div>
                         ))}
+                      </div>
+                    )}
+                    
+                    {/* Visual indicators for image sources */}
+                    {(newEvent as any).imageUrls && (newEvent as any).imageUrls.length > 0 && (
+                      <div className="mt-2 p-2 bg-success bg-opacity-10 rounded">
+                        <small className="text-success">
+                          <strong>✓ URL Images Set:</strong> {(newEvent as any).imageUrls.length} image(s) via URL
+                        </small>
+                      </div>
+                    )}
+                    
+                    {eventImages.length > 0 && (!(newEvent as any).imageUrls || (newEvent as any).imageUrls.length === 0) && (
+                      <div className="mt-2 p-2 bg-info bg-opacity-10 rounded">
+                        <small className="text-info">
+                          <strong>📁 Image Files Selected:</strong> {eventImages.length} file(s) uploaded
+                        </small>
                       </div>
                     )}
                   </div>
@@ -3057,6 +3101,8 @@ const Admin: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [member, setMember] = useState<any>(null);
+  const [hasCheckedAuth, setHasCheckedAuth] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
   const [memberStats, setMemberStats] = useState<MemberStatistics | null>(null);
@@ -3069,7 +3115,6 @@ const Admin: React.FC = () => {
   const [sortBy, setSortBy] = useState('createdAt');
   const [sortOrder, setSortOrder] = useState('desc');
   const [statusFilter, setStatusFilter] = useState('active'); // New: status filter state
-  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null); // New: search timeout state
   
   // New: Cached data for client-side filtering
   const [cachedMembers, setCachedMembers] = useState<Member[]>([]);
@@ -3199,6 +3244,10 @@ const Admin: React.FC = () => {
   const [showEventModal, setShowEventModal] = useState(false);
   const [editingYear, setEditingYear] = useState<GalleryYear | null>(null);
   const [editingEvent, setEditingEvent] = useState<GalleryEvent | null>(null);
+
+  // Add a ref to track if data is already being loaded to prevent duplicate calls
+  const isLoadingRef = useRef(false);
+  const isAuthCheckingRef = useRef(false);
 
   
   // Form states for new year
@@ -3441,6 +3490,7 @@ const Admin: React.FC = () => {
 
   
   const navigate = useNavigate();
+  const navigateRef = useRef(navigate);
   const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
 
   // Helper functions for client-side filtering
@@ -3539,19 +3589,48 @@ const Admin: React.FC = () => {
   }, [useClientSideFiltering, isDataCached, cachedMembers.length, searchTerm, statusFilter, sortBy, sortOrder, currentPage, filterMembersClientSide, paginateMembers, calculateMemberStats, setMembers, setTotalPages, setMemberStats]);
 
   const loadDashboardData = useCallback(async () => {
+    // Prevent duplicate calls
+    if (isLoadingRef.current) {
+      return;
+    }
+    
+    isLoadingRef.current = true;
+    
     try {
       const memberToken = localStorage.getItem('memberToken');
       const adminToken = localStorage.getItem('adminToken');
       const token = memberToken || adminToken;
       
-      // Load dashboard stats
-      const statsResponse = await fetch(`${API_BASE_URL}/admin/dashboard`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      // Load members - use client-side filtering if enabled
+      if (useClientSideFiltering && isDataCached && cachedMembers.length > 0) {
+        // Use cached data for client-side filtering
+        updateClientSideFiltering();
+        setLoading(false);
+        isLoadingRef.current = false;
+        return;
+      }
+      
+      // Make both API calls in parallel for better performance
+      const queryParams = useClientSideFiltering 
+        ? '?limit=1000' // Get all data for caching
+        : `?page=${currentPage}&limit=20&sortBy=${sortBy}&sortOrder=${sortOrder}&status=${statusFilter}`;
+        
+      const [statsResponse, membersResponse] = await Promise.all([
+        fetch(`${API_BASE_URL}/admin/dashboard`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }),
+        fetch(`${API_BASE_URL}/admin/members/all${queryParams}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        })
+      ]);
 
+      // Handle dashboard stats
       if (statsResponse.ok) {
         const statsData = await statsResponse.json();
         setStats(statsData.statistics);
@@ -3560,26 +3639,7 @@ const Admin: React.FC = () => {
         console.error('Dashboard stats error:', errorText);
       }
 
-      // Load members - use client-side filtering if enabled
-      if (useClientSideFiltering && isDataCached && cachedMembers.length > 0) {
-        // Use cached data for client-side filtering
-        updateClientSideFiltering();
-        setLoading(false);
-        return;
-      }
-      
-      // Fetch from server (with or without filters based on approach)
-      const queryParams = useClientSideFiltering 
-        ? '?limit=1000' // Get all data for caching
-        : `?page=${currentPage}&limit=20&sortBy=${sortBy}&sortOrder=${sortOrder}&status=${statusFilter}`;
-        
-      const membersResponse = await fetch(`${API_BASE_URL}/admin/members/all${queryParams}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
+      // Handle members data
       if (membersResponse.ok) {
         const membersData = await membersResponse.json();
         
@@ -3614,17 +3674,25 @@ const Admin: React.FC = () => {
       console.error('Dashboard load error:', error);
       setError('Failed to load dashboard data');
       setLoading(false);
+    } finally {
+      isLoadingRef.current = false;
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [API_BASE_URL, useClientSideFiltering, isDataCached, cachedMembers, currentPage, searchTerm, statusFilter, sortBy, sortOrder, updateClientSideFiltering, filterMembersClientSide, paginateMembers, calculateMemberStats, setMembers, setTotalPages, setMemberStats, setCachedMembers, setIsDataCached, setStats, setLoading, setError]);
+  }, [API_BASE_URL, useClientSideFiltering, isDataCached, cachedMembers, currentPage, searchTerm, statusFilter, sortBy, sortOrder, calculateMemberStats, filterMembersClientSide, paginateMembers, updateClientSideFiltering]);
 
   const checkAuth = useCallback(async () => {
+    // Prevent duplicate auth checks
+    if (isAuthCheckingRef.current) {
+      return;
+    }
+    
+    isAuthCheckingRef.current = true;
+    
     const memberToken = localStorage.getItem('memberToken');
     const adminToken = localStorage.getItem('adminToken');
     
     if (!memberToken && !adminToken) {
       setLoading(false);
+      isAuthCheckingRef.current = false;
       return;
     }
 
@@ -3659,21 +3727,16 @@ const Admin: React.FC = () => {
               }
             });
             setIsAuthenticated(true);
-            // Call loadDashboardData directly instead of including it in dependencies
-            // This prevents circular dependency issues
-            setTimeout(() => {
-              loadDashboardData();
-            }, 0);
           } else {
             // Member doesn't have admin privileges
             localStorage.removeItem('memberToken');
             setLoading(false);
-            navigate('/auth');
+            navigateRef.current('/auth');
           }
         } else {
           localStorage.removeItem('memberToken');
           setLoading(false);
-          navigate('/auth');
+          navigateRef.current('/auth');
         }
       } else if (adminToken) {
         // Legacy admin authentication
@@ -3688,15 +3751,10 @@ const Admin: React.FC = () => {
           data = await response.json();
           setUser(data.user);
           setIsAuthenticated(true);
-          // Call loadDashboardData directly instead of including it in dependencies
-          // This prevents circular dependency issues
-          setTimeout(() => {
-            loadDashboardData();
-          }, 0);
         } else {
           localStorage.removeItem('adminToken');
           setLoading(false);
-          navigate('/auth');
+          navigateRef.current('/auth');
         }
       }
     } catch (error) {
@@ -3704,23 +3762,26 @@ const Admin: React.FC = () => {
       localStorage.removeItem('memberToken');
       localStorage.removeItem('adminToken');
       setLoading(false);
-      navigate('/auth');
+      navigateRef.current('/auth');
+    } finally {
+      isAuthCheckingRef.current = false;
+      setHasCheckedAuth(true);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [API_BASE_URL, navigate, setMember, setUser, setIsAuthenticated, setLoading]);
+  }, [API_BASE_URL]);
 
   useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
+    if (!isAuthCheckingRef.current && !hasCheckedAuth && !isInitialized) {
+      setIsInitialized(true);
+      checkAuth();
+    }
+  }, [checkAuth, hasCheckedAuth, isInitialized]);
 
-  // Cleanup search timeout on unmount
+  // Update navigateRef when navigate changes
   useEffect(() => {
-    return () => {
-      if (searchTimeout) {
-        clearTimeout(searchTimeout);
-      }
-    };
-  }, [searchTimeout]);
+    navigateRef.current = navigate;
+  }, [navigate]);
+
+
 
   // Modal size management - removed manual DOM manipulation
 
@@ -3766,7 +3827,10 @@ const Admin: React.FC = () => {
     setMember(null);
     setStats(null);
     setMembers([]);
-    navigate('/');
+    setHasCheckedAuth(false);
+    setIsInitialized(false);
+    isAuthCheckingRef.current = false;
+    navigateRef.current('/');
   };
 
   const handleSearch = (e: React.FormEvent) => {
@@ -3777,16 +3841,8 @@ const Admin: React.FC = () => {
       // Instant client-side filtering
       updateClientSideFiltering();
     } else {
-      // Server-side filtering with debouncing
-      if (searchTimeout) {
-        clearTimeout(searchTimeout);
-      }
-      
-      const timeout = setTimeout(() => {
-        loadDashboardData();
-      }, 500);
-      
-      setSearchTimeout(timeout);
+      // Use debounced search for server-side filtering
+      debouncedSearch(searchTerm);
     }
   };
 
@@ -3799,10 +3855,8 @@ const Admin: React.FC = () => {
       // Instant client-side filtering
       updateClientSideFiltering();
     } else {
-      // Server-side filtering with debouncing
-      setTimeout(() => {
-        loadDashboardData();
-      }, 300);
+      // Use debounced search for server-side filtering
+      debouncedSearch(searchTerm);
     }
   };
 
@@ -3820,8 +3874,8 @@ const Admin: React.FC = () => {
       // Instant client-side sorting
       updateClientSideFiltering();
     } else {
-      // Server-side sorting
-      loadDashboardData();
+      // Server-side sorting with debouncing
+      debouncedSearch(searchTerm);
     }
   };
 
@@ -4238,8 +4292,8 @@ const Admin: React.FC = () => {
       // Instant client-side pagination
       updateClientSideFiltering();
     } else {
-      // Server-side pagination
-      loadDashboardData();
+      // Server-side pagination with debouncing
+      debouncedSearch(searchTerm);
     }
   };
 
@@ -4253,21 +4307,41 @@ const Admin: React.FC = () => {
     }
   };
 
+  // Simple debounce utility
+  const debounce = (func: Function, delay: number) => {
+    let timeoutId: NodeJS.Timeout;
+    return (...args: any[]) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => func.apply(null, args), delay);
+    };
+  };
+
+  // Debounced search to prevent rapid API calls
+  const debouncedSearch = useCallback(
+    (value: string) => {
+      const debouncedFn = debounce(() => {
+        if (!useClientSideFiltering && !isLoadingRef.current) {
+          loadDashboardData();
+        }
+      }, 300);
+      debouncedFn();
+    },
+    [loadDashboardData, useClientSideFiltering]
+  );
+
   // Effect to handle client-side filtering updates
   useEffect(() => {
-    if (useClientSideFiltering && isDataCached && cachedMembers.length > 0) {
+    if (useClientSideFiltering && isDataCached && cachedMembers.length > 0 && !isLoadingRef.current) {
       updateClientSideFiltering();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [useClientSideFiltering, isDataCached, cachedMembers.length]);
+  }, [useClientSideFiltering, isDataCached, cachedMembers.length, updateClientSideFiltering]);
 
   // Effect to load data when component mounts or when switching modes
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !isLoadingRef.current) {
       loadDashboardData();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated]);
+  }, [isAuthenticated, loadDashboardData]);
 
   useEffect(() => {
     if (activeTab === 'gallery') {
@@ -4294,6 +4368,7 @@ const Admin: React.FC = () => {
       
       if (yearsResponse.ok) {
         const yearsData = await yearsResponse.json();
+        console.log('Fetched years:', yearsData.years);
         setGalleryYears(yearsData.years);
       }
       
@@ -4306,6 +4381,7 @@ const Admin: React.FC = () => {
       
       if (eventsResponse.ok) {
         const eventsData = await eventsResponse.json();
+        console.log('Fetched events:', eventsData.events);
         setGalleryEvents(eventsData.events);
       }
     } catch (err) {
@@ -4325,6 +4401,7 @@ const Admin: React.FC = () => {
       console.log('Creating/updating gallery year with data:', {
         newYear,
         yearImage: yearImage ? yearImage.name : 'No image',
+        imageUrl: (newYear as any).imageUrl || 'No URL',
         editingYear: editingYear?.id
       });
       
@@ -4335,14 +4412,12 @@ const Admin: React.FC = () => {
       formData.append('description', newYear.description);
       formData.append('alt', newYear.alt || '');
       
-      // Add image file if selected
-      if (yearImage) {
-        formData.append('image', yearImage);
-      }
-
-      // Add year image URL if provided
+      // Add year image URL if provided (prioritize URL over file upload)
       if ((newYear as any).imageUrl) {
         formData.append('imageUrl', (newYear as any).imageUrl);
+      } else if (yearImage) {
+        // Only add file if no URL is provided
+        formData.append('image', yearImage);
       }
       
       const memberToken = localStorage.getItem('memberToken');
@@ -4398,13 +4473,18 @@ const Admin: React.FC = () => {
       
 
       
-      // Add thumbnail if selected
-      if (eventThumbnail) {
+      // Add thumbnail URL if provided (prioritize URL over file upload)
+      if ((newEvent as any).thumbnailUrl) {
+        formData.append('thumbnailUrl', (newEvent as any).thumbnailUrl);
+        console.log('Adding thumbnailUrl:', (newEvent as any).thumbnailUrl);
+      } else if (eventThumbnail) {
+        // Only add file if no URL is provided
         formData.append('thumbnail', eventThumbnail);
+        console.log('Adding thumbnail file:', eventThumbnail.name);
       }
       
-      // Add event images if selected
-      if (eventImages && eventImages.length > 0) {
+      // Add event images if selected (only if no URL images are provided)
+      if (eventImages && eventImages.length > 0 && (!(newEvent as any).imageUrls || (newEvent as any).imageUrls.length === 0)) {
         eventImages.forEach((image, index) => {
           formData.append('images', image);
         });
@@ -4419,11 +4499,6 @@ const Admin: React.FC = () => {
       // Add URL images
       if ((newEvent as any).imageUrls && (newEvent as any).imageUrls.length > 0) {
         formData.append('imageUrls', JSON.stringify((newEvent as any).imageUrls));
-      }
-
-      // Add thumbnail URL if provided
-      if ((newEvent as any).thumbnailUrl) {
-        formData.append('thumbnailUrl', (newEvent as any).thumbnailUrl);
       }
       
       const memberToken = localStorage.getItem('memberToken');
@@ -4516,7 +4591,7 @@ const Admin: React.FC = () => {
   };
 
   const handleDeleteYear = async (yearId: string) => {
-    if (!window.confirm('Are you sure you want to delete this gallery year?')) return;
+    if (!window.confirm('Are you sure you want to permanently delete this gallery year? This action cannot be undone.')) return;
     
     try {
       setLoading(true);
@@ -4541,8 +4616,11 @@ const Admin: React.FC = () => {
       if (response.ok) {
         const data = await response.json();
         console.log('Delete success:', data);
-        setSuccess('Gallery year deleted successfully!');
-        fetchGalleryData();
+        setSuccess('Gallery year permanently deleted successfully!');
+        // Add a small delay to ensure backend processing is complete
+        setTimeout(() => {
+          fetchGalleryData();
+        }, 500);
       } else {
         const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
         console.error('Delete failed:', errorData);
@@ -4576,7 +4654,7 @@ const Admin: React.FC = () => {
   };
 
   const handleDeleteEvent = async (eventId: string) => {
-    if (!window.confirm('Are you sure you want to delete this event?')) return;
+    if (!window.confirm('Are you sure you want to permanently delete this event? This action cannot be undone.')) return;
     
     try {
       setLoading(true);
@@ -4601,8 +4679,11 @@ const Admin: React.FC = () => {
       if (response.ok) {
         const data = await response.json();
         console.log('Delete success:', data);
-        setSuccess('Event deleted successfully!');
-        fetchGalleryData();
+        setSuccess('Event permanently deleted successfully!');
+        // Add a small delay to ensure backend processing is complete
+        setTimeout(() => {
+          fetchGalleryData();
+        }, 500);
       } else {
         const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
         console.error('Delete failed:', errorData);

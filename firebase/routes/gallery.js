@@ -644,12 +644,8 @@ router.delete('/events/:eventId', [
       return res.status(404).json({ message: 'Event not found' });
     }
 
-    // Soft delete - mark as inactive
-    await eventRef.update({
-      isActive: false,
-      deletedAt: admin.firestore.FieldValue.serverTimestamp(),
-      deletedBy: req.user.id || req.user.uid
-    });
+    // Hard delete - completely remove the document
+    await eventRef.delete();
 
     res.json({
       message: 'Gallery event deleted successfully',
@@ -753,12 +749,24 @@ router.delete('/years/:yearId', [
       return res.status(404).json({ message: 'Gallery year not found' });
     }
 
-    // Soft delete - mark as inactive
-    await yearRef.update({
-      isActive: false,
-      deletedAt: admin.firestore.FieldValue.serverTimestamp(),
-      deletedBy: req.user.id || req.user.uid
-    });
+    const yearData = yearDoc.data();
+    const yearValue = yearData.year;
+
+    // Check if there are any associated events for this year
+    const eventsSnapshot = await db.collection('gallery_events')
+      .where('year', '==', yearValue)
+      .get();
+
+    if (!eventsSnapshot.empty) {
+      const eventCount = eventsSnapshot.size;
+      return res.status(400).json({ 
+        message: `Cannot delete year "${yearValue}" because it has ${eventCount} associated event(s). Please delete all events for this year first.`,
+        eventCount: eventCount
+      });
+    }
+
+    // Hard delete - completely remove the document
+    await yearRef.delete();
 
     res.json({
       message: 'Gallery year deleted successfully',
@@ -771,7 +779,7 @@ router.delete('/years/:yearId', [
 });
 
 // @route   GET /api/gallery/admin/years
-// @desc    Get all years for admin (including inactive)
+// @desc    Get all active years for admin
 // @access  Private (Editor)
 router.get('/admin/years', [
   authenticateToken
@@ -780,6 +788,7 @@ router.get('/admin/years', [
     const db = admin.firestore();
     
     const yearsSnapshot = await db.collection('gallery_years')
+      .where('isActive', '==', true)
       .orderBy('year', 'desc')
       .get();
 
@@ -796,7 +805,7 @@ router.get('/admin/years', [
 });
 
 // @route   GET /api/gallery/admin/events
-// @desc    Get all events for admin (including inactive)
+// @desc    Get all active events for admin
 // @access  Private (Editor)
 router.get('/admin/events', [
   authenticateToken
@@ -805,22 +814,50 @@ router.get('/admin/events', [
     const { year } = req.query;
     const db = admin.firestore();
     
-    let eventsQuery = db.collection('gallery_events');
+    let eventsQuery = db.collection('gallery_events')
+      .where('isActive', '==', true);
     
     if (year) {
       eventsQuery = eventsQuery.where('year', '==', year);
     }
     
-    const eventsSnapshot = await eventsQuery
-      .orderBy('createdAt', 'desc')
-      .get();
+    try {
+      const eventsSnapshot = await eventsQuery
+        .orderBy('createdAt', 'desc')
+        .get();
 
-    const events = eventsSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+      const events = eventsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
 
-    res.json({ events });
+      res.json({ events });
+    } catch (indexError) {
+      // Fallback: if compound index doesn't exist, filter client-side
+      console.log('Compound index not available, using client-side filtering');
+      const eventsSnapshot = await db.collection('gallery_events')
+        .where('isActive', '==', true)
+        .get();
+
+      let events = eventsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+
+      // Filter by year if specified
+      if (year) {
+        events = events.filter(event => event.year === year);
+      }
+
+      // Sort by createdAt
+      events.sort((a, b) => {
+        const aTime = a.createdAt?.toDate?.() || new Date(a.createdAt || 0);
+        const bTime = b.createdAt?.toDate?.() || new Date(b.createdAt || 0);
+        return bTime - aTime;
+      });
+
+      res.json({ events });
+    }
   } catch (error) {
     console.error('Get admin events error:', error);
     res.status(500).json({ message: 'Server error' });

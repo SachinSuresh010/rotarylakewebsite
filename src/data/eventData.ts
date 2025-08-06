@@ -102,46 +102,6 @@ export const events2022: Event[] = [
     thumbnail: "/assets/images/gb-22-09-22-001-816x612.jpeg",
     images: [
       { id: "gb-22-09-22", src: "/assets/images/gb-22-09-22-001-816x612.jpeg", alt: "Club Meeting" },
-      { id: "whatsapp-2022-1", src: "/assets/images/whatsapp-image-2022-07-02-at-11.34.51-am-2-1256x942.jpg", alt: "Club Meeting" },
-      { id: "whatsapp-2022-2", src: "/assets/images/whatsapp-image-2022-07-02-at-11.34.53-am-816x612.jpg", alt: "Club Meeting" },
-      { id: "whatsapp-2022-3", src: "/assets/images/whatsapp-image-2022-07-02-at-4.57.32-pm-816x1088.jpg", alt: "Club Meeting" },
-      { id: "screenshot-2022", src: "/assets/images/screenshot-2022-11-22-at-11.26.42-pm-596x582.png", alt: "Club Meeting" },
-      { id: "photo-1", src: "/assets/images/photo-816x817.jpg", alt: "Club Meeting" },
-      { id: "photo-2", src: "/assets/images/photo-816x817.jpeg", alt: "Club Meeting" },
-      { id: "madhuram", src: "/assets/images/madhuram-malayalam-816x644.jpg", alt: "Club Meeting" },
-      { id: "beena-prasad-1", src: "/assets/images/beena-and-prasad-596x397.jpeg", alt: "Club Meeting" },
-      { id: "beena-prasad-2", src: "/assets/images/beena and prasad-596x397.jpeg", alt: "Club Meeting" },
-      { id: "jayaram-1", src: "/assets/images/jayaram-816x733.jpeg", alt: "Club Meeting" },
-      { id: "jayaram-2", src: "/assets/images/jayaram-1-816x733.jpeg", alt: "Club Meeting" },
-      { id: "saju-navodaya", src: "/assets/images/saju-navodaya-1-600x450.jpeg", alt: "Club Meeting" },
-      { id: "kj-saju", src: "/assets/images/kj-saju-634x641.png", alt: "Club Meeting" },
-      { id: "sunil", src: "/assets/images/sunil-edited-288x216.jpg", alt: "Club Meeting" },
-      { id: "ria", src: "/assets/images/ria-1-596x718.jpeg", alt: "Club Meeting" },
-      { id: "photo-2024-1", src: "/assets/images/photo-2024-06-28-10-13-23-816x965.jpeg", alt: "Club Meeting" },
-      { id: "photo-2024-2", src: "/assets/images/photo-2024-06-28-10-13-24-816x965.jpeg", alt: "Club Meeting" },
-      { id: "photo-2024-3", src: "/assets/images/photo-2024-06-28-10-13-25-816x965.jpeg", alt: "Club Meeting" },
-      { id: "img-7557", src: "/assets/images/img-7557-596x795.jpeg", alt: "Club Meeting" },
-      { id: "img-5183", src: "/assets/images/img-5183-596x587.jpg", alt: "Club Meeting" },
-      { id: "img-3646", src: "/assets/images/img-3646-596x1060.jpeg", alt: "Club Meeting" },
-      { id: "fe2cd234", src: "/assets/images/fe2cd234-d745-4982-a515-6150120657ce-1280x960.jpg", alt: "Club Meeting" },
-      { id: "f2974069", src: "/assets/images/f2974069-f63a-459e-a783-3b7f24dca3e1-1600x1052.jpg", alt: "Club Meeting" },
-      { id: "e047cb98", src: "/assets/images/e047cb98-342a-4490-9cf0-3e3443aa692c-960x1280.jpeg", alt: "Club Meeting" },
-      { id: "da197218", src: "/assets/images/da197218-7e38-42ef-8bb3-f767e5c108b2-596x1060.jpeg", alt: "Club Meeting" },
-      { id: "a7eac4de", src: "/assets/images/a7eac4de-03fe-4f44-893a-b80d7af1b098-1280x853.jpg", alt: "Club Meeting" },
-      { id: "9c0f48bd", src: "/assets/images/9c0f48bd-e32f-432e-878b-23b6f71699ff-816x612.jpg", alt: "Club Meeting" },
-      { id: "9348f58f", src: "/assets/images/9348f58f-f7a0-4ad7-81ba-725e8146f8f7-960x1280.jpeg", alt: "Club Meeting" },
-      { id: "8be3bf26-1", src: "/assets/images/8be3bf26-d719-459f-9df8-8f283785fd4b-596x382.jpeg", alt: "Club Meeting" },
-      { id: "8be3bf26-2", src: "/assets/images/8be3bf26-d719-459f-9df8-8f283785fd4b-1-596x382.jpeg", alt: "Club Meeting" },
-      { id: "817d1ab1", src: "/assets/images/817d1ab1-18a1-449b-84b3-4b353be3fbee-1280x853.jpg", alt: "Club Meeting" },
-      { id: "7f502d53", src: "/assets/images/7f502d53-c603-4a52-8489-c76bab98194f-596x1060.jpeg", alt: "Club Meeting" },
-      { id: "5e8ef2d2", src: "/assets/images/5e8ef2d2-1bc2-4ade-b54b-4cb0b0d18e0e-1600x720.jpg", alt: "Club Meeting" },
-      { id: "5078cb9f", src: "/assets/images/5078cb9f-5f5a-4cdf-9f73-8b6e720e9ecb-1040x468.jpg", alt: "Club Meeting" },
-      { id: "40e3aab6", src: "/assets/images/40e3aab6-5e8e-4024-9648-75d9df705247-596x1034.jpeg", alt: "Club Meeting" },
-      { id: "3f8d0426", src: "/assets/images/3f8d0426-f70e-4b95-be2e-980af4674244-816x544.jpg", alt: "Club Meeting" },
-      { id: "3417d14c", src: "/assets/images/3417d14c-f989-4d22-bcb1-c24acdeb8c7b-1600x721.jpg", alt: "Club Meeting" },
-      { id: "29cce85f-1", src: "/assets/images/29cce85f-3867-4dff-b9d0-00549b5eef17-1280x853.jpg", alt: "Club Meeting" },
-      { id: "29cce85f-2", src: "/assets/images/29cce85f-3867-4dff-b9d0-00549b5eef17-1-1280x853.jpg", alt: "Club Meeting" },
-      { id: "1d014944", src: "/assets/images/1d014944-8fd3-4203-a77b-f0c762068037-816x612.jpg", alt: "Club Meeting" }
     ]
   },
   {
@@ -158,9 +118,9 @@ export const events2022: Event[] = [
     id: "christmas-newyear-2022",
     name: "Christmas and New Year Celebrations",
     description: "Festive celebrations with club members and families",
-    thumbnail: "/assets/images/9348f58f-f7a0-4ad7-81ba-725e8146f8f7-960x1280.jpeg",
+    thumbnail: "/assets/images/3417d14c-f989-4d22-bcb1-c24acdeb8c7b-1600x721.jpg",
     images: [
-      { id: "christmas-1", src: "/assets/images/9348f58f-f7a0-4ad7-81ba-725e8146f8f7-960x1280.jpeg", alt: "Christmas and New Year Celebrations" }
+      { id: "christmas-1", src: "/assets/images/3417d14c-f989-4d22-bcb1-c24acdeb8c7b-1600x721.jpg", alt: "Christmas and New Year Celebrations" },
       // Add more Christmas/New Year images here
     ]
   },
@@ -168,9 +128,9 @@ export const events2022: Event[] = [
     id: "family-tour-2022",
     name: "Family Tour",
     description: "Family bonding activities and tours",
-    thumbnail: "/assets/images/fe2cd234-d745-4982-a515-6150120657ce-1280x960.jpg",
+    thumbnail: "/assets/images/5e8ef2d2-1bc2-4ade-b54b-4cb0b0d18e0e-1600x720.jpg",
     images: [
-      { id: "family-1", src: "/assets/images/fe2cd234-d745-4982-a515-6150120657ce-1280x960.jpg", alt: "Family Tour" }
+      { id: "family-1", src: "/assets/images/5e8ef2d2-1bc2-4ade-b54b-4cb0b0d18e0e-1600x720.jpg", alt: "Family Tour" },
       // Add more family tour images here
     ]
   },
@@ -178,9 +138,9 @@ export const events2022: Event[] = [
     id: "district-events-2022",
     name: "District Events",
     description: "Participation in district-level events and activities",
-    thumbnail: "/assets/images/f2974069-f63a-459e-a783-3b7f24dca3e1-1600x1052.jpg",
+    thumbnail: "/assets/images/fe2cd234-d745-4982-a515-6150120657ce-1280x960.jpg",
     images: [
-      { id: "district-1", src: "/assets/images/f2974069-f63a-459e-a783-3b7f24dca3e1-1600x1052.jpg", alt: "District Events" }
+      { id: "district-1", src: "/assets/images/fe2cd234-d745-4982-a515-6150120657ce-1280x960.jpg", alt: "District Events" }
       // Add more district event images here
     ]
   },
@@ -188,9 +148,10 @@ export const events2022: Event[] = [
     id: "other-events-2022",
     name: "Other Club Events",
     description: "Various other club events and activities",
-    thumbnail: "/assets/images/e047cb98-342a-4490-9cf0-3e3443aa692c-960x1280.jpeg",
+    thumbnail: "/assets/images/9348f58f-f7a0-4ad7-81ba-725e8146f8f7-960x1280.jpeg",
     images: [
-      { id: "other-1", src: "/assets/images/e047cb98-342a-4490-9cf0-3e3443aa692c-960x1280.jpeg", alt: "Other Club Events" }
+      { id: "other-1", src: "/assets/images/9348f58f-f7a0-4ad7-81ba-725e8146f8f7-960x1280.jpeg", alt: "Other Club Events" },
+      { id: "other-2", src: "/assets/images/1d014944-8fd3-4203-a77b-f0c762068037-816x612.jpg", alt: "Other Club Events" },
       // Add more other event images here
     ]
   }

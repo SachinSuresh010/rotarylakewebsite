@@ -13,9 +13,6 @@ import Directors from './pages/Directors';
 import PastPresidents from './pages/PastPresidents';
 import Services from './pages/Services';
 import Gallery from './pages/Gallery';
-
-import Gallery2023 from './pages/Gallery2023';
-import Gallery2022 from './pages/Gallery2022';
 import EventPage from './pages/EventPage';
 import EventGallery from './pages/EventGallery';
 import Admin from './pages/Admin';
@@ -37,9 +34,6 @@ function App() {
           <Route path="/past-presidents" element={<PastPresidents />} />
           <Route path="/services" element={<Services />} />
           <Route path="/gallery" element={<Gallery />} />
-
-          <Route path="/gallery/2023-2024" element={<Gallery2023 />} />
-          <Route path="/gallery/2022-2023" element={<Gallery2022 />} />
           <Route path="/gallery/:year" element={<EventGallery />} />
           <Route path="/gallery/:year/:eventId" element={<EventPage />} />
           <Route path="/auth" element={<MemberAuth />} />
