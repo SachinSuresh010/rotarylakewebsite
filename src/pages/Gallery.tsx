@@ -52,40 +52,7 @@ const Gallery: React.FC = () => {
       } catch (err) {
         console.error('Error fetching gallery years:', err);
         setError('Failed to load gallery. Please try again later.');
-        
-        // Fallback to static data if API fails
-        setGalleryYears([
-          {
-            id: "2024-2025",
-            year: "2024-2025",
-            title: "2024-2025",
-            description: "Current year activities and events",
-            image: "/assets/images/29cce85f-3867-4dff-b9d0-00549b5eef17-1-1280x853.jpg",
-            alt: "2024-2025 Gallery",
-            link: "/gallery/2024-2025",
-            isStatic: true
-          },
-          {
-            id: "2023-2024",
-            year: "2023-2024",
-            title: "2023-2024",
-            description: "A walk through our journey this year",
-            image: "/assets/images/whatsapp-image-2023-06-25-at-12.53.19-pm-816x614.jpg",
-            alt: "2023-2024 Gallery",
-            link: "/gallery/2023-2024",
-            isStatic: true
-          },
-          {
-            id: "2022-2023",
-            year: "2022-2023",
-            title: "2022-2023",
-            description: "A Collection of our memories",
-            image: "/assets/images/img-5252-816x544.jpeg",
-            alt: "2022-2023 Gallery",
-            link: "/gallery/2022-2023",
-            isStatic: true
-          }
-        ]);
+        setGalleryYears([]);
       } finally {
         setLoading(false);
       }
@@ -137,7 +104,7 @@ const Gallery: React.FC = () => {
           <Alert variant="warning" className="mb-4">
             <Alert.Heading>Notice</Alert.Heading>
             <p>{error}</p>
-            <p className="mb-0">Showing static gallery data.</p>
+            <p className="mb-0">Please try refreshing the page.</p>
           </Alert>
         )}
 
@@ -180,7 +147,12 @@ const Gallery: React.FC = () => {
                       }}
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
-                        target.src = '/assets/images/placeholder.jpg';
+                        // If it's a URL image that failed to load, show placeholder
+                        if (!target.src.startsWith('data:')) {
+                          target.src = '/assets/images/placeholder.jpg';
+                        } else {
+                          target.src = '/assets/images/placeholder.jpg';
+                        }
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.transform = 'scale(1.05)';
@@ -245,15 +217,15 @@ const Gallery: React.FC = () => {
                       View Gallery →
                     </Link>
                   </Card.Body>
-                              </Card>
-            </motion.div>
-          </Col>
-        )) : (
-          <Col xs={12} className="text-center py-5">
-            <h4>No gallery years available</h4>
-            <p className="text-muted">Please check back later.</p>
-          </Col>
-        )}
+                </Card>
+              </motion.div>
+            </Col>
+          )) : (
+            <Col xs={12} className="text-center py-5">
+              <h4>No gallery years available</h4>
+              <p className="text-muted">Please check back later.</p>
+            </Col>
+          )}
         </Row>
 
         {/* Quick Preview Section */}

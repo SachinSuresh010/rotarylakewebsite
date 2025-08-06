@@ -148,6 +148,7 @@ interface DynamicEvent {
 interface GalleryYearResponse {
   year: string;
   isStatic: boolean;
+  hasDynamicEvents?: boolean;
   yearData?: any;
   events?: DynamicEvent[];
 }
@@ -189,15 +190,26 @@ const EventGallery: React.FC = () => {
         
         if (response.ok) {
           const data: GalleryYearResponse = await response.json();
+          console.log('EventGallery API response:', data);
           
           if (data.isStatic) {
-            // Use static data from frontend
-            const staticEvents = getEventsByYear(year);
-            setEvents(staticEvents);
-            setIsStatic(true);
-            setYearDescription('Static gallery content');
+            if (data.hasDynamicEvents && data.events && data.events.length > 0) {
+              // Use dynamic events even for static years
+              console.log('Using dynamic events for static year');
+              setEvents(data.events);
+              setIsStatic(false);
+              setYearDescription('Gallery content');
+            } else {
+              // Use static data from frontend
+              console.log('Using static data from frontend');
+              const staticEvents = getEventsByYear(year);
+              setEvents(staticEvents);
+              setIsStatic(true);
+              setYearDescription('Static gallery content');
+            }
           } else {
             // Use dynamic data from API
+            console.log('Using dynamic data from API');
             setEvents(data.events || []);
             setIsStatic(false);
             // Use year description from backend if available
@@ -205,6 +217,7 @@ const EventGallery: React.FC = () => {
           }
         } else {
           // Fallback to static data
+          console.log('API failed, using static data');
           const staticEvents = getEventsByYear(year);
           setEvents(staticEvents);
           setIsStatic(true);
@@ -524,7 +537,15 @@ const EventGallery: React.FC = () => {
                       transition: 'opacity 0.3s ease'
                     }}
                     onLoad={handleImageLoad}
-                    onError={handleImageError}
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      // If it's a URL image that failed to load, show placeholder
+                      if (!target.src.startsWith('data:')) {
+                        target.src = '/assets/images/placeholder.jpg';
+                      } else {
+                        handleImageError(e);
+                      }
+                    }}
                   />
                   
                   {/* Navigation Arrows */}

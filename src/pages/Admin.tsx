@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Form, Alert, Nav, Table, Badge, InputGroup, Spinner, Modal } from 'react-bootstrap';
-import { FaUsers, FaChartBar, FaGear, FaRightFromBracket, FaPlus, FaPenToSquare, FaTrash, FaMagnifyingGlass, FaClock, FaUserCheck, FaUserXmark, FaEye, FaCalendar, FaEnvelope, FaUser, FaBriefcase, FaGraduationCap, FaHeart, FaLocationDot, FaPhone, FaTrophy, FaStar, FaXmark, FaLinkedin, FaFacebook, FaTwitter, FaCamera, FaFloppyDisk, FaTag, FaImages, FaCalendarDay, FaImage, FaKey, FaRotateLeft } from 'react-icons/fa6';
+import { FaUsers, FaChartBar, FaGear, FaRightFromBracket, FaPlus, FaPenToSquare, FaTrash, FaMagnifyingGlass, FaClock, FaUserCheck, FaUserXmark, FaEye, FaCalendar, FaEnvelope, FaUser, FaBriefcase, FaGraduationCap, FaHeart, FaLocationDot, FaPhone, FaTrophy, FaStar, FaXmark, FaLinkedin, FaFacebook, FaTwitter, FaCamera, FaFloppyDisk, FaTag, FaImages, FaCalendarDay, FaImage, FaKey, FaRotateLeft, FaCompress } from 'react-icons/fa6';
 import MemberSearchModal from '../components/MemberSearchModal';
 import { usePageTitle } from '../hooks/usePageTitle';
 
@@ -1332,19 +1332,74 @@ const GalleryTab: React.FC<{
   }, [editingEvent, setExistingEventImages]);
 
   const handleYearImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setYearImage(file);
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file size (2MB limit)
+      const maxFileSize = 2 * 1024 * 1024; // 2MB
+      if (file.size > maxFileSize) {
+        alert(`File is too large. Maximum file size is 2MB. Please compress your image.`);
+        return;
+      }
+      setYearImage(file);
+    }
   };
 
   const handleEventThumbnailUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setEventThumbnail(file);
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file size (2MB limit)
+      const maxFileSize = 2 * 1024 * 1024; // 2MB
+      if (file.size > maxFileSize) {
+        alert(`File is too large. Maximum file size is 2MB. Please compress your image.`);
+        return;
+      }
+      setEventThumbnail(file);
+    }
   };
 
   const handleEventImagesUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []) as File[];
+    
+    // Validate file size (2MB limit)
+    const maxFileSize = 2 * 1024 * 1024; // 2MB
+    const oversizedFiles = files.filter(file => file.size > maxFileSize);
+    
+    if (oversizedFiles.length > 0) {
+      alert(`Some files are too large. Maximum file size is 2MB. Please compress your images.`);
+      return;
+    }
+    
+    // Validate number of images (max 10)
+    const maxImages = 10;
+    if (files.length > maxImages) {
+      alert(`Maximum ${maxImages} images allowed. Please select fewer images.`);
+      return;
+    }
+    
     setEventImages(files);
   };
+
+
+
+  const handleEventImageUrlRemove = (index: number) => {
+    setNewEvent((prev: any) => ({
+      ...prev,
+      imageUrls: prev.imageUrls?.filter((_: any, i: number) => i !== index) || []
+    }));
+  };
+
+  const handleEventImageUrlUpdate = (index: number, field: 'url' | 'alt', value: string) => {
+    setNewEvent((prev: any) => ({
+      ...prev,
+      imageUrls: prev.imageUrls?.map((item: any, i: number) => 
+        i === index ? { ...item, [field]: value } : item
+      ) || []
+    }));
+  };
+
+
+
+
 
   const removeExistingEventImage = (imageId: string) => {
     setExistingEventImages(existingEventImages.filter(img => img.id !== imageId));
@@ -1398,7 +1453,7 @@ const GalleryTab: React.FC<{
                         size="sm" 
                         onClick={() => {
                           setEditingYear(null);
-                          setNewYear({ year: '', title: '', description: '', alt: '' });
+                          setNewYear({ year: '', title: '', description: '', alt: '', imageUrl: '', newImageUrl: '' });
                           setYearImage(null);
                           setYearImagePreview('');
                           setShowYearModal(true);
@@ -1423,7 +1478,7 @@ const GalleryTab: React.FC<{
                             size="sm"
                             onClick={() => {
                               setEditingYear(null);
-                              setNewYear({ year: '', title: '', description: '', alt: '' });
+                              setNewYear({ year: '', title: '', description: '', alt: '', imageUrl: '', newImageUrl: '' });
                               setYearImage(null);
                               setYearImagePreview('');
                               setShowYearModal(true);
@@ -1496,7 +1551,7 @@ const GalleryTab: React.FC<{
                         size="sm" 
                         onClick={() => {
                           setEditingEvent(null);
-                          setNewEvent({ year: '', name: '', description: '' });
+                          setNewEvent({ year: '', name: '', description: '', imageUrls: [], thumbnailUrl: '', newImageUrl: '', newThumbnailUrl: '' });
                           setEventThumbnail(null);
                           setEventThumbnailPreview('');
                           setEventImages([]);
@@ -1524,7 +1579,7 @@ const GalleryTab: React.FC<{
                             size="sm"
                             onClick={() => {
                               setEditingEvent(null);
-                              setNewEvent({ year: '', name: '', description: '' });
+                              setNewEvent({ year: '', name: '', description: '', imageUrls: [], thumbnailUrl: '', newImageUrl: '', newThumbnailUrl: '' });
                               setEventThumbnail(null);
                               setEventThumbnailPreview('');
                               setEventImages([]);
@@ -1702,6 +1757,73 @@ const GalleryTab: React.FC<{
                     <small className="text-muted">
                       Recommended: 800x600px or larger
                     </small>
+                    
+                    <div className="mt-3">
+                      <h6>Add Year Image via URL:</h6>
+                      <Form.Control
+                        type="text"
+                        placeholder="e.g., https://example.com/year-image.jpg or /assets/images/year-image.jpg"
+                        value={(newYear as any).newImageUrl || ''}
+                        onChange={(e) => setNewYear((prev: any) => ({ ...prev, newImageUrl: e.target.value }))}
+                      />
+                      <Form.Text className="text-muted">
+                        Enter a full URL or relative path to an image file
+                      </Form.Text>
+                    </div>
+                    
+                    {/* Preview for year image URL */}
+                    {(newYear as any).newImageUrl && !(newYear as any).newImageUrl.startsWith('blob:') && (
+                      <div className="mt-3">
+                        <h6>Year Image URL Preview:</h6>
+                        <div className="position-relative d-inline-block">
+                          <img 
+                            src={(newYear as any).newImageUrl} 
+                            alt="Year" 
+                            style={{ 
+                              maxWidth: '200px', 
+                              maxHeight: '150px', 
+                              objectFit: 'cover',
+                              border: '1px solid #ddd',
+                              borderRadius: '4px'
+                            }} 
+                          />
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            className="position-absolute top-0 end-0"
+                            style={{ transform: 'translate(50%, -50%)' }}
+                            onClick={() => setNewYear((prev: any) => ({ ...prev, newImageUrl: '' }))}
+                          >
+                            ×
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <Button
+                      variant="outline-primary"
+                      size="sm"
+                      className="mt-2"
+                      onClick={() => {
+                        if ((newYear as any).newImageUrl && !(newYear as any).newImageUrl.startsWith('blob:')) {
+                          setNewYear((prev: any) => ({ 
+                            ...prev, 
+                            imageUrl: (newYear as any).newImageUrl,
+                            newImageUrl: ''
+                          }));
+                        }
+                      }}
+                      disabled={!(newYear as any).newImageUrl || (newYear as any).newImageUrl.startsWith('blob:')}
+                    >
+                      <IconWrapper icon={FaPlus} className="me-2" />
+                      Set Year Image URL
+                    </Button>
+                    
+                    {(newYear as any).imageUrl && (
+                      <div className="mt-2 p-2 bg-light rounded">
+                        <small className="text-muted">Current URL: {(newYear as any).imageUrl}</small>
+                      </div>
+                    )}
                   </div>
                 </Form.Group>
               </Col>
@@ -1833,6 +1955,73 @@ const GalleryTab: React.FC<{
                     <small className="text-muted">
                       Recommended: 400x300px or larger
                     </small>
+                    
+                    <div className="mt-3">
+                      <h6>Add Thumbnail via URL:</h6>
+                      <Form.Control
+                        type="text"
+                        placeholder="e.g., https://example.com/thumbnail.jpg or /assets/images/event-thumbnail.jpg"
+                        value={(newEvent as any).newThumbnailUrl || ''}
+                        onChange={(e) => setNewEvent((prev: any) => ({ ...prev, newThumbnailUrl: e.target.value }))}
+                      />
+                      <Form.Text className="text-muted">
+                        Enter a full URL or relative path to an image file
+                      </Form.Text>
+                    </div>
+                    
+                    {/* Preview for thumbnail URL */}
+                    {(newEvent as any).newThumbnailUrl && !(newEvent as any).newThumbnailUrl.startsWith('blob:') && (
+                      <div className="mt-3">
+                        <h6>Thumbnail URL Preview:</h6>
+                        <div className="position-relative d-inline-block">
+                          <img 
+                            src={(newEvent as any).newThumbnailUrl} 
+                            alt="Thumbnail" 
+                            style={{ 
+                              maxWidth: '200px', 
+                              maxHeight: '150px', 
+                              objectFit: 'cover',
+                              border: '1px solid #ddd',
+                              borderRadius: '4px'
+                            }} 
+                          />
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            className="position-absolute top-0 end-0"
+                            style={{ transform: 'translate(50%, -50%)' }}
+                            onClick={() => setNewEvent((prev: any) => ({ ...prev, newThumbnailUrl: '' }))}
+                          >
+                            ×
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <Button
+                      variant="outline-primary"
+                      size="sm"
+                      className="mt-2"
+                      onClick={() => {
+                        if ((newEvent as any).newThumbnailUrl && !(newEvent as any).newThumbnailUrl.startsWith('blob:')) {
+                          setNewEvent((prev: any) => ({ 
+                            ...prev, 
+                            thumbnailUrl: (newEvent as any).newThumbnailUrl,
+                            newThumbnailUrl: ''
+                          }));
+                        }
+                      }}
+                      disabled={!(newEvent as any).newThumbnailUrl || (newEvent as any).newThumbnailUrl.startsWith('blob:')}
+                    >
+                      <IconWrapper icon={FaPlus} className="me-2" />
+                      Set Thumbnail URL
+                    </Button>
+                    
+                    {(newEvent as any).thumbnailUrl && (
+                      <div className="mt-2 p-2 bg-light rounded">
+                        <small className="text-muted">Current URL: {(newEvent as any).thumbnailUrl}</small>
+                      </div>
+                    )}
                   </div>
                 </Form.Group>
               </Col>
@@ -1904,16 +2093,129 @@ const GalleryTab: React.FC<{
                         <p className="text-muted small">No new images selected</p>
                       </div>
                     )}
-                    <Form.Control
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={handleEventImagesUpload}
-                      required={!editingEvent && existingEventImages.length === 0}
-                    />
-                    <small className="text-muted">
-                      Select multiple images. Recommended: 1200x800px or larger
-                    </small>
+                    <div className="mb-3">
+                      <h6>Upload Image Files:</h6>
+                      <Form.Control
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleEventImagesUpload}
+                        required={!editingEvent && existingEventImages.length === 0}
+                      />
+                      <small className="text-muted">
+                        Select multiple images. Recommended: 1200x800px or larger
+                      </small>
+                    </div>
+                    
+                    <div className="mb-3">
+                      <h6>Add Image via URL:</h6>
+                      <Form.Control
+                        type="text"
+                        placeholder="e.g., https://example.com/image.jpg or /assets/images/event-image.jpg"
+                        value={(newEvent as any).newImageUrl || ''}
+                        onChange={(e) => setNewEvent((prev: any) => ({ ...prev, newImageUrl: e.target.value }))}
+                      />
+                      <Form.Text className="text-muted">
+                        Enter a full URL or relative path to an image file
+                      </Form.Text>
+                    </div>
+                    
+                    {/* Preview for URL image */}
+                    {(newEvent as any).newImageUrl && !(newEvent as any).newImageUrl.startsWith('blob:') && (
+                      <div className="mb-3">
+                        <h6>URL Image Preview:</h6>
+                        <div className="position-relative d-inline-block">
+                          <img 
+                            src={(newEvent as any).newImageUrl} 
+                            alt="Preview" 
+                            style={{ 
+                              maxWidth: '200px', 
+                              maxHeight: '150px', 
+                              objectFit: 'cover',
+                              border: '1px solid #ddd',
+                              borderRadius: '4px'
+                            }} 
+                          />
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            className="position-absolute top-0 end-0"
+                            style={{ transform: 'translate(50%, -50%)' }}
+                            onClick={() => setNewEvent((prev: any) => ({ ...prev, newImageUrl: '' }))}
+                          >
+                            ×
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <Button
+                      variant="outline-primary"
+                      size="sm"
+                      onClick={() => {
+                        if ((newEvent as any).newImageUrl && !(newEvent as any).newImageUrl.startsWith('blob:')) {
+                          const newImageUrls = [...((newEvent as any).imageUrls || []), { 
+                            url: (newEvent as any).newImageUrl, 
+                            alt: `Event Image ${((newEvent as any).imageUrls || []).length + 1}` 
+                          }];
+                          setNewEvent((prev: any) => ({ 
+                            ...prev, 
+                            imageUrls: newImageUrls,
+                            newImageUrl: ''
+                          }));
+                        }
+                      }}
+                      disabled={!(newEvent as any).newImageUrl || (newEvent as any).newImageUrl.startsWith('blob:')}
+                    >
+                      <IconWrapper icon={FaPlus} className="me-2" />
+                      Add URL Image
+                    </Button>
+                    
+                    {/* Display added URL images */}
+                    {(newEvent as any).imageUrls && (newEvent as any).imageUrls.length > 0 && (
+                      <div className="mt-3">
+                        <h6 className="mb-2">Added URL Images:</h6>
+                        {(newEvent as any).imageUrls.map((item: any, index: number) => (
+                          <div key={index} className="mb-2 p-2 bg-light rounded">
+                            <div className="row">
+                              <div className="col-md-8">
+                                <div className="d-flex gap-2 align-items-center">
+                                  <Form.Control
+                                    type="text"
+                                    placeholder="Image URL"
+                                    value={item.url}
+                                    onChange={(e) => handleEventImageUrlUpdate(index, 'url', e.target.value)}
+                                    size="sm"
+                                  />
+                                  <Form.Control
+                                    type="text"
+                                    placeholder="Alt text"
+                                    value={item.alt}
+                                    onChange={(e) => handleEventImageUrlUpdate(index, 'alt', e.target.value)}
+                                    size="sm"
+                                  />
+                                  <Button
+                                    variant="outline-danger"
+                                    size="sm"
+                                    onClick={() => handleEventImageUrlRemove(index)}
+                                  >
+                                    <IconWrapper icon={FaXmark} />
+                                  </Button>
+                                </div>
+                              </div>
+                              <div className="col-md-4">
+                                <img 
+                                  src={item.url} 
+                                  alt={item.alt}
+                                  className="img-fluid rounded"
+                                  style={{ height: '60px', width: '100%', objectFit: 'cover' }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </Form.Group>
               </Col>
@@ -4037,6 +4339,11 @@ const Admin: React.FC = () => {
       if (yearImage) {
         formData.append('image', yearImage);
       }
+
+      // Add year image URL if provided
+      if ((newYear as any).imageUrl) {
+        formData.append('imageUrl', (newYear as any).imageUrl);
+      }
       
       const memberToken = localStorage.getItem('memberToken');
       const adminToken = localStorage.getItem('adminToken');
@@ -4106,6 +4413,17 @@ const Admin: React.FC = () => {
       // Add existing images that weren't removed
       if (existingEventImages && existingEventImages.length > 0) {
         formData.append('existingImages', JSON.stringify(existingEventImages));
+        console.log('Sending existingImages:', existingEventImages);
+      }
+
+      // Add URL images
+      if ((newEvent as any).imageUrls && (newEvent as any).imageUrls.length > 0) {
+        formData.append('imageUrls', JSON.stringify((newEvent as any).imageUrls));
+      }
+
+      // Add thumbnail URL if provided
+      if ((newEvent as any).thumbnailUrl) {
+        formData.append('thumbnailUrl', (newEvent as any).thumbnailUrl);
       }
       
       const memberToken = localStorage.getItem('memberToken');
@@ -4121,6 +4439,8 @@ const Admin: React.FC = () => {
         url = `${API_BASE_URL}/gallery/events/${editingEvent.id}`;
         method = 'PUT';
       }
+      
+
       
       const response = await fetch(url, {
         method,
@@ -4188,8 +4508,9 @@ const Admin: React.FC = () => {
       year: year.year,
       title: year.title,
       description: year.description,
-      alt: year.alt || ''
-    });
+      alt: year.alt || '',
+      imageUrl: ''
+    } as any);
     setYearImage(null);
     setShowYearModal(true);
   };
@@ -4237,12 +4558,18 @@ const Admin: React.FC = () => {
 
   const handleEditEvent = (event: GalleryEvent) => {
     setEditingEvent(event);
+    
     setNewEvent({
       year: event.year,
       name: event.name,
       description: event.description,
-      images: event.images || []
-    });
+      images: event.images || [],
+      imageUrls: [], // Start with empty imageUrls - only new URLs will be added here
+      thumbnailUrl: event.thumbnail || ''
+    } as any);
+    
+    // Set existing images for display
+    setExistingEventImages(event.images || []);
     setEventThumbnail(null);
     setEventImages([]);
     setShowEventModal(true);
@@ -4596,39 +4923,82 @@ const Admin: React.FC = () => {
                   <ServicesTab />
                 )}
                 {activeTab === 'gallery' && (
-                  <GalleryTab 
-                    galleryYears={galleryYears}
-                    galleryEvents={galleryEvents}
-                    loading={loading}
-                    error={error}
-                    success={success}
-                    showYearModal={showYearModal}
-                    setShowYearModal={setShowYearModal}
-                    showEventModal={showEventModal}
-                    setShowEventModal={setShowEventModal}
-                    newYear={newYear}
-                    setNewYear={setNewYear}
-                    newEvent={newEvent}
-                    setNewEvent={setNewEvent}
-                    handleCreateYear={handleCreateYear}
-                    handleCreateEvent={handleCreateEvent}
-                    handleEditYear={handleEditYear}
-                    handleDeleteYear={handleDeleteYear}
-                    handleEditEvent={handleEditEvent}
-                    handleDeleteEvent={handleDeleteEvent}
-                    yearImage={yearImage}
-                    setYearImage={setYearImage}
-                    eventThumbnail={eventThumbnail}
-                    setEventThumbnail={setEventThumbnail}
-                    eventImages={eventImages}
-                    setEventImages={setEventImages}
-                    editingYear={editingYear}
-                    editingEvent={editingEvent}
-                    setEditingYear={setEditingYear}
-                    setEditingEvent={setEditingEvent}
-                    existingEventImages={existingEventImages}
-                    setExistingEventImages={setExistingEventImages}
-                  />
+                  <>
+                    <div className="mb-4">
+                      <Button 
+                        variant="warning" 
+                        size="sm"
+                        onClick={async () => {
+                          if (window.confirm('This will compress all existing gallery images to reduce file sizes. This may take a few minutes. Continue?')) {
+                            try {
+                              setLoading(true);
+                              setError(null);
+                              const memberToken = localStorage.getItem('memberToken');
+                              const adminToken = localStorage.getItem('adminToken');
+                              const token = memberToken || adminToken;
+                              const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+                              
+                              const response = await fetch(`${API_BASE_URL}/gallery/compress-existing`, {
+                                method: 'POST',
+                                headers: {
+                                  'Authorization': `Bearer ${token}`
+                                }
+                              });
+                              
+                              if (response.ok) {
+                                const result = await response.json();
+                                setSuccess(`Compression completed! ${result.summary.events.compressed} events and ${result.summary.years.compressed} years compressed.`);
+                                fetchGalleryData();
+                              } else {
+                                const errorData = await response.json();
+                                setError(errorData.message || 'Failed to compress existing data');
+                              }
+                            } catch (err) {
+                              setError('Failed to compress existing data');
+                            } finally {
+                              setLoading(false);
+                            }
+                          }
+                        }}
+                      >
+                        <IconWrapper icon={FaCompress} className="me-1" />
+                        Compress Existing Images
+                      </Button>
+                    </div>
+                    <GalleryTab 
+                      galleryYears={galleryYears}
+                      galleryEvents={galleryEvents}
+                      loading={loading}
+                      error={error}
+                      success={success}
+                      showYearModal={showYearModal}
+                      setShowYearModal={setShowYearModal}
+                      showEventModal={showEventModal}
+                      setShowEventModal={setShowEventModal}
+                      newYear={newYear}
+                      setNewYear={setNewYear}
+                      newEvent={newEvent}
+                      setNewEvent={setNewEvent}
+                      handleCreateYear={handleCreateYear}
+                      handleCreateEvent={handleCreateEvent}
+                      handleEditYear={handleEditYear}
+                      handleDeleteYear={handleDeleteYear}
+                      handleEditEvent={handleEditEvent}
+                      handleDeleteEvent={handleDeleteEvent}
+                      yearImage={yearImage}
+                      setYearImage={setYearImage}
+                      eventThumbnail={eventThumbnail}
+                      setEventThumbnail={setEventThumbnail}
+                      eventImages={eventImages}
+                      setEventImages={setEventImages}
+                      editingYear={editingYear}
+                      editingEvent={editingEvent}
+                      setEditingYear={setEditingYear}
+                      setEditingEvent={setEditingEvent}
+                      existingEventImages={existingEventImages}
+                      setExistingEventImages={setExistingEventImages}
+                    />
+                  </>
                 )}
                 {activeTab === 'home' && (
                   <HomePageTab 
@@ -4915,7 +5285,7 @@ const Admin: React.FC = () => {
                   <div className="position-relative">
                     <img 
                       src={familyPhotoPreview || familyFormData.photo} 
-                      alt="Family member preview" 
+                                                  alt="Family member" 
                       className="rounded-circle"
                       style={{ width: '60px', height: '60px', objectFit: 'cover' }}
                     />
@@ -6637,7 +7007,7 @@ const MemberForm: React.FC<{
                     <div className="position-relative">
                       <img 
                         src={currentMemberPhotoPreview || formData.profileImage} 
-                        alt="Profile preview" 
+                        alt="Profile" 
                         className="rounded-circle"
                         style={{ width: '80px', height: '80px', objectFit: 'cover' }}
                       />
