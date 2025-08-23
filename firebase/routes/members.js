@@ -245,11 +245,13 @@ router.post('/', [
       });
     }
 
-    // Create new member
+    // Create new member with admin fields
     const newMember = {
       ...memberData,
       isActive: true,
       status: 'active',
+      isAdmin: memberData.isAdmin || false,
+      role: memberData.role || 'member',
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -308,9 +310,11 @@ router.put('/:id', [
       }
     }
 
-    // Update member
+    // Update member with admin fields
     const updateData = {
       ...req.body,
+      isAdmin: req.body.isAdmin || false,
+      role: req.body.role || 'member',
       updatedAt: new Date()
     };
 

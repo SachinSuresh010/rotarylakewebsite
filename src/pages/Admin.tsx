@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Form, Alert, Nav, Table, Badge, InputGroup, Spinner, Modal } from 'react-bootstrap';
-import { FaUsers, FaChartBar, FaGear, FaRightFromBracket, FaPlus, FaPenToSquare, FaTrash, FaMagnifyingGlass, FaClock, FaUserCheck, FaUserXmark, FaEye, FaCalendar, FaEnvelope, FaUser, FaBriefcase, FaGraduationCap, FaHeart, FaLocationDot, FaPhone, FaTrophy, FaStar, FaXmark, FaLinkedin, FaFacebook, FaTwitter, FaCamera, FaFloppyDisk, FaTag, FaImages, FaCalendarDay, FaImage, FaKey, FaRotateLeft, FaCompress } from 'react-icons/fa6';
+import { FaUsers, FaChartBar, FaGear, FaRightFromBracket, FaPlus, FaPenToSquare, FaTrash, FaMagnifyingGlass, FaClock, FaUserCheck, FaUserXmark, FaEye, FaCalendar, FaEnvelope, FaUser, FaBriefcase, FaGraduationCap, FaHeart, FaLocationDot, FaPhone, FaTrophy, FaStar, FaXmark, FaLinkedin, FaFacebook, FaTwitter, FaCamera, FaFloppyDisk, FaTag, FaImages, FaCalendarDay, FaImage, FaKey, FaRotateLeft, FaCompress, FaShieldCat, FaUserTie } from 'react-icons/fa6';
 import MemberSearchModal from '../components/MemberSearchModal';
 import { usePageTitle } from '../hooks/usePageTitle';
 
@@ -1098,6 +1098,9 @@ interface Member {
       twitter?: string;
     };
   };
+  // Admin fields
+  isAdmin?: boolean;
+  role?: string;
   // Legacy fields for backward compatibility
   image?: string;
   alt?: string;
@@ -3153,6 +3156,9 @@ const Admin: React.FC = () => {
         twitter: ''
       }
     },
+    // Admin fields
+    isAdmin: false,
+    role: 'member',
     // Legacy fields
     pastPositions: [] as string[],
     isPastPresident: false,
@@ -3184,6 +3190,9 @@ const Admin: React.FC = () => {
         twitter: ''
       }
     },
+    // Admin fields
+    isAdmin: false,
+    role: 'member',
     // Legacy fields
     pastPositions: [] as string[],
     isPastPresident: false,
@@ -3910,18 +3919,21 @@ const Admin: React.FC = () => {
       birthday: member.birthday || '',
       hobbies: member.hobbies || '',
       personalBio: member.personalBio || '',
-      personalDetails: {
-        address: member.personalDetails?.address || '',
-        phone: member.personalDetails?.phone || '',
-        education: member.personalDetails?.education || '',
-        achievements: member.personalDetails?.achievements || '',
-        interests: member.personalDetails?.interests || '',
-        socialMedia: {
-          linkedin: member.personalDetails?.socialMedia?.linkedin || '',
-          facebook: member.personalDetails?.socialMedia?.facebook || '',
-          twitter: member.personalDetails?.socialMedia?.twitter || ''
-        }
-      },
+              personalDetails: {
+          address: member.personalDetails?.address || '',
+          phone: member.personalDetails?.phone || '',
+          education: member.personalDetails?.education || '',
+          achievements: member.personalDetails?.achievements || '',
+          interests: member.personalDetails?.interests || '',
+          socialMedia: {
+            linkedin: member.personalDetails?.socialMedia?.linkedin || '',
+            facebook: member.personalDetails?.socialMedia?.facebook || '',
+            twitter: member.personalDetails?.socialMedia?.twitter || ''
+          }
+        },
+      // Admin fields
+      isAdmin: member.isAdmin || false,
+      role: member.role || 'member',
       // Legacy fields
       pastPositions: member.pastPositions || [],
       isPastPresident: member.isPastPresident || false,
@@ -3990,7 +4002,7 @@ const Admin: React.FC = () => {
         
         setShowEditModal(false);
         setEditingMember(null);
-        setEditFormData({ name: '', email: '', classification: '', status: 'active', joinDate: new Date().toISOString().split('T')[0], memberSince: new Date().getFullYear().toString(), profileImage: '', currentDesignation: '', profession: '', birthday: '', hobbies: '', personalBio: '', personalDetails: { address: '', phone: '', education: '', achievements: '', interests: '', socialMedia: { linkedin: '', facebook: '', twitter: '' } }, pastPositions: [], isPastPresident: false, presidentialYears: [], familyMembers: [] });
+        setEditFormData({ name: '', email: '', classification: '', status: 'active', joinDate: new Date().toISOString().split('T')[0], memberSince: new Date().getFullYear().toString(), profileImage: '', currentDesignation: '', profession: '', birthday: '', hobbies: '', personalBio: '', personalDetails: { address: '', phone: '', education: '', achievements: '', interests: '', socialMedia: { linkedin: '', facebook: '', twitter: '' } }, isAdmin: false, role: 'member', pastPositions: [], isPastPresident: false, presidentialYears: [], familyMembers: [] });
         setFamilyMembers([]);
       } else {
         const errorData = await response.json();
@@ -4101,7 +4113,7 @@ const Admin: React.FC = () => {
   const handleEditCancel = () => {
     setShowEditModal(false);
     setEditingMember(null);
-            setEditFormData({ name: '', email: '', classification: '', status: 'active', joinDate: new Date().toISOString().split('T')[0], memberSince: new Date().getFullYear().toString(), profileImage: '', currentDesignation: '', profession: '', birthday: '', hobbies: '', personalBio: '', personalDetails: { address: '', phone: '', education: '', achievements: '', interests: '', socialMedia: { linkedin: '', facebook: '', twitter: '' } }, pastPositions: [], isPastPresident: false, presidentialYears: [], familyMembers: [] });
+            setEditFormData({ name: '', email: '', classification: '', status: 'active', joinDate: new Date().toISOString().split('T')[0], memberSince: new Date().getFullYear().toString(), profileImage: '', currentDesignation: '', profession: '', birthday: '', hobbies: '', personalBio: '', personalDetails: { address: '', phone: '', education: '', achievements: '', interests: '', socialMedia: { linkedin: '', facebook: '', twitter: '' } }, isAdmin: false, role: 'member', pastPositions: [], isPastPresident: false, presidentialYears: [], familyMembers: [] });
     setFamilyMembers([]);
     
     // Clear photo state
@@ -4143,8 +4155,10 @@ const Admin: React.FC = () => {
           twitter: ''
         }
       },
+      // Admin fields
+      isAdmin: false,
+      role: 'member',
       // Legacy fields
-
       pastPositions: [],
       isPastPresident: false,
       presidentialYears: [],
@@ -4206,7 +4220,7 @@ const Admin: React.FC = () => {
         setMembers(prevMembers => [memberWithCorrectId, ...prevMembers]);
         
         setShowAddModal(false);
-        setAddFormData({ name: '', email: '', classification: '', joinDate: new Date().toISOString().split('T')[0], memberSince: new Date().getFullYear().toString(), profileImage: '', currentDesignation: '', profession: '', birthday: '', hobbies: '', personalBio: '', personalDetails: { address: '', phone: '', education: '', achievements: '', interests: '', socialMedia: { linkedin: '', facebook: '', twitter: '' } }, pastPositions: [], isPastPresident: false, presidentialYears: [], familyMembers: [] });
+        setAddFormData({ name: '', email: '', classification: '', joinDate: new Date().toISOString().split('T')[0], memberSince: new Date().getFullYear().toString(), profileImage: '', currentDesignation: '', profession: '', birthday: '', hobbies: '', personalBio: '', personalDetails: { address: '', phone: '', education: '', achievements: '', interests: '', socialMedia: { linkedin: '', facebook: '', twitter: '' } }, isAdmin: false, role: 'member', pastPositions: [], isPastPresident: false, presidentialYears: [], familyMembers: [] });
         setFamilyMembers([]);
       } else {
         const errorData = await response.json();
@@ -4223,7 +4237,7 @@ const Admin: React.FC = () => {
 
   const handleAddCancel = () => {
     setShowAddModal(false);
-    setAddFormData({ name: '', email: '', classification: '', joinDate: new Date().toISOString().split('T')[0], memberSince: new Date().getFullYear().toString(), profileImage: '', currentDesignation: '', profession: '', birthday: '', hobbies: '', personalBio: '', personalDetails: { address: '', phone: '', education: '', achievements: '', interests: '', socialMedia: { linkedin: '', facebook: '', twitter: '' } }, pastPositions: [], isPastPresident: false, presidentialYears: [], familyMembers: [] });
+    setAddFormData({ name: '', email: '', classification: '', joinDate: new Date().toISOString().split('T')[0], memberSince: new Date().getFullYear().toString(), profileImage: '', currentDesignation: '', profession: '', birthday: '', hobbies: '', personalBio: '', personalDetails: { address: '', phone: '', education: '', achievements: '', interests: '', socialMedia: { linkedin: '', facebook: '', twitter: '' } }, isAdmin: false, role: 'member', pastPositions: [], isPastPresident: false, presidentialYears: [], familyMembers: [] });
     setFamilyMembers([]);
     
     // Clear photo state
@@ -5962,6 +5976,11 @@ const MembersTab: React.FC<{
                           <div className="d-flex gap-1 mb-2">
                             {getStatusBadge(member.status)}
                             {getLoginStatusBadge(member)}
+                            {member.isAdmin && (
+                              <Badge className="admin-badge bg-danger px-2 py-1" style={{ fontSize: '10px' }}>
+                                {member.role || 'Admin'}
+                              </Badge>
+                            )}
                           </div>
                           <div className="d-flex gap-2 justify-content-start">
                             <Button 
@@ -6013,6 +6032,9 @@ const MembersTab: React.FC<{
                     <span className="fw-semibold text-dark">Current Designation</span>
                   </th>
                   <th className="d-none d-lg-table-cell">
+                    <span className="fw-semibold text-dark">Admin Status</span>
+                  </th>
+                  <th className="d-none d-lg-table-cell">
                     <Button 
                       variant="link" 
                       className="p-0 text-decoration-none fw-semibold text-dark"
@@ -6041,7 +6063,7 @@ const MembersTab: React.FC<{
               <tbody>
                 {members.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="text-center py-5">
+                    <td colSpan={8} className="text-center py-5">
                       <div className="text-muted">
                         <IconWrapper icon={FaUsers} className="fs-1 mb-3" />
                         <p className="mb-0">No members found</p>
@@ -6071,6 +6093,17 @@ const MembersTab: React.FC<{
                             <Badge className="admin-badge bg-warning ms-2 px-2 py-1" style={{ fontSize: '10px' }}>
                               Past President
                             </Badge>
+                          )}
+                        </div>
+                      </td>
+                      <td className="d-none d-lg-table-cell">
+                        <div>
+                          {member.isAdmin ? (
+                            <Badge className="admin-badge bg-danger px-2 py-1" style={{ fontSize: '10px' }}>
+                              {member.role || 'Admin'}
+                            </Badge>
+                          ) : (
+                            <span className="text-muted">Member</span>
                           )}
                         </div>
                       </td>
@@ -7250,6 +7283,53 @@ const MemberForm: React.FC<{
                   />
                   <small className="text-muted">
                     Enter presidential years separated by commas. You can use ranges like "2020-2021" or single years like "2020".
+                  </small>
+                </Form.Group>
+              )}
+            </Col>
+          </Row>
+          
+          <Row>
+            <Col md={6}>
+              <Form.Group className="mb-3">
+                <Form.Check
+                  type="checkbox"
+                  id="isAdmin"
+                  checked={formData.isAdmin}
+                  onChange={(e) => setFormData({
+                    ...formData, 
+                    isAdmin: e.target.checked,
+                    role: e.target.checked ? 'admin' : 'member'
+                  })}
+                  label={
+                    <span className="fw-semibold text-dark">
+                      <IconWrapper icon={FaShieldCat} className="me-2" style={{ color: '#0066CC' }} />
+                      Admin Access
+                    </span>
+                  }
+                  className="mb-3"
+                />
+                <small className="text-muted">
+                  Check this to grant admin privileges to this member
+                </small>
+              </Form.Group>
+            </Col>
+            <Col md={6}>
+              {formData.isAdmin && (
+                <Form.Group className="mb-3">
+                  <Form.Label className="fw-semibold text-dark">
+                    <IconWrapper icon={FaUserTie} className="me-2" style={{ color: '#0066CC' }} />
+                    Admin Role
+                  </Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={formData.role}
+                    onChange={(e) => setFormData({...formData, role: e.target.value})}
+                    placeholder="e.g., admin, super_admin, moderator"
+                    className="admin-form-control"
+                  />
+                  <small className="text-muted">
+                    Specify the admin role level for this member
                   </small>
                 </Form.Group>
               )}
