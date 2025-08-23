@@ -241,7 +241,7 @@ router.post('/', [
 
     if (!existingMemberSnapshot.empty) {
       return res.status(400).json({ 
-        message: 'Member with this email already exists' 
+        message: 'Member with this email already exists. Please use the Account Setup tab to set up your password.' 
       });
     }
 
@@ -305,7 +305,7 @@ router.put('/:id', [
 
       if (!existingMemberSnapshot.empty) {
         return res.status(400).json({ 
-          message: 'Member with this email already exists' 
+          message: 'Member with this email already exists. Please use the Account Setup tab to set up your password.' 
         });
       }
     }
